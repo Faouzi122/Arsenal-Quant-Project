@@ -1,6 +1,8 @@
-pandas
-pandas-ta
-python-binance
+langchain
+langchain-community
+langchain-chroma
+langchain-google-genai
+langchain-text-splitters
+chromadb
+pypdf
 python-dotenv
-python-telegram-bot
-requests
