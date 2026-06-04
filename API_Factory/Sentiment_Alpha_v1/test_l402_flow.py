@@ -348,7 +348,7 @@ def print_report(results: dict):
 # ─────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     print("\n" + "═"*55)
-    print("  ANTIGRAVITY ENGINE — Test de validation L402")
+    print("  ARSENAL DECISION ENGINE — Test de validation L402")
     print("  Endpoint : " + ENGINE_URL)
     print("  LNbits   : " + LNBITS_URL)
     print("═"*55)

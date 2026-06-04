@@ -106,7 +106,7 @@ def analyze_m2_payments(payments):
         # Check if it's settled (pending is False) and belongs to the Decision Engine
         if not p.get("pending", True):
             memo = p.get("memo", "")
-            if "Decision Engine" in memo or "Antigravity Engine" in memo or "Arsenal" in memo:
+            if "Decision Engine" in memo or "Arsenal" in memo:
                 msats = p.get("amount", 0)  # LNbits returns amount in millisatoshis
                 sats = int(msats / 1000)
                 total_sats += sats

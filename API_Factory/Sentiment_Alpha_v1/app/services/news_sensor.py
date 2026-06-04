@@ -19,7 +19,7 @@ class MaritimeNewsSensor:
             "https://www.portofrotterdam.com/en/news-and-press-releases/rss"
         ]
         # The central nerve for logging significant events (Zero GUI)
-        self.pulse_file = os.getenv("PULSE_FILE_PATH", "/home/faouzi/Antigravity_Knowledge_Base/Flux_Projets/MARKET_PULSE.json")
+        self.pulse_file = os.getenv("PULSE_FILE_PATH", "/home/faouzi/Arsenal_Knowledge_Base/Flux_Projets/MARKET_PULSE.json")
         
         # Ensure the directory exists
         os.makedirs(os.path.dirname(self.pulse_file), exist_ok=True)

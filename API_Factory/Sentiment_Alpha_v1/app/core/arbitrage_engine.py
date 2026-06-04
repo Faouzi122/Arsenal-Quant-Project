@@ -131,7 +131,7 @@ class ArbitrageEngine:
         )
 
     # -------------------------------------------------------------------------
-    # STEP 1 — KABBAJ'S 6 FILTERS
+    # STEP 1 — QUANTITATIVE 6 FILTERS
     # -------------------------------------------------------------------------
 
     def _run_quant_filters(self, opp: ArbitrageOpportunity) -> Dict[str, Any]:

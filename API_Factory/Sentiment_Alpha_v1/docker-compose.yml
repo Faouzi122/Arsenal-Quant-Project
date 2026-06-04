@@ -33,7 +33,7 @@ services:
       lnbits:
         condition: service_healthy
     networks:
-      - antigravity_net
+      - arsenal_net
 
   # ── LIGHTNING PAYMENT GATEWAY (L402) ─────────────────────────────────────
   # Self-hosted LNbits — REST API compatible, sovereign, zero external dependency.
@@ -65,7 +65,7 @@ services:
       retries: 5
       start_period: 20s
     networks:
-      - antigravity_net
+      - arsenal_net
 
   # ── CLOUDFLARE PUBLIC TUNNEL ──────────────────────────────────────────────
   # Exposes decision_engine publicly via HTTPS. lnbits is NOT exposed.
@@ -79,15 +79,15 @@ services:
     depends_on:
       - decision_engine
     networks:
-      - antigravity_net
+      - arsenal_net
 
 networks:
-  antigravity_net:
-    name: antigravity_network
+  arsenal_net:
+    name: arsenal_network
     driver: bridge
 
 volumes:
   pulse_data:
-    name: antigravity_pulse_volume
+    name: arsenal_pulse_volume
   lnbits_data:
-    name: antigravity_lnbits_volume
+    name: arsenal_lnbits_volume
