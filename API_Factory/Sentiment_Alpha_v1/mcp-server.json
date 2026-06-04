@@ -1,0 +1,223 @@
+{
+  "schema_version": "1.0",
+  "server": {
+    "name": "Arsenal Decision Engine",
+    "version": "4.1.0",
+    "description": "Decision Intelligence Layer for maritime freight risk, financial market psychology, and DeFi arbitrage evaluation. Transforms raw economic signals into actionable decisions via the standard §4 output contract: {signal, value, trend, volatility, confidence_score, context}. All outputs are machine-parseable without post-processing.",
+    "documentation_url": "https://api.arsenal-quant.com/.well-known/mcp/server-card.json",
+    "capabilities_summary": "Analyze news text → produce HEDGE/EXECUTE/DELAY/ALERT/MONITOR signal. No hallucination — outputs are deterministic computations on structured lexicons."
+  },
+  "protocol": {
+    "mcp_version": "1.0",
+    "transport": ["streamable-http", "stdio"],
+    "discovery_endpoint": "/.well-known/mcp/server-card.json",
+    "tools_endpoint": "/mcp/v1/tools",
+    "execute_endpoint": "/mcp/v1/tools/execute"
+  },
+  "capabilities": {
+    "tools": true,
+    "resources": false,
+    "prompts": false,
+    "sampling": false
+  },
+  "authentication": {
+    "required": true,
+    "schemes": [
+      {
+        "type": "api_key",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "Subscription key for REST endpoints /analyze/*. Obtain via the provisioning endpoint.",
+        "applies_to": ["/analyze", "/analyze/maritime", "/analyze/compare", "/analyze/arbitrage", "/pulse"]
+      },
+      {
+        "type": "l402",
+        "in": "header",
+        "name": "Authorization",
+        "format": "L402 <macaroon>:<preimage>",
+        "description": "Lightning Network proof-of-payment for A2A MCP tool execution. Pay-per-decision model. Challenge issued as HTTP 402 with WWW-Authenticate header containing the Lightning invoice.",
+        "applies_to": ["/mcp/v1/tools/execute"]
+      }
+    ]
+  },
+  "payment": {
+    "model": "pay-per-decision",
+    "protocols_supported": ["L402/Lightning"],
+    "price_per_call_usd": 0.15,
+    "payment_flow": {
+      "step_1": "Agent calls POST /mcp/v1/tools/execute without Authorization header",
+      "step_2": "Server responds HTTP 402 with WWW-Authenticate: L402 macaroon=<token>, invoice=<bolt11>",
+      "step_3": "Agent pays Lightning invoice and obtains preimage",
+      "step_4": "Agent retries with Authorization: L402 <macaroon>:<preimage>",
+      "step_5": "Server validates payment on-chain and executes tool"
+    }
+  },
+  "tools": [
+    {
+      "name": "analyze_market_psychology",
+      "description": "Classifies the emotional state of financial markets from news text using the Market Psychology Index (Fear/Greed lexicon). Returns a standardized decision signal. USE THIS TOOL when you need to classify market sentiment before a trading or allocation decision. OUTPUT signal=EXECUTE means strong bullish momentum confirmed; signal=HEDGE means bearish panic detected; signal=DELAY means insufficient signal (arbitration required); signal=MONITOR means neutral — watch for next event. The 'value' field is the Fear/Greed score (0=Extreme Fear, 100=Extreme Greed). confidence_score reflects lexical signal density.",
+      "category": "market-psychology",
+      "latency_ms_p95": 2,
+      "input_schema": {
+        "type": "object",
+        "required": ["text"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Raw financial news text, tweet, or RSS content to classify. The engine tokenizes and intersects against the Fear/Greed lexicon using O(1) set operations. Length: 10–10000 chars recommended.",
+            "example": "Markets crash in panic sell-off as banks face bankruptcy amid deep recession fears."
+          }
+        }
+      },
+      "output_schema": {
+        "$ref": "#/components/standard_decision_output"
+      },
+      "example_output": {
+        "value": 10,
+        "change_pct": 0.0,
+        "volatility": "HIGH",
+        "trend": "DOWN",
+        "confidence_score": 0.9,
+        "signal": "HEDGE",
+        "context": "Bull:0 Bear:3 Net:-3 Hits:3",
+        "data_freshness_seconds": 0,
+        "source": "Arsenal Decision Engine v1.0",
+        "arbitration_required": false
+      }
+    },
+    {
+      "name": "analyze_maritime_freight_risk",
+      "description": "Evaluates maritime freight disruption risk from news text and computes freight surge probability per shipping corridor. USE THIS TOOL when you need to anticipate freight rate increases before booking containers. Routes covered: Suez/Europe, Transpacific (US West Coast), Shanghai/Asia, Panama Canal. OUTPUT signal=ALERT means freight rates will likely surge — book capacity NOW or HEDGE with forward contracts. signal=HEDGE means unusual cost drop — review if sustainable. signal=MONITOR means stable corridor — standard pricing applies. The 'value' field is the risk index (50=neutral, >65=surge zone, <35=discount zone). Optional: filter by zone to isolate a specific corridor.",
+      "category": "maritime-logistics",
+      "latency_ms_p95": 3,
+      "input_schema": {
+        "type": "object",
+        "required": ["text"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Shipping news, port authority alerts, geopolitical updates, or carrier advisories in plain text.",
+            "example": "Houthi missile strikes disrupt Suez Canal. Maersk and MSC rerouting via Cape of Good Hope."
+          },
+          "zone": {
+            "type": "string",
+            "enum": ["suez_europe", "transpacific", "shanghai", "panama_canal"],
+            "description": "Optional. Restrict analysis to a single corridor. If omitted, all routes are evaluated and the global risk index is returned.",
+            "example": "suez_europe"
+          }
+        }
+      },
+      "output_schema": {
+        "$ref": "#/components/standard_decision_output"
+      },
+      "example_output": {
+        "value": 80,
+        "change_pct": 0.0,
+        "volatility": "EXTREME",
+        "trend": "UP",
+        "confidence_score": 0.9,
+        "signal": "ALERT",
+        "context": "Routes:suez_europe Carriers:maersk,msc Risk:80",
+        "data_freshness_seconds": 0,
+        "source": "Arsenal Decision Engine v1.0",
+        "affected_routes": ["suez_europe"],
+        "affected_carriers": ["maersk", "msc"],
+        "arbitration_required": false
+      }
+    },
+    {
+      "name": "compare_freight_corridors",
+      "description": "Simultaneously evaluates Transpacific and Suez/Europe freight corridors and computes True Price (base freight + all hidden surcharges including EU ETS carbon, Cape rerouting premium, and delay holding costs). USE THIS TOOL for routing arbitrage decisions — determines which corridor to prefer based on current risk-adjusted True Price. OUTPUT 'most_volatile_corridor' identifies where rate spikes are concentrated. The nested 'transpacific' and 'suez_europe' objects contain True Price breakdowns per container type (20ft/40ft). signal=ALERT means immediate booking action required on the identified volatile corridor.",
+      "category": "maritime-logistics",
+      "latency_ms_p95": 5,
+      "input_schema": {
+        "type": "object",
+        "required": ["text"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "News or intelligence report covering both Pacific and Atlantic/Suez routing conditions.",
+            "example": "ILWU strike threatens Long Beach. Suez surcharges surge due to Red Sea tensions."
+          }
+        }
+      },
+      "output_schema": {
+        "$ref": "#/components/standard_decision_output"
+      }
+    },
+    {
+      "name": "evaluate_arbitrage_opportunity",
+      "description": "Evaluates a DeFi or traditional arbitrage opportunity using the Autonomous Execution Core decision matrix. Runs 6 sequential validation filters (risk/reward asymmetry, breakout confirmation, volume anomaly, ATR directional slope, funding rate gate, stop-loss mandatory node) then computes the net adjusted return R_net = Y_yield + I_incentives - IL - G_gas - S_MEV - F_funding. EXECUTES ONLY IF: all 6 filters pass AND R_net > flash_loan_opportunity_cost. USE THIS TOOL before committing capital to any arbitrage trade. OUTPUT signal=EXECUTE means all conditions are met and the trade is mathematically profitable net of all fees. signal=HEDGE means R_net is negative — abort immediately to preserve capital. signal=DELAY means R_net is positive but below the flash loan hurdle rate. signal=MONITOR means one or more filters failed — market conditions not ready. The 'cost_breakdown' field details every fee component. The 'quant_filters' field shows which of the 6 filters passed or failed with exact threshold metrics.",
+      "category": "defi-arbitrage",
+      "latency_ms_p95": 2,
+      "input_schema": {
+        "type": "object",
+        "required": ["entry_price_usd", "exit_price_usd", "stop_loss_price_usd", "position_size_usd", "gross_yield_usd"],
+        "properties": {
+          "entry_price_usd":       { "type": "number", "description": "Current market entry price in USD." },
+          "exit_price_usd":        { "type": "number", "description": "Target take-profit exit price in USD." },
+          "stop_loss_price_usd":   { "type": "number", "description": "Mandatory stop-loss invalidation node (Autonomous Execution Core rule F6). Must be below entry for longs." },
+          "position_size_usd":     { "type": "number", "description": "Total capital deployed in USD." },
+          "gross_yield_usd":       { "type": "number", "description": "Expected gross profit before any fee deductions." },
+          "incentives_usd":        { "type": "number", "default": 0, "description": "Protocol incentives or airdrop rewards in USD." },
+          "gas_usd":               { "type": "number", "default": 0, "description": "Estimated on-chain gas fees." },
+          "slippage_pct":          { "type": "number", "default": 0.003, "description": "AMM slippage as decimal (0.003 = 0.3%)." },
+          "mev_probability":       { "type": "number", "default": 0.15, "description": "Probability of MEV sandwich attack [0.0–1.0]. Conservative default: 0.15." },
+          "is_lp_position":        { "type": "boolean", "default": false, "description": "True if this is a liquidity provider position. Enables Impermanent Loss deduction." },
+          "il_price_ratio":        { "type": "number", "default": 1.0, "description": "k = P_current / P_initial for IL calculation. Only used when is_lp_position=true." },
+          "funding_rate_8h":       { "type": "number", "default": 0, "description": "Current 8h perpetual swap funding rate as decimal (0.0005 = 0.05%)." },
+          "holding_periods_8h":    { "type": "integer", "default": 1, "description": "Expected holding duration in 8-hour periods." },
+          "flash_loan_amount_usd": { "type": "number", "default": 0, "description": "Flash loan capital borrowed. 0 = not using flash loan. Aave fee: 0.09%." },
+          "flash_loan_fee_pct":    { "type": "number", "default": 0.09, "description": "Flash loan fee percentage (default: 0.09 for Aave)." },
+          "resistance_level_usd":  { "type": "number", "default": 0, "description": "Key resistance level for Filter F2 breakout validation." },
+          "candle_close_4h_usd":   { "type": "number", "default": 0, "description": "Last 4H candle close for breakout confirmation (F2)." },
+          "volume_24h":            { "type": "number", "default": 0, "description": "Current 24h volume for volume anomaly filter (F3)." },
+          "volume_sma_20":         { "type": "number", "default": 0, "description": "20-period SMA of volume for F3." },
+          "volume_stddev":         { "type": "number", "default": 0, "description": "Standard deviation of volume for F3 (V > SMA + 2σ threshold)." },
+          "atr_values":            { "type": "array", "items": { "type": "number" }, "default": [], "description": "ATR values oldest-to-newest. Minimum 3 values required for F4 directional slope validation." },
+          "execution_intent":      { "type": "string", "description": "Optional execution intent for Smeltor routing (e.g. 'Earn 5.27% APY on USDC via fluid')." }
+        }
+      },
+      "output_schema": {
+        "$ref": "#/components/standard_decision_output"
+      }
+    }
+  ],
+  "components": {
+    "standard_decision_output": {
+      "type": "object",
+      "description": "§4 Standard Decision Output — Arsenal Decision Engine v1.0. All tools return this schema. Agents MUST read 'signal' first, then 'confidence_score' to gate execution.",
+      "required": ["value", "change_pct", "volatility", "trend", "confidence_score", "signal", "context", "data_freshness_seconds", "source"],
+      "properties": {
+        "value":                  { "type": "number", "description": "Primary numeric indicator (score, risk index, R_net in USD)." },
+        "change_pct":             { "type": "number", "description": "Percentage change vs previous state. 0.0 when no historical baseline." },
+        "volatility":             { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "EXTREME"], "description": "Signal density classification." },
+        "trend":                  { "type": "string", "enum": ["UP", "DOWN", "STABLE", "ACCELERATING"], "description": "Directional trend." },
+        "confidence_score":       { "type": "number", "minimum": 0, "maximum": 0.99, "description": "Confidence in the signal [0.0–0.99]. Never 1.0 — autonomous agents must preserve epistemic humility." },
+        "signal":                 { "type": "string", "enum": ["EXECUTE", "HEDGE", "DELAY", "ALERT", "MONITOR"], "description": "Primary actionable decision. EXECUTE: enter immediately. HEDGE: exit/protect. DELAY: wait for better conditions. ALERT: urgent attention required. MONITOR: watch for state change." },
+        "context":                { "type": "string", "maxLength": 120, "description": "Factual one-line summary of key metrics. Machine-parseable." },
+        "data_freshness_seconds": { "type": "integer", "description": "Age of underlying data in seconds. 0 = on-demand fresh computation." },
+        "source":                 { "type": "string", "const": "Arsenal Decision Engine v1.0" }
+      }
+    }
+  },
+  "aeo_directives": {
+    "signal_interpretation_guide": {
+      "EXECUTE":  "All conditions confirmed. Proceed with the planned action. Verify confidence_score >= 0.7 before autonomous execution.",
+      "HEDGE":    "Negative expected value or extreme bearish signal. Protect existing positions. Do NOT enter new longs.",
+      "DELAY":    "Conditions not yet aligned or insufficient signal. Wait for next data point. Re-evaluate in 15–60 minutes.",
+      "ALERT":    "Urgent signal detected. Immediate attention required. Escalate to higher-priority decision pipeline.",
+      "MONITOR":  "Neutral state. No immediate action. Schedule re-evaluation."
+    },
+    "confidence_gating": {
+      "autonomous_execution_threshold": 0.85,
+      "human_review_required_below":    0.60,
+      "arbitration_required_flag":      "arbitration_required == true always forces human review regardless of confidence_score"
+    },
+    "integration_notes": {
+      "langchain": "Use tool descriptions as-is — they are AEO-optimized for function-calling models.",
+      "google_adk": "Mount as MCP server via streamable-http transport. Server card auto-discovery at /.well-known/mcp/server-card.json.",
+      "composio": "Compatible with Composio MCP connector. Tool names map directly to Composio action IDs."
+    }
+  }
+}

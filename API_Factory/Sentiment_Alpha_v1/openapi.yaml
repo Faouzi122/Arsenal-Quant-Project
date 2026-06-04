@@ -1,0 +1,728 @@
+openapi: "3.1.0"
+
+info:
+  title: "Arsenal Decision Engine — Decision Intelligence Layer"
+  version: "4.1.0"
+  description: |
+    ## What this API does
+
+    Transforms raw economic signals (news text, market data, DeFi parameters) into
+    **standardized actionable decisions** that autonomous agents can consume directly
+    without post-processing.
+
+    Every endpoint returns the **§4 Standard Decision Output**:
+    ```json
+    {
+      "signal":           "EXECUTE | HEDGE | DELAY | ALERT | MONITOR",
+      "value":            <primary numeric indicator>,
+      "trend":            "UP | DOWN | STABLE | ACCELERATING",
+      "volatility":       "LOW | MEDIUM | HIGH | EXTREME",
+      "confidence_score": <0.0–0.99>,
+      "context":          "<factual summary, max 120 chars>",
+      "source":           "Arsenal Decision Engine v1.0"
+    }
+    ```
+
+    ## Signal Interpretation (Agent Engine Optimization)
+
+    | Signal    | Meaning                                         | Autonomous Action                         |
+    |-----------|-------------------------------------------------|-------------------------------------------|
+    | `EXECUTE` | All conditions confirmed, positive expected value | Proceed with planned action if conf ≥ 0.7 |
+    | `HEDGE`   | Negative expected value or extreme fear signal  | Protect positions, do NOT enter new longs |
+    | `DELAY`   | Insufficient signal or conditions not aligned   | Re-evaluate in 15–60 min                  |
+    | `ALERT`   | Urgent disruption detected                      | Escalate immediately                      |
+    | `MONITOR` | Neutral state                                   | Schedule re-evaluation                    |
+
+    ## Authentication
+
+    - **REST endpoints** (`/analyze/*`, `/pulse`): `X-API-Key` header
+    - **MCP tool execution** (`/mcp/v1/tools/execute`): L402 Lightning proof-of-payment
+
+    ## Confidence Gating Rule
+    ```
+    if confidence_score >= 0.85  → autonomous execution permitted
+    if confidence_score <  0.60  → human review required
+    if arbitration_required==true → human review mandatory regardless of score
+    ```
+
+  contact:
+    name: "Arsenal Decision Engine — Autonomous Execution Core"
+  license:
+    name: "Proprietary"
+
+servers:
+  - url: "http://localhost:8002"
+    description: "Local development (Docker)"
+  - url: "https://api.arsenal-quant.com"
+    description: "Production (Cloudflare Tunnel)"
+
+tags:
+  - name: "Decision Engine"
+    description: "Core decision endpoints. All return §4 Standard Decision Output."
+  - name: "Market Intelligence"
+    description: "Live market pulse feed."
+  - name: "MCP Bridge"
+    description: "Model Context Protocol endpoints for A2A agent integration."
+  - name: "Billing & Provisioning"
+    description: "Payment and subscription management."
+
+# =============================================================================
+# PATHS
+# =============================================================================
+
+paths:
+
+  /analyze:
+    post:
+      tags: ["Decision Engine"]
+      operationId: "analyze_market_psychology"
+      summary: "Market Psychology Index — Fear/Greed Classification"
+      description: |
+        Classifies the emotional state of financial markets from news text.
+
+        **When to use**: Before any market entry/exit decision. Feed in news headlines,
+        RSS content, or social media text to get a machine-parseable sentiment signal.
+
+        **Algorithm**: Tokenizes input → intersects against curated Fear/Greed lexicon
+        using O(1) set operations → computes net sentiment score (0–100).
+
+        **Output interpretation**:
+        - `value` = Fear/Greed score. 0 = Extreme Fear, 100 = Extreme Greed, 50 = Neutral
+        - `signal=EXECUTE` → Bullish momentum confirmed (score > 65)
+        - `signal=HEDGE` → Bearish panic detected (score < 35)
+        - `signal=DELAY` → No decisive signal — arbitration flag raised
+        - `signal=MONITOR` → Neutral market state
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TextInput"
+            example:
+              text: "Markets crash in panic sell-off as banks face bankruptcy amid deep recession fears."
+      responses:
+        "200":
+          description: "§4 Standard Decision Output"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardDecisionOutput"
+              example:
+                value: 10
+                change_pct: 0.0
+                volatility: "HIGH"
+                trend: "DOWN"
+                confidence_score: 0.9
+                signal: "HEDGE"
+                context: "Bull:0 Bear:3 Net:-3 Hits:3"
+                data_freshness_seconds: 0
+                source: "Arsenal Decision Engine v1.0"
+                arbitration_required: false
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /analyze/maritime:
+    post:
+      tags: ["Decision Engine"]
+      operationId: "analyze_maritime_freight_risk"
+      summary: "Maritime Freight Risk — Corridor Disruption & Surge Prediction"
+      description: |
+        Evaluates maritime freight disruption risk from news text.
+        Predicts freight rate surges per shipping corridor using the Market Psychology Index.
+
+        **When to use**: Before booking containers or issuing freight quotes. Feed in
+        shipping news, port alerts, or geopolitical updates.
+
+        **Corridors monitored**:
+        - `suez_europe`: Suez Canal, Red Sea, Bab el-Mandeb, Europe ports
+        - `transpacific`: US West Coast, Long Beach/LA, ILWU labor
+        - `shanghai`: China / Asia Pacific ports
+        - `panama_canal`: Panama Canal throughput
+
+        **Output interpretation**:
+        - `value` = Risk index. 50=neutral, >65=surge zone, <35=discount zone
+        - `signal=ALERT` → Freight rates will surge. Book capacity NOW or hedge with forwards.
+        - `signal=HEDGE` → Unusual cost drop — review sustainability
+        - `signal=MONITOR` → Stable corridor — standard pricing applies
+        - `signal=DELAY` → Conflicting signals — arbitration required
+        - `affected_routes` → Which corridors are impacted
+        - `affected_carriers` → Which carriers are involved (msc, maersk, cma, cosco...)
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MaritimeInput"
+            examples:
+              crisis:
+                summary: "Red Sea crisis"
+                value:
+                  text: "Houthi missile strikes disrupt Suez Canal. Maersk and MSC rerouting via Cape of Good Hope. Surcharges announced."
+              zone_filter:
+                summary: "Filter to Transpacific only"
+                value:
+                  text: "ILWU strike threats at Long Beach. Tariffs escalate US-China trade tensions."
+                  zone: "transpacific"
+      responses:
+        "200":
+          description: "§4 Standard Decision Output with maritime domain extensions"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/StandardDecisionOutput"
+                  - type: object
+                    properties:
+                      affected_routes:
+                        type: array
+                        items:
+                          type: string
+                          enum: ["suez_europe", "transpacific", "shanghai", "panama_canal"]
+                      affected_carriers:
+                        type: array
+                        items:
+                          type: string
+                      arbitration_required:
+                        type: boolean
+              example:
+                value: 80
+                change_pct: 0.0
+                volatility: "EXTREME"
+                trend: "UP"
+                confidence_score: 0.9
+                signal: "ALERT"
+                context: "Routes:suez_europe Carriers:maersk,msc Risk:80"
+                data_freshness_seconds: 0
+                source: "Arsenal Decision Engine v1.0"
+                affected_routes: ["suez_europe"]
+                affected_carriers: ["maersk", "msc"]
+                arbitration_required: false
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /analyze/compare:
+    post:
+      tags: ["Decision Engine"]
+      operationId: "compare_freight_corridors"
+      summary: "Corridor Arbitrage — True Price Comparison (Transpacific vs Suez/Europe)"
+      description: |
+        Simultaneously evaluates both Transpacific and Suez/Europe corridors.
+        Computes True Price per container (base freight + all hidden surcharges).
+
+        **When to use**: For routing arbitrage decisions. Determines which corridor
+        offers the lowest risk-adjusted True Price right now.
+
+        **Hidden surcharges included in True Price**:
+        - EU ETS carbon cost (per EUA market price)
+        - Cape of Good Hope rerouting premium ($1,150 baseline)
+        - Transit delay holding costs ($50/day)
+        - Sentiment-driven surge surcharge (derived from risk index)
+
+        **Output interpretation**:
+        - `most_volatile_corridor` → Where to focus risk management
+        - `transparency_status` values: `MARKET_ALIGNED` | `CAUTION_OVERPRICED` | `SEVERE_SURCHARGE_RISK`
+        - Nested `transpacific` and `suez_europe` objects contain True Price per 20ft/40ft container
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TextInput"
+            example:
+              text: "ILWU strike threatens Long Beach port. Suez rerouting surcharges surge on Red Sea tensions."
+      responses:
+        "200":
+          description: "§4 Standard Decision Output with corridor comparison extensions"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/StandardDecisionOutput"
+                  - type: object
+                    properties:
+                      most_volatile_corridor:
+                        type: string
+                        enum: ["transpacific", "suez_europe", "none"]
+                      transpacific:
+                        $ref: "#/components/schemas/CorridorDetail"
+                      suez_europe:
+                        $ref: "#/components/schemas/CorridorDetail"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /analyze/arbitrage:
+    post:
+      tags: ["Decision Engine"]
+      operationId: "evaluate_arbitrage_opportunity"
+      summary: "Arbitrage Decision — Autonomous Execution Core (R_net vs Flash Loan Cost)"
+      description: |
+        Evaluates a DeFi or traditional arbitrage opportunity through the Autonomous
+        Execution Core decision matrix.
+
+        **Decision logic (strict sequential)**:
+        1. Run 6 validation filters (all must pass for EXECUTE):
+           - F1: Risk/Reward asymmetry ≥ 3:1
+           - F2: Breakout confirmation (4H close > resistance)
+           - F3: Volume anomaly V_24h > SMA(V,20) + 2σ
+           - F4: ATR positive slope over 3 consecutive periods
+           - F5: Funding rate < 0.05% per 8h (long squeeze guard — absolute veto)
+           - F6: Stop-loss mandatory (capital preservation rule — absolute veto)
+        2. Compute R_net = Y_yield + I_incentives − IL − G_gas − S_MEV − F_funding
+        3. Compare R_net vs flash loan opportunity cost
+
+        **EXECUTE condition**: 6/6 filters pass AND R_net > flash_loan_cost
+        **Capital preservation rule**: If R_net ≤ 0, signal is ALWAYS HEDGE regardless of filters.
+
+        **Output interpretation**:
+        - `r_net_usd` → Actual net profit after ALL fee deductions
+        - `flash_loan_cost_usd` → Flash loan fee hurdle
+        - `net_vs_flash_loan_usd` → Margin above/below the hurdle (positive = profitable)
+        - `cost_breakdown` → Itemized: gross yield, incentives, IL, gas, MEV, funding
+        - `quant_filters` → Pass/fail per filter with exact threshold metrics
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ArbitrageInput"
+            example:
+              entry_price_usd: 100.0
+              exit_price_usd: 115.0
+              stop_loss_price_usd: 95.0
+              position_size_usd: 10000.0
+              gross_yield_usd: 1500.0
+              gas_usd: 8.0
+              slippage_pct: 0.003
+              mev_probability: 0.15
+              funding_rate_8h: 0.0003
+              holding_periods_8h: 2
+              flash_loan_amount_usd: 10000.0
+              flash_loan_fee_pct: 0.09
+              resistance_level_usd: 98.0
+              candle_close_4h_usd: 101.5
+              volume_24h: 5500000
+              volume_sma_20: 3000000
+              volume_stddev: 1200000
+              atr_values: [1.2, 1.5, 1.8]
+      responses:
+        "200":
+          description: "§4 Standard Decision Output with full arbitrage cost breakdown"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/StandardDecisionOutput"
+                  - type: object
+                    properties:
+                      r_net_usd:
+                        type: number
+                        description: "Net return after all fee deductions (USD)"
+                      flash_loan_cost_usd:
+                        type: number
+                        description: "Flash loan opportunity cost = amount × fee_pct"
+                      net_vs_flash_loan_usd:
+                        type: number
+                        description: "R_net minus flash loan cost. Positive = profitable."
+                      cost_breakdown:
+                        $ref: "#/components/schemas/CostBreakdown"
+                      quant_filters:
+                        $ref: "#/components/schemas/QuantFilters"
+              example:
+                value: 1531.5
+                change_pct: 15.315
+                volatility: "MEDIUM"
+                trend: "UP"
+                confidence_score: 0.99
+                signal: "EXECUTE"
+                context: "R_net=1531.50$ FL=9.00$ Filters:6/6 RR:3.0 MEV:4.50$"
+                data_freshness_seconds: 0
+                source: "Arsenal Decision Engine v1.0"
+                r_net_usd: 1531.5
+                flash_loan_cost_usd: 9.0
+                net_vs_flash_loan_usd: 1522.5
+                arbitration_required: false
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /pulse:
+    get:
+      tags: ["Market Intelligence"]
+      operationId: "get_market_pulse"
+      summary: "Live Market Pulse — Streaming Event Feed"
+      description: |
+        Returns the current market pulse feed: timestamped critical events where
+        the risk index crossed threshold (>65 or <35) during the last RSS scan cycle.
+        Each entry is pre-classified with a Market Psychology Index label and freight prediction.
+
+        **When to use**: For periodic polling by monitoring agents. Scan interval: 15 minutes.
+        If the feed is empty, no critical events were detected in the last cycle.
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: "Array of critical market pulse events"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    timestamp:
+                      type: string
+                      format: "date-time"
+                    route:
+                      type: string
+                    event:
+                      type: string
+                    market_psychology_index:
+                      type: string
+                    prediction:
+                      type: string
+                    confidence:
+                      type: number
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /.well-known/mcp/server-card.json:
+    get:
+      tags: ["MCP Bridge"]
+      operationId: "get_mcp_server_card"
+      summary: "MCP Server Card — Agent Discovery Endpoint"
+      description: |
+        Standard A2A discovery endpoint. Returns the full MCP server card containing:
+        - Tool definitions with input/output schemas
+        - Authentication requirements (API key + L402)
+        - Payment model (pay-per-decision, $0.15/call)
+        - AEO signal interpretation guide for autonomous agents
+
+        Compatible with Google ADK, LangChain, Composio, and any MCP-aware agent framework.
+      responses:
+        "200":
+          description: "MCP Server Card JSON"
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /mcp/v1/tools:
+    get:
+      tags: ["MCP Bridge"]
+      operationId: "list_mcp_tools"
+      summary: "MCP Tool Registry — List Available Decision Tools"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: "List of available MCP tools"
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /mcp/v1/tools/execute:
+    post:
+      tags: ["MCP Bridge"]
+      operationId: "execute_mcp_tool"
+      summary: "MCP Tool Execution — Pay-per-Decision A2A Endpoint"
+      description: |
+        Executes a named decision tool in MCP format. Protected by L402 Lightning paywall.
+
+        **Payment flow**:
+        1. Call without Authorization header → receive HTTP 402 with Lightning invoice in WWW-Authenticate
+        2. Pay the Lightning invoice → obtain preimage
+        3. Retry with `Authorization: L402 <macaroon>:<preimage>`
+        4. Tool executes and returns MCP content response
+      security:
+        - L402Auth: []
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: ["name", "arguments"]
+              properties:
+                name:
+                  type: string
+                  enum:
+                    - "analyze_market_psychology"
+                    - "analyze_maritime_freight_risk"
+                    - "compare_freight_corridors"
+                    - "evaluate_arbitrage_opportunity"
+                    - "calculate_rerouting_financial_impact"
+                arguments:
+                  type: object
+                  description: "Tool arguments matching the tool's inputSchema"
+      responses:
+        "200":
+          description: "MCP content response"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          enum: ["text"]
+                        text:
+                          type: string
+        "402":
+          description: "Payment Required — L402 Lightning Invoice"
+          headers:
+            WWW-Authenticate:
+              schema:
+                type: string
+              example: 'L402 macaroon="<token>", invoice="lnbc150n1p..."'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Payment Required"
+                  message:
+                    type: string
+                    example: "This A2A capability requires a 0.15$ micro-transaction via L402 Lightning Protocol."
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: "Tool not found"
+
+# =============================================================================
+# COMPONENTS
+# =============================================================================
+
+components:
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: "Subscription key for REST endpoints. Obtain via provisioning."
+    L402Auth:
+      type: http
+      scheme: bearer
+      bearerFormat: "L402 <macaroon>:<preimage>"
+      description: "Lightning Network proof-of-payment. Format: 'L402 <macaroon>:<preimage>'"
+
+  schemas:
+
+    TextInput:
+      type: object
+      required: ["text"]
+      properties:
+        text:
+          type: string
+          minLength: 10
+          maxLength: 10000
+          description: "Raw text to analyze (news, RSS, social media content)."
+
+    MaritimeInput:
+      type: object
+      required: ["text"]
+      properties:
+        text:
+          type: string
+          description: "Shipping news or geopolitical text."
+        zone:
+          type: string
+          nullable: true
+          enum: ["suez_europe", "transpacific", "shanghai", "panama_canal"]
+          description: "Optional corridor filter. Omit to evaluate all corridors."
+
+    ArbitrageInput:
+      type: object
+      required:
+        - entry_price_usd
+        - exit_price_usd
+        - stop_loss_price_usd
+        - position_size_usd
+        - gross_yield_usd
+      properties:
+        entry_price_usd:       { type: number }
+        exit_price_usd:        { type: number }
+        stop_loss_price_usd:   { type: number }
+        position_size_usd:     { type: number }
+        gross_yield_usd:       { type: number }
+        incentives_usd:        { type: number, default: 0.0 }
+        gas_usd:               { type: number, default: 0.0 }
+        slippage_pct:          { type: number, default: 0.003 }
+        mev_probability:       { type: number, default: 0.15 }
+        is_lp_position:        { type: boolean, default: false }
+        il_price_ratio:        { type: number, default: 1.0 }
+        funding_rate_8h:       { type: number, default: 0.0 }
+        holding_periods_8h:    { type: integer, default: 1 }
+        flash_loan_amount_usd: { type: number, default: 0.0 }
+        flash_loan_fee_pct:    { type: number, default: 0.09 }
+        resistance_level_usd:  { type: number, default: 0.0 }
+        candle_close_4h_usd:   { type: number, default: 0.0 }
+        volume_24h:            { type: number, default: 0.0 }
+        volume_sma_20:         { type: number, default: 0.0 }
+        volume_stddev:         { type: number, default: 0.0 }
+        atr_values:
+          type: array
+          items: { type: number }
+          default: []
+
+    StandardDecisionOutput:
+      type: object
+      description: "§4 Standard Decision Output — all engines return this schema."
+      required:
+        - value
+        - change_pct
+        - volatility
+        - trend
+        - confidence_score
+        - signal
+        - context
+        - data_freshness_seconds
+        - source
+      properties:
+        value:
+          type: number
+          description: "Primary numeric indicator."
+        change_pct:
+          type: number
+          description: "Percentage change vs previous state."
+        volatility:
+          type: string
+          enum: ["LOW", "MEDIUM", "HIGH", "EXTREME"]
+        trend:
+          type: string
+          enum: ["UP", "DOWN", "STABLE", "ACCELERATING"]
+        confidence_score:
+          type: number
+          minimum: 0.0
+          maximum: 0.99
+        signal:
+          type: string
+          enum: ["EXECUTE", "HEDGE", "DELAY", "ALERT", "MONITOR"]
+          description: "Primary actionable decision. Always read this first."
+        context:
+          type: string
+          maxLength: 120
+        data_freshness_seconds:
+          type: integer
+        source:
+          type: string
+          const: "Arsenal Decision Engine v1.0"
+
+    CorridorDetail:
+      type: object
+      properties:
+        market_psychology_index: { type: number }
+        transparency_index:      { type: number }
+        freight_trend_prediction: { type: string }
+        container_20_feet:
+          $ref: "#/components/schemas/ContainerPrice"
+        container_40_feet:
+          $ref: "#/components/schemas/ContainerPrice"
+
+    ContainerPrice:
+      type: object
+      properties:
+        base_freight_rate_usd:      { type: number }
+        hidden_surcharges_detected: { type: number }
+        true_price_estimated:       { type: number }
+        transparency_status:
+          type: string
+          enum: ["MARKET_ALIGNED", "CAUTION_OVERPRICED", "SEVERE_SURCHARGE_RISK"]
+
+    CostBreakdown:
+      type: object
+      properties:
+        gross_yield_usd:  { type: number }
+        incentives_usd:   { type: number }
+        il_usd:           { type: number, description: "Impermanent Loss (LP positions)" }
+        gas_usd:          { type: number }
+        s_mev_usd:        { type: number, description: "MEV sandwich attack expected cost" }
+        f_funding_usd:    { type: number, description: "Perpetual swap funding cost" }
+
+    QuantFilters:
+      type: object
+      properties:
+        f1_risk_reward:
+          type: object
+          properties:
+            passed: { type: boolean }
+            value:  { type: number, description: "Actual risk/reward ratio" }
+            threshold: { type: string, const: ">=3.0" }
+        f2_breakout:
+          type: object
+          properties:
+            passed: { type: boolean }
+            candle_close_4h: { type: number }
+            resistance_level: { type: number }
+        f3_volume_anomaly:
+          type: object
+          properties:
+            passed:    { type: boolean }
+            z_score:   { type: number }
+            threshold: { type: string, const: ">2σ" }
+        f4_atr_slope:
+          type: object
+          properties:
+            passed:     { type: boolean }
+            atr_last_3: { type: array, items: { type: number } }
+        f5_funding_rate:
+          type: object
+          properties:
+            passed:        { type: boolean }
+            rate_8h_pct:   { type: number }
+            threshold_pct: { type: string, const: "< 0.05%" }
+        f6_stop_loss:
+          type: object
+          properties:
+            passed:          { type: boolean }
+            stop_price_usd:  { type: number }
+            entry_price_usd: { type: number }
+        passed_count: { type: integer, minimum: 0, maximum: 6 }
+        all_passed:   { type: boolean }
+
+  responses:
+    Unauthorized:
+      description: "Missing or invalid API key"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+                example: "Unauthorized: Invalid or missing API Key. Paywall Active."
+    ValidationError:
+      description: "Request body validation error"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: array
+                items:
+                  type: object

@@ -1,0 +1,26 @@
+# © 2026 Arsenal Quant Project
+# Global .gitignore file for the repository
+
+# Ignore everything by default
+*
+
+# Whitelist the new Arsenal Quant API codebase
+!/API_Factory/
+!/API_Factory/Sentiment_Alpha_v1/
+!/API_Factory/Sentiment_Alpha_v1/**
+
+# Whitelist the open-source scripts
+!/Antigravity_System/
+!/Antigravity_System/scripts/
+!/Antigravity_System/scripts/abi_guardrail.py
+
+# Exclude virtual environments, environment secrets, and caches inside whitelisted folders
+**/venv/
+**/.venv/
+**/__pycache__/
+**/*.pyc
+**/.env
+**/.env.local
+**/.idea/
+**/.vscode/
+**/server.log

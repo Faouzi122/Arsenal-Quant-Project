@@ -1,0 +1,15 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "com.arsenal-quant/arsenal-decision-engine",
+  "title": "Arsenal Decision Engine",
+  "description": "High-performance DeFi decision oracle with a 6-filter quantitative matrix and L402 paywall.",
+  "version": "4.1.0",
+  "homepage": "https://github.com/Faouzi122/Arsenal-Quant-Project",
+  "license": "Proprietary",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://api.arsenal-quant.com"
+    }
+  ]
+}

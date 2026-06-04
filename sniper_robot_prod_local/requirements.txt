@@ -1,5 +1,0 @@
-pandas
-ta
-python-binance
-python-dotenv
-python-telegram-bot
