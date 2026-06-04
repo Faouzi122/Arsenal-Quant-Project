@@ -1,0 +1,93 @@
+# Arsenal Decision Engine — Autonomous Execution Stack
+# Docker Compose v3.8
+#
+# Services:
+#   decision_engine  → FastAPI decision engine (port 8002)
+#   lnbits           → Self-hosted Lightning wallet REST API (port 5001, internal only)
+#   tunnel           → Cloudflare public HTTPS exposure (no port forwarding)
+#
+# PaymentGateway (§9): LNbits self-hosted via http://lnbits:5000/api/v1
+# The engine calls lnbits directly on the Docker internal network (< 1ms RTT).
+# Zero external dependency for invoice creation.
+
+services:
+
+  # ── DECISION INTELLIGENCE LAYER ──────────────────────────────────────────
+  decision_engine:
+    build: .
+    container_name: decision_engine
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8002}:8002"
+    environment:
+      - ENGINE_API_KEY=${ENGINE_API_KEY}
+      - SENSOR_INTERVAL=${SENSOR_INTERVAL:-900}
+      - PULSE_FILE_PATH=/app/data/MARKET_PULSE.json
+      # PaymentGateway — L402 via LNbits self-hosted (§9)
+      # Internal Docker network: lnbits:5000 (never exposed externally)
+      - LNBITS_API_KEY=${LNBITS_INVOICE_KEY}
+      - LNBITS_URL=${LNBITS_URL:-https://demo.lnbits.com/api/v1}
+    volumes:
+      - pulse_data:/app/data
+    depends_on:
+      lnbits:
+        condition: service_healthy
+    networks:
+      - antigravity_net
+
+  # ── LIGHTNING PAYMENT GATEWAY (L402) ─────────────────────────────────────
+  # Self-hosted LNbits — REST API compatible, sovereign, zero external dependency.
+  # Admin UI: http://localhost:5001 (local only, never forwarded publicly).
+  # Invoice API: http://lnbits:5000/api/v1 (internal Docker network).
+  lnbits:
+    image: lnbitsdocker/lnbits:latest
+    container_name: lnbits_gateway
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5001:5000"      # Admin UI on localhost ONLY — not public
+    environment:
+      # LNbits funding source — uses FakeWallet by default for dev/test.
+      # For mainnet: set LNBITS_BACKEND_WALLET_CLASS + wallet-specific vars in .env
+      - LNBITS_DATA_FOLDER=/data
+      - LNBITS_BACKEND_WALLET_CLASS=${LNBITS_BACKEND_WALLET_CLASS:-FakeWallet}
+      # Mainnet options (set in .env, leave blank for dev):
+      - LND_REST_ENDPOINT=${LND_REST_ENDPOINT:-}
+      - LND_REST_CERT=${LND_REST_CERT:-}
+      - LND_REST_MACAROON=${LND_REST_MACAROON:-}
+      # CLN alternative:
+      - CCLIGHTNING_RPC=${CCLIGHTNING_RPC:-}
+    volumes:
+      - lnbits_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:5000/api/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - antigravity_net
+
+  # ── CLOUDFLARE PUBLIC TUNNEL ──────────────────────────────────────────────
+  # Exposes decision_engine publicly via HTTPS. lnbits is NOT exposed.
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflare_tunnel
+    restart: unless-stopped
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    command: tunnel --no-autoupdate run --protocol http2
+    depends_on:
+      - decision_engine
+    networks:
+      - antigravity_net
+
+networks:
+  antigravity_net:
+    name: antigravity_network
+    driver: bridge
+
+volumes:
+  pulse_data:
+    name: antigravity_pulse_volume
+  lnbits_data:
+    name: antigravity_lnbits_volume

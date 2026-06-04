@@ -1,0 +1,636 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Arsenal Decision Engine \u2014 Decision Intelligence Layer",
+        "description": "Predict freight volatility before it hits your budget. Analyzes global news to generate a Market Psychology Index and resolve conflicting signals via an AI-Conflict Resolution Layer.",
+        "version": "4.0.0"
+    },
+    "paths": {
+        "/analyze": {
+            "post": {
+                "summary": "Analyze Market Mood",
+                "description": "Standard Financial Fear & Greed Index.",
+                "operationId": "analyze_market_mood_analyze_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NewsInput"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "title": "Response Analyze Market Mood Analyze Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/analyze/maritime": {
+            "post": {
+                "summary": "Analyze Maritime Risk",
+                "description": "Maritime freight risk analysis using quantitative psychology principles.\nPredicts price surges based on global routing tensions.\nCan filter by zone (e.g., 'transpacific').",
+                "operationId": "analyze_maritime_risk_analyze_maritime_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MaritimeInput"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "title": "Response Analyze Maritime Risk Analyze Maritime Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/analyze/compare": {
+            "post": {
+                "summary": "Compare Corridors Risk",
+                "description": "Compares the Transpacific and Suez Europe corridors to identify arbitrage opportunities.",
+                "operationId": "compare_corridors_risk_analyze_compare_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NewsInput"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MeridianOutput"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/analyze/arbitrage": {
+            "post": {
+                "tags": [
+                    "Decision Engine"
+                ],
+                "summary": "Evaluate Arbitrage Opportunity",
+                "description": "**Quantitative Arbitrage Decision Engine** \u2014 GEMINI.md \u00a74 + Quantitative Decision Matrix.\n\nEvaluates a DeFi arbitrage opportunity through 6 sequential filters:\n- F1: Risk/Reward asymmetry \u2265 3:1\n- F2: Breakout confirmation (4H/Daily close above resistance)\n- F3: Volume anomaly V_24h > SMA(V,20) + 2\u03c3\n- F4: ATR positive slope over 3 consecutive periods\n- F5: Funding rate < 0.05% per 8h (long squeeze guard)\n- F6: Stop-loss node mandatory (capital preservation rule)\n\nThen computes R_net = Y_yield + I_incentives \u2212 IL \u2212 G_gas \u2212 S_MEV \u2212 F_funding.\nProposes EXECUTE only if R_net > flash_loan_opportunity_cost AND all 6 filters pass.",
+                "operationId": "evaluate_arbitrage_opportunity_analyze_arbitrage_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ArbitrageInput"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "title": "Response Evaluate Arbitrage Opportunity Analyze Arbitrage Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/.well-known/mcp/server-card.json": {
+            "get": {
+                "tags": [
+                    "MCP Bridge"
+                ],
+                "summary": "Get Server Card",
+                "description": "MCP Server Card \u2014 A2A agent discovery endpoint (Ghost Protocol compliant).\nLoaded from static mcp-server.json. No internal names exposed.\nCompatible with Google ADK, LangChain, Composio, and MCP-aware agents.",
+                "operationId": "get_server_card__well_known_mcp_server_card_json_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/mcp/v1/tools": {
+            "get": {
+                "tags": [
+                    "MCP Bridge"
+                ],
+                "summary": "List Mcp Tools",
+                "description": "Endpoint standard du protocole MCP permettant aux agents autonomes (Claude, etc.)\nde d\u00e9couvrir les capacit\u00e9s et les sch\u00e9mas de Meridian Alpha en t\u00e2che de fond.",
+                "operationId": "list_mcp_tools_mcp_v1_tools_get",
+                "parameters": [
+                    {
+                        "name": "x-api-key",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Api-Key"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/mcp/v1/tools/execute": {
+            "post": {
+                "tags": [
+                    "MCP Bridge"
+                ],
+                "summary": "Execute Mcp Tool",
+                "description": "Point d'ex\u00e9cution automatique pour les agents IA autonomes.",
+                "operationId": "execute_mcp_tool_mcp_v1_tools_execute_post",
+                "parameters": [
+                    {
+                        "name": "x-api-key",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "X-Api-Key"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MCPExecuteRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/webhook": {
+            "post": {
+                "tags": [
+                    "Billing & Provisioning"
+                ],
+                "summary": "Paddle Webhook",
+                "description": "Point de terminaison s\u00e9curis\u00e9 pour recevoir les notifications de paiement de Paddle.\nD\u00e9clenche la g\u00e9n\u00e9ration de la cl\u00e9 API (via generate_api_key.py) et le provisionnement.",
+                "operationId": "paddle_webhook_webhook_post",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ArbitrageInput": {
+                "properties": {
+                    "entry_price_usd": {
+                        "type": "number",
+                        "title": "Entry Price Usd"
+                    },
+                    "exit_price_usd": {
+                        "type": "number",
+                        "title": "Exit Price Usd"
+                    },
+                    "stop_loss_price_usd": {
+                        "type": "number",
+                        "title": "Stop Loss Price Usd"
+                    },
+                    "position_size_usd": {
+                        "type": "number",
+                        "title": "Position Size Usd"
+                    },
+                    "gross_yield_usd": {
+                        "type": "number",
+                        "title": "Gross Yield Usd"
+                    },
+                    "incentives_usd": {
+                        "type": "number",
+                        "title": "Incentives Usd",
+                        "default": 0.0
+                    },
+                    "gas_usd": {
+                        "type": "number",
+                        "title": "Gas Usd",
+                        "default": 0.0
+                    },
+                    "slippage_pct": {
+                        "type": "number",
+                        "title": "Slippage Pct",
+                        "default": 0.003
+                    },
+                    "mev_probability": {
+                        "type": "number",
+                        "title": "Mev Probability",
+                        "default": 0.15
+                    },
+                    "is_lp_position": {
+                        "type": "boolean",
+                        "title": "Is Lp Position",
+                        "default": false
+                    },
+                    "il_price_ratio": {
+                        "type": "number",
+                        "title": "Il Price Ratio",
+                        "default": 1.0
+                    },
+                    "funding_rate_8h": {
+                        "type": "number",
+                        "title": "Funding Rate 8H",
+                        "default": 0.0
+                    },
+                    "holding_periods_8h": {
+                        "type": "integer",
+                        "title": "Holding Periods 8H",
+                        "default": 1
+                    },
+                    "flash_loan_amount_usd": {
+                        "type": "number",
+                        "title": "Flash Loan Amount Usd",
+                        "default": 0.0
+                    },
+                    "flash_loan_fee_pct": {
+                        "type": "number",
+                        "title": "Flash Loan Fee Pct",
+                        "default": 0.09
+                    },
+                    "resistance_level_usd": {
+                        "type": "number",
+                        "title": "Resistance Level Usd",
+                        "default": 0.0
+                    },
+                    "candle_close_4h_usd": {
+                        "type": "number",
+                        "title": "Candle Close 4H Usd",
+                        "default": 0.0
+                    },
+                    "volume_24h": {
+                        "type": "number",
+                        "title": "Volume 24H",
+                        "default": 0.0
+                    },
+                    "volume_sma_20": {
+                        "type": "number",
+                        "title": "Volume Sma 20",
+                        "default": 0.0
+                    },
+                    "volume_stddev": {
+                        "type": "number",
+                        "title": "Volume Stddev",
+                        "default": 0.0
+                    },
+                    "atr_values": {
+                        "items": {
+                            "type": "number"
+                        },
+                        "type": "array",
+                        "title": "Atr Values",
+                        "default": []
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "entry_price_usd",
+                    "exit_price_usd",
+                    "stop_loss_price_usd",
+                    "position_size_usd",
+                    "gross_yield_usd"
+                ],
+                "title": "ArbitrageInput",
+                "description": "Input schema for the Quantitative Arbitrage Engine.\nAll monetary values in USD. Rates as decimals (0.003 = 0.3%)."
+            },
+            "ContainerPricing": {
+                "properties": {
+                    "base_freight_rate_usd": {
+                        "type": "number",
+                        "title": "Base Freight Rate Usd"
+                    },
+                    "hidden_surcharges_detected": {
+                        "type": "number",
+                        "title": "Hidden Surcharges Detected"
+                    },
+                    "true_price_estimated": {
+                        "type": "number",
+                        "title": "True Price Estimated"
+                    },
+                    "transparency_status": {
+                        "type": "string",
+                        "title": "Transparency Status"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "base_freight_rate_usd",
+                    "hidden_surcharges_detected",
+                    "true_price_estimated",
+                    "transparency_status"
+                ],
+                "title": "ContainerPricing"
+            },
+            "HTTPValidationError": {
+                "properties": {
+                    "detail": {
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "type": "array",
+                        "title": "Detail"
+                    }
+                },
+                "type": "object",
+                "title": "HTTPValidationError"
+            },
+            "MCPExecuteRequest": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "arguments": {
+                        "type": "object",
+                        "title": "Arguments"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name",
+                    "arguments"
+                ],
+                "title": "MCPExecuteRequest"
+            },
+            "MaritimeInput": {
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "title": "Text"
+                    },
+                    "zone": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Zone"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "text"
+                ],
+                "title": "MaritimeInput"
+            },
+            "MeridianOutput": {
+                "properties": {
+                    "most_volatile_corridor": {
+                        "type": "string",
+                        "title": "Most Volatile Corridor"
+                    },
+                    "transpacific": {
+                        "$ref": "#/components/schemas/RouteAnalysis"
+                    },
+                    "suez_europe": {
+                        "$ref": "#/components/schemas/RouteAnalysis"
+                    },
+                    "arbitration_required": {
+                        "type": "boolean",
+                        "title": "Arbitration Required"
+                    },
+                    "arbitration_reason": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Arbitration Reason"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "most_volatile_corridor",
+                    "transpacific",
+                    "suez_europe",
+                    "arbitration_required"
+                ],
+                "title": "MeridianOutput"
+            },
+            "NewsInput": {
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "title": "Text"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "text"
+                ],
+                "title": "NewsInput"
+            },
+            "RouteAnalysis": {
+                "properties": {
+                    "market_psychology_index": {
+                        "type": "integer",
+                        "title": "Market Psychology Index"
+                    },
+                    "transparency_index": {
+                        "type": "integer",
+                        "title": "Transparency Index"
+                    },
+                    "freight_trend_prediction": {
+                        "type": "string",
+                        "title": "Freight Trend Prediction"
+                    },
+                    "container_20_feet": {
+                        "$ref": "#/components/schemas/ContainerPricing"
+                    },
+                    "container_40_feet": {
+                        "$ref": "#/components/schemas/ContainerPricing"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "market_psychology_index",
+                    "transparency_index",
+                    "freight_trend_prediction",
+                    "container_20_feet",
+                    "container_40_feet"
+                ],
+                "title": "RouteAnalysis"
+            },
+            "ValidationError": {
+                "properties": {
+                    "loc": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Location"
+                    },
+                    "msg": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Error Type"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "title": "ValidationError"
+            }
+        }
+    }
+}
