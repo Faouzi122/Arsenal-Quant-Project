@@ -32,7 +32,9 @@ _TRUSTED_TARGETS: Dict[str, str] = {
 _ERC20_SELECTORS: Dict[str, Tuple[str, str]] = {
     "0x095ea7b3": ("approve", "approve(address,uint256)"),
     "0xa9059cbb": ("transfer", "transfer(address,uint256)"),
-    "0x23b872dd": ("transferFrom", "transferFrom(address,address,uint256)")
+    "0x23b872dd": ("transferFrom", "transferFrom(address,address,uint256)"),
+    "0xd505accf": ("permit", "permit(address,address,uint256,uint256,uint8,bytes32,bytes32)"),
+    "0x8fcbafcc": ("permit_dai", "permit(address,address,uint256,uint256,bool,uint8,bytes32,bytes32)")
 }
 
 # Maximum allowed transaction value/amount for safety checks (e.g. $10,000,000 equivalent)
@@ -83,6 +85,45 @@ class TransactionGuardrail:
                 "sender": sender.lower(),
                 "recipient": recipient.lower(),
                 "amount": amount
+            }
+
+        elif selector == "0xd505accf":  # permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
+            if len(data_bytes) < 228:
+                raise ValueError("Calldata too short for ERC20 permit")
+            owner_word = data_bytes[4:36]
+            spender_word = data_bytes[36:68]
+            value_word = data_bytes[68:100]
+            deadline_word = data_bytes[100:132]
+            owner = "0x" + owner_word[12:].hex()
+            spender = "0x" + spender_word[12:].hex()
+            value = int.from_bytes(value_word, byteorder="big")
+            deadline = int.from_bytes(deadline_word, byteorder="big")
+            return {
+                "owner": owner.lower(),
+                "spender": spender.lower(),
+                "value": value,
+                "deadline": deadline
+            }
+
+        elif selector == "0x8fcbafcc":  # permit(address holder, address spender, uint256 nonce, uint256 expiry, bool allowed, uint8 v, bytes32 r, bytes32 s)
+            if len(data_bytes) < 260:
+                raise ValueError("Calldata too short for DAI permit")
+            holder_word = data_bytes[4:36]
+            spender_word = data_bytes[36:68]
+            nonce_word = data_bytes[68:100]
+            expiry_word = data_bytes[100:132]
+            allowed_word = data_bytes[132:164]
+            holder = "0x" + holder_word[12:].hex()
+            spender = "0x" + spender_word[12:].hex()
+            nonce = int.from_bytes(nonce_word, byteorder="big")
+            expiry = int.from_bytes(expiry_word, byteorder="big")
+            allowed = int.from_bytes(allowed_word, byteorder="big") != 0
+            return {
+                "holder": holder.lower(),
+                "spender": spender.lower(),
+                "nonce": nonce,
+                "expiry": expiry,
+                "allowed": allowed
             }
 
         return {}
@@ -172,6 +213,35 @@ class TransactionGuardrail:
                             "decoded_call": decoded_call
                         }
 
+                # RULE 11 Veto check for permit (ERC-2612)
+                elif method_name == "permit":
+                    spender = params["spender"]
+                    value = params["value"]
+                    if spender not in _TRUSTED_TARGETS:
+                        return {
+                            "status": "REJECTED",
+                            "reason": f"Security Veto: Permit spender address {spender} is not whitelisted. Blind signing blocked.",
+                            "decoded_call": decoded_call
+                        }
+                    if value > _MAX_TRANSACTION_LIMIT:
+                        return {
+                            "status": "REJECTED",
+                            "reason": f"Security Veto: Permitted amount {value} exceeds the transaction ceiling limit.",
+                            "decoded_call": decoded_call
+                        }
+
+                # RULE 11 Veto check for permit_dai
+                elif method_name == "permit_dai":
+                    spender = params["spender"]
+                    allowed = params["allowed"]
+                    if allowed:
+                        if spender not in _TRUSTED_TARGETS:
+                            return {
+                                "status": "REJECTED",
+                                "reason": f"Security Veto: Permit spender address {spender} is not whitelisted. Blind signing blocked.",
+                                "decoded_call": decoded_call
+                            }
+
             except Exception as e:
                 return {
                     "status": "REJECTED",
@@ -188,6 +258,86 @@ class TransactionGuardrail:
             "status": "APPROVED",
             "reason": "Transaction passed all security guardrail whitelists.",
             "decoded_call": decoded_call
+        }
+
+    def inspect_typed_data(self, typed_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Inspects EIP-712 typed data signatures (phishing mitigation).
+        Checks if it is a Permit request and audits the verifyingContract and spender.
+        """
+        if not isinstance(typed_data, dict):
+            return {
+                "status": "REJECTED",
+                "reason": "Typed data must be a JSON dictionary.",
+                "decoded_signature": {}
+            }
+
+        primary_type = typed_data.get("primaryType", "")
+        message = typed_data.get("message", {})
+        domain = typed_data.get("domain", {})
+
+        # 1. Detect if it is a Permit message
+        is_permit = False
+        if primary_type == "Permit":
+            is_permit = True
+        elif "spender" in message and ("value" in message or "allowed" in message or "amount" in message):
+            is_permit = True
+
+        decoded_sig = {
+            "primaryType": primary_type,
+            "is_permit": is_permit,
+            "domain": domain,
+            "message": message
+        }
+
+        if is_permit:
+            # Audit verifying contract (the token contract itself)
+            verifying_contract = domain.get("verifyingContract", "").strip().lower()
+            if verifying_contract and verifying_contract not in _TRUSTED_TARGETS:
+                return {
+                    "status": "REJECTED",
+                    "reason": f"Security Veto: Verifying token contract {verifying_contract} is not whitelisted.",
+                    "decoded_signature": decoded_sig
+                }
+
+            # Audit the spender (who gets the transfer allowance)
+            spender = message.get("spender", "").strip().lower()
+            if not spender:
+                return {
+                    "status": "REJECTED",
+                    "reason": "Security Veto: Permit signature missing spender parameter.",
+                    "decoded_signature": decoded_sig
+                }
+
+            if spender not in _TRUSTED_TARGETS:
+                return {
+                    "status": "REJECTED",
+                    "reason": f"Security Veto: Permit spender address {spender} is not whitelisted. Signature request blocked.",
+                    "decoded_signature": decoded_sig
+                }
+
+            # Audit the amount
+            value = message.get("value")
+            if value is None:
+                value = message.get("amount")
+            
+            if isinstance(value, (int, float)) and value > _MAX_TRANSACTION_LIMIT:
+                return {
+                    "status": "REJECTED",
+                    "reason": f"Security Veto: Permitted amount {value} exceeds the transaction ceiling limit.",
+                    "decoded_signature": decoded_sig
+                }
+
+            return {
+                "status": "APPROVED",
+                "reason": "Permit signature request passed all security whitelists.",
+                "decoded_signature": decoded_sig
+            }
+
+        return {
+            "status": "APPROVED",
+            "reason": "Non-permit EIP-712 signature request approved.",
+            "decoded_signature": decoded_sig
         }
 
 

@@ -221,9 +221,80 @@ def run_system_circuit_breaker_tests():
     print("=" * 60)
 
 
+def run_permit_guardrail_tests():
+    print("\n" + "=" * 60)
+    print("  RUNNING PERMIT & EIP-712 PHISHING GUARDRAIL TESTS")
+    print("=" * 60)
+
+    # 1. Test EIP-712 permit off-chain validation APPROVED
+    print("Test Case 10: EIP-712 Permit off-chain signature (Trusted Spender)")
+    typed_data_ok = {
+        "primaryType": "Permit",
+        "domain": {
+            "name": "USD Coin",
+            "version": "2",
+            "chainId": 8453,
+            "verifyingContract": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913" # USDC
+        },
+        "message": {
+            "owner": "0x4200000000000000000000000000000000000006",
+            "spender": "0x1111111254fb6c44bac0bed2854e76f90643097d", # whitelisted 1inch
+            "value": 5000000000,
+            "nonce": 0,
+            "deadline": 1717545600
+        }
+    }
+    audit = transaction_guardrail.inspect_typed_data(typed_data_ok)
+    assert audit["status"] == "APPROVED", f"Expected APPROVED, got {audit['status']} ({audit.get('reason')})"
+    print(f"  [PASS] Off-chain permit approved safely: Spender is whitelisted.")
+
+    # 2. Test EIP-712 permit off-chain validation REJECTED
+    print("\nTest Case 11: EIP-712 Permit off-chain signature (Untrusted Spender)")
+    typed_data_bad = {
+        "primaryType": "Permit",
+        "domain": {
+            "name": "USD Coin",
+            "version": "2",
+            "chainId": 8453,
+            "verifyingContract": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+        },
+        "message": {
+            "owner": "0x4200000000000000000000000000000000000006",
+            "spender": "0xbadbeef000000000000000000000000000000000", # malicious
+            "value": 5000000000,
+            "nonce": 0,
+            "deadline": 1717545600
+        }
+    }
+    audit_bad = transaction_guardrail.inspect_typed_data(typed_data_bad)
+    assert audit_bad["status"] == "REJECTED"
+    assert "not whitelisted" in audit_bad["reason"]
+    print(f"  [PASS] Successfully blocked untrusted off-chain permit spender.")
+
+    # 3. Test on-chain permit transaction veto
+    print("\nTest Case 12: On-chain ERC-2612 permit transaction check (Malicious Spender)")
+    test_target = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913" # USDC
+    bad_permit_calldata = (
+        "0xd505accf"
+        "0000000000000000000000004200000000000000000000000000000000000006" # owner
+        "000000000000000000000000badbeef000000000000000000000000000000000" # malicious spender
+        "0000000000000000000000000000000000000000000000000000000005f5e100"
+        "00000000000000000000000000000000000000000000000000000000665f8a00"
+        "000000000000000000000000000000000000000000000000000000000000001c"
+        "0000000000000000000000000000000000000000000000000000000000000000"
+        "0000000000000000000000000000000000000000000000000000000000000000"
+    )
+    audit_tx = transaction_guardrail.inspect_transaction(to=test_target, data=bad_permit_calldata)
+    assert audit_tx["status"] == "REJECTED"
+    assert "Permit spender address" in audit_tx["reason"]
+    print("  [PASS] Successfully blocked malicious on-chain permit transaction.")
+    print("-" * 60)
+
+
 if __name__ == "__main__":
     run_aggregator_tests()
     run_adapter_tests()
     run_security_guardrail_tests()
     run_system_circuit_breaker_tests()
+    run_permit_guardrail_tests()
     print("\n🎉 ALL DIRECT AGGREGATOR & SECURITY GUARDRAIL TESTS PASSED SUCCESSFULLY! 🚀")
