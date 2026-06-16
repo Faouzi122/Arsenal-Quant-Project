@@ -67,6 +67,21 @@ services:
     networks:
       - arsenal_net
 
+  # ── L402 GATEWAY SERVICE ──────────────────────────────────────────────────
+  l402_gateway:
+    image: python:3.10-slim
+    container_name: l402_gateway
+    restart: unless-stopped
+    ports:
+      - "8088:8088"
+    volumes:
+      - /home/faouzi/Antigravity_System:/home/faouzi/Antigravity_System
+    working_dir: /home/faouzi/Antigravity_System/06_Router_MCP
+    command: sh -c "pip install fastapi uvicorn httpx && python3 l402_gateway_real.py"
+    networks:
+      - arsenal_net
+
+
   # ── CLOUDFLARE PUBLIC TUNNEL ──────────────────────────────────────────────
   # Exposes decision_engine publicly via HTTPS. lnbits is NOT exposed.
   tunnel:

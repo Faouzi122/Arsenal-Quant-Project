@@ -13,6 +13,10 @@
 !/Antigravity_System/
 !/Antigravity_System/scripts/
 !/Antigravity_System/scripts/abi_guardrail.py
+!/Antigravity_System/06_Router_MCP/
+!/Antigravity_System/06_Router_MCP/**
+!/Antigravity_System/01_Orchestrator_Grosz/
+!/Antigravity_System/01_Orchestrator_Grosz/memory.md
 
 # Exclude virtual environments, environment secrets, and caches inside whitelisted folders
 **/venv/

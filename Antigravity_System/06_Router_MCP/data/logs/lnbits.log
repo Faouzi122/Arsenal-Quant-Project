@@ -1,0 +1,884 @@
+2026-06-05 18:07:30.38 | INFO | Started server process [26]
+2026-06-05 18:07:30.38 | INFO | Waiting for application startup.
+2026-06-05 18:07:30.38 | INFO | Starting LNbits Version: 1.5.4
+2026-06-05 18:07:30.83 | INFO | Updating payments
+2026-06-05 18:07:30.83 | INFO | Updating 0 to 1000
+2026-06-05 18:07:30.83 | INFO | Payments count: 0
+2026-06-05 18:07:30.83 | INFO | Payments updated
+2026-06-05 18:07:31.17 | INFO | ✔️ All migrations done.
+2026-06-05 18:07:31.17 | WARNING | Settings DB empty. Inserting default settings.
+2026-06-05 18:07:32.85 | WARNING | Initialized settings from environment variables.
+2026-06-05 18:07:33.10 | SUCCESS | ✔️ Admin UI is enabled. run `uv run lnbits-cli superuser` to get the superuser.
+2026-06-05 18:07:34.01 | INFO | Initialized webpush settings with generated VAPID key pair.
+2026-06-05 18:07:34.01 | INFO | Pubkey: BEsWxrG8QmGaHnyt-3_LQRfXspC2HYwpOgzJAb17O6Y42A9wvt3ym09gQP9muKht9Rw0EnPYIUSFxlcNOOUIv6o
+2026-06-05 18:07:34.01 | INFO | Installed Extensions (0):
+2026-06-05 18:07:34.02 | INFO | LNbits Info
+2026-06-05 18:07:34.02 | SUCCESS | This is a fresh install of LNbits.
+2026-06-05 18:07:34.02 | INFO | Version: 1.5.4
+2026-06-05 18:07:34.02 | INFO | Baseurl: http://127.0.0.1:5000/
+2026-06-05 18:07:34.02 | INFO | Host: 0.0.0.0
+2026-06-05 18:07:34.02 | INFO | Port: 5000
+2026-06-05 18:07:34.02 | INFO | Debug: False
+2026-06-05 18:07:34.02 | INFO | Site title: LNbits
+2026-06-05 18:07:34.02 | INFO | Funding source: VoidWallet
+2026-06-05 18:07:34.02 | INFO | Data folder: /data
+2026-06-05 18:07:34.02 | INFO | Database: SQLite
+2026-06-05 18:07:34.02 | INFO | Service fee: 0.0
+2026-06-05 18:07:34.02 | INFO | Service fee max: 0
+2026-06-05 18:07:34.02 | INFO | Service fee wallet: None
+2026-06-05 18:07:34.02 | INFO | Connecting to backend VoidWallet...
+2026-06-05 18:07:34.02 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:07:34.02 | SUCCESS | ✔️ Backend VoidWallet connected and with a balance of 0 msat.
+2026-06-05 18:07:34.36 | SUCCESS | LNbits started in 3.98 seconds.
+2026-06-05 18:07:34.36 | WARNING | Task: skipping pending check for VoidWallet
+2026-06-05 18:07:34.36 | INFO | got a payment notification 
+2026-06-05 18:07:34.36 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:07:34.36 | INFO | Application startup complete.
+2026-06-05 18:07:35.01 | INFO | Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
+2026-06-05 18:07:35.02 | WARNING | No payment found for ''.
+2026-06-05 18:07:35.05 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:07:38.01 | WARNING | Failed to fetch Bitcoin price for USD from Exir: 
+2026-06-05 18:07:38.01 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: 
+2026-06-05 18:07:38.01 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: 
+2026-06-05 18:07:38.02 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-05 18:07:38.02 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-05 18:07:40.12 | WARNING | Manifest https://raw.githubusercontent.com/lnbits/lnbits-extensions/main/extensions.json failed with ''
+2026-06-05 18:08:40.13 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:09:40.14 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:10:40.14 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:11:40.15 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:12:40.16 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:12:41.91 | WARNING | Failed to fetch Bitcoin price for USD from Exir: 
+2026-06-05 18:12:41.91 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: 
+2026-06-05 18:12:41.91 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: 
+2026-06-05 18:12:41.92 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: 
+2026-06-05 18:12:41.92 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-05 18:12:41.92 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-05 18:13:40.17 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:14:30.84 | INFO | 172.20.0.1:43214 - "POST /api/v1/payments HTTP/1.1" 307
+2026-06-05 18:14:30.87 | INFO | 172.20.0.1:43224 - "GET /api/v1/payments/AgEEbW...mock_macaroon_signature HTTP/1.1" 307
+2026-06-05 18:14:31.13 | INFO | 172.20.0.1:43228 - "GET /first_install HTTP/1.1" 200
+2026-06-05 18:14:40.18 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:15:03.70 | INFO | 172.20.0.1:35430 - "POST /api/v1/payments HTTP/1.1" 307
+2026-06-05 18:15:03.72 | INFO | 172.20.0.1:35444 - "GET /api/v1/payments/AgEEbW...mock_macaroon_signature HTTP/1.1" 307
+2026-06-05 18:15:03.96 | INFO | 172.20.0.1:35456 - "GET /first_install HTTP/1.1" 200
+2026-06-05 18:15:40.18 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:16:40.19 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:17:40.20 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:17:45.53 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: 
+2026-06-05 18:17:45.53 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-05 18:17:45.53 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-05 18:18:40.20 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:19:40.21 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:20:40.22 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:21:40.22 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:22:40.23 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:23:40.24 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:24:40.25 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:25:40.25 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:26:40.26 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:27:40.27 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:27:51.92 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: 
+2026-06-05 18:27:51.92 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-05 18:27:51.92 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-05 18:28:40.28 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:29:40.28 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:30:40.29 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:31:40.30 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:32:40.31 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:32:55.69 | WARNING | Failed to fetch Bitcoin price for USD from Exir: 
+2026-06-05 18:33:40.32 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:34:40.33 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:35:40.33 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:36:40.34 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:37:34.36 | WARNING | Task: skipping pending check for VoidWallet
+2026-06-05 18:37:40.35 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:37:59.63 | WARNING | Failed to fetch Bitcoin price for USD from Exir: 
+2026-06-05 18:37:59.63 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-05 18:37:59.63 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-05 18:38:40.36 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:39:40.37 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:40:40.37 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:41:40.38 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:42:40.39 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:43:00.29 | WARNING | Failed to fetch Bitcoin price for USD from Blockchain: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:43:00.29 | WARNING | Failed to fetch Bitcoin price for USD from Binance: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:43:00.30 | WARNING | Failed to fetch Bitcoin price for USD from Exir: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:43:00.30 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:43:00.31 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:43:00.32 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:43:00.33 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:43:00.33 | WARNING | Failed to fetch Bitcoin price for USD from yadio: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:43:40.39 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:44:40.40 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:45:40.41 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:46:40.42 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:47:40.43 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:48:01.00 | WARNING | Failed to fetch Bitcoin price for USD from Binance: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:48:01.00 | WARNING | Failed to fetch Bitcoin price for USD from Blockchain: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:48:01.01 | WARNING | Failed to fetch Bitcoin price for USD from Exir: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:48:01.01 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:48:01.02 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:48:01.02 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:48:01.03 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:48:01.03 | WARNING | Failed to fetch Bitcoin price for USD from yadio: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:48:40.44 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:49:40.44 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:50:40.45 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:51:40.46 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:52:40.47 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:53:01.66 | WARNING | Failed to fetch Bitcoin price for USD from Binance: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:53:01.66 | WARNING | Failed to fetch Bitcoin price for USD from Blockchain: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:53:01.68 | WARNING | Failed to fetch Bitcoin price for USD from Exir: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:53:01.68 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:53:01.68 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:53:01.68 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:53:01.69 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:53:01.70 | WARNING | Failed to fetch Bitcoin price for USD from yadio: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:53:40.47 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:54:40.48 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:55:40.49 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:56:40.50 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:57:40.50 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:58:02.35 | WARNING | Failed to fetch Bitcoin price for USD from Blockchain: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:58:02.36 | WARNING | Failed to fetch Bitcoin price for USD from Binance: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:58:02.37 | WARNING | Failed to fetch Bitcoin price for USD from Exir: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:58:02.37 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:58:02.38 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:58:02.38 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:58:02.39 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:58:02.39 | WARNING | Failed to fetch Bitcoin price for USD from yadio: [Errno -3] Temporary failure in name resolution
+2026-06-05 18:58:40.51 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 18:59:40.53 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:00:40.53 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:01:40.54 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:02:40.55 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:03:03.06 | WARNING | Failed to fetch Bitcoin price for USD from Binance: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:03:03.06 | WARNING | Failed to fetch Bitcoin price for USD from Blockchain: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:03:03.07 | WARNING | Failed to fetch Bitcoin price for USD from Exir: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:03:03.07 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:03:03.08 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:03:03.08 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:03:03.09 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:03:03.09 | WARNING | Failed to fetch Bitcoin price for USD from yadio: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:03:40.56 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:04:40.56 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:05:40.57 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:06:40.58 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:07:34.37 | WARNING | Task: skipping pending check for VoidWallet
+2026-06-05 19:07:40.59 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:07:40.72 | WARNING | Manifest https://raw.githubusercontent.com/lnbits/lnbits-extensions/main/extensions.json failed with '[Errno -3] Temporary failure in name resolution'
+2026-06-05 19:08:03.72 | WARNING | Failed to fetch Bitcoin price for USD from Binance: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:08:03.72 | WARNING | Failed to fetch Bitcoin price for USD from Blockchain: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:08:03.73 | WARNING | Failed to fetch Bitcoin price for USD from Exir: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:08:03.73 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:08:03.74 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:08:03.75 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:08:03.76 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:08:03.76 | WARNING | Failed to fetch Bitcoin price for USD from yadio: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:08:40.60 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:09:40.61 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:10:40.61 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:11:40.62 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:12:40.63 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:13:04.38 | WARNING | Failed to fetch Bitcoin price for USD from Blockchain: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:13:04.38 | WARNING | Failed to fetch Bitcoin price for USD from Binance: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:13:04.39 | WARNING | Failed to fetch Bitcoin price for USD from Exir: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:13:04.39 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:13:04.40 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:13:04.40 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:13:04.41 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:13:04.41 | WARNING | Failed to fetch Bitcoin price for USD from yadio: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:13:40.64 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:14:40.66 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:15:40.67 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:16:40.68 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:17:40.69 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:18:05.05 | WARNING | Failed to fetch Bitcoin price for USD from Binance: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:18:05.05 | WARNING | Failed to fetch Bitcoin price for USD from Blockchain: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:18:05.06 | WARNING | Failed to fetch Bitcoin price for USD from Exir: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:18:05.06 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:18:05.07 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:18:05.07 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:18:05.09 | WARNING | Failed to fetch Bitcoin price for USD from yadio: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:18:05.09 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:18:40.70 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:19:40.70 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:20:40.71 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:21:40.72 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:22:40.73 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:23:05.73 | WARNING | Failed to fetch Bitcoin price for USD from Binance: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:23:05.74 | WARNING | Failed to fetch Bitcoin price for USD from Blockchain: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:23:05.75 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:23:05.75 | WARNING | Failed to fetch Bitcoin price for USD from Exir: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:23:05.76 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:23:05.76 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:23:05.77 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:23:05.77 | WARNING | Failed to fetch Bitcoin price for USD from yadio: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:23:40.74 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:24:40.75 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:25:40.75 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:26:40.76 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:27:40.80 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:28:06.53 | WARNING | Failed to fetch Bitcoin price for USD from Binance: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:28:06.55 | WARNING | Failed to fetch Bitcoin price for USD from Exir: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:28:06.57 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:28:06.59 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:28:06.61 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:28:06.63 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:28:06.64 | WARNING | Failed to fetch Bitcoin price for USD from yadio: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:28:09.40 | WARNING | Failed to fetch Bitcoin price for USD from Blockchain: 
+2026-06-05 19:28:40.81 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:29:40.82 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:30:40.83 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:31:40.83 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:32:40.84 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:33:10.03 | WARNING | Failed to fetch Bitcoin price for USD from Blockchain: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:33:10.03 | WARNING | Failed to fetch Bitcoin price for USD from Binance: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:33:10.04 | WARNING | Failed to fetch Bitcoin price for USD from Exir: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:33:10.05 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:33:10.06 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:33:10.06 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:33:10.07 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:33:10.07 | WARNING | Failed to fetch Bitcoin price for USD from yadio: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:33:40.85 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:34:40.86 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:35:40.87 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:36:40.88 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:37:34.37 | WARNING | Task: skipping pending check for VoidWallet
+2026-06-05 19:37:40.89 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:38:10.74 | WARNING | Failed to fetch Bitcoin price for USD from Blockchain: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:38:10.74 | WARNING | Failed to fetch Bitcoin price for USD from Binance: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:38:10.75 | WARNING | Failed to fetch Bitcoin price for USD from Exir: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:38:10.75 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:38:10.76 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:38:10.77 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:38:10.77 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:38:10.77 | WARNING | Failed to fetch Bitcoin price for USD from yadio: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:38:40.89 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:39:40.90 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:40:40.91 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:41:40.92 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:42:40.94 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:43:11.42 | WARNING | Failed to fetch Bitcoin price for USD from Binance: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:43:11.42 | WARNING | Failed to fetch Bitcoin price for USD from Blockchain: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:43:11.43 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:43:11.44 | WARNING | Failed to fetch Bitcoin price for USD from Exir: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:43:11.45 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:43:11.45 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:43:11.46 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:43:11.46 | WARNING | Failed to fetch Bitcoin price for USD from yadio: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:43:40.95 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:44:40.96 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:45:40.96 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:46:40.97 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:47:40.98 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:48:12.13 | WARNING | Failed to fetch Bitcoin price for USD from Binance: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:48:12.13 | WARNING | Failed to fetch Bitcoin price for USD from Blockchain: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:48:12.14 | WARNING | Failed to fetch Bitcoin price for USD from Exir: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:48:12.14 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:48:12.15 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:48:12.15 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:48:12.17 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:48:12.17 | WARNING | Failed to fetch Bitcoin price for USD from yadio: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:48:40.99 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:49:40.99 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:50:41.00 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:51:41.01 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:52:41.02 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:53:12.87 | WARNING | Failed to fetch Bitcoin price for USD from Blockchain: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:53:12.87 | WARNING | Failed to fetch Bitcoin price for USD from Binance: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:53:12.88 | WARNING | Failed to fetch Bitcoin price for USD from Exir: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:53:12.88 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:53:12.89 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:53:12.92 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:53:12.93 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:53:12.94 | WARNING | Failed to fetch Bitcoin price for USD from yadio: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:53:41.03 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:54:41.04 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:55:41.04 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:56:41.05 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:57:41.06 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:58:13.59 | WARNING | Failed to fetch Bitcoin price for USD from Blockchain: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:58:13.59 | WARNING | Failed to fetch Bitcoin price for USD from Binance: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:58:13.60 | WARNING | Failed to fetch Bitcoin price for USD from Exir: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:58:13.60 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:58:13.61 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:58:13.61 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:58:13.62 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:58:13.62 | WARNING | Failed to fetch Bitcoin price for USD from yadio: [Errno -3] Temporary failure in name resolution
+2026-06-05 19:58:41.09 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 19:59:41.10 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:00:41.10 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:01:41.11 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:02:41.12 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:03:14.27 | WARNING | Failed to fetch Bitcoin price for USD from Blockchain: [Errno -3] Temporary failure in name resolution
+2026-06-05 20:03:14.27 | WARNING | Failed to fetch Bitcoin price for USD from Binance: [Errno -3] Temporary failure in name resolution
+2026-06-05 20:03:14.28 | WARNING | Failed to fetch Bitcoin price for USD from Exir: [Errno -3] Temporary failure in name resolution
+2026-06-05 20:03:14.28 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: [Errno -3] Temporary failure in name resolution
+2026-06-05 20:03:14.30 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: [Errno -3] Temporary failure in name resolution
+2026-06-05 20:03:14.30 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: [Errno -3] Temporary failure in name resolution
+2026-06-05 20:03:14.31 | WARNING | Failed to fetch Bitcoin price for USD from yadio: [Errno -3] Temporary failure in name resolution
+2026-06-05 20:03:14.31 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: [Errno -3] Temporary failure in name resolution
+2026-06-05 20:03:41.13 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:04:41.13 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:05:41.14 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:06:41.15 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:07:34.37 | WARNING | Task: skipping pending check for VoidWallet
+2026-06-05 20:07:41.16 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:07:41.27 | WARNING | Manifest https://raw.githubusercontent.com/lnbits/lnbits-extensions/main/extensions.json failed with '[Errno -3] Temporary failure in name resolution'
+2026-06-05 20:08:14.94 | WARNING | Failed to fetch Bitcoin price for USD from Binance: [Errno -3] Temporary failure in name resolution
+2026-06-05 20:08:14.95 | WARNING | Failed to fetch Bitcoin price for USD from Blockchain: [Errno -3] Temporary failure in name resolution
+2026-06-05 20:08:14.96 | WARNING | Failed to fetch Bitcoin price for USD from Exir: [Errno -3] Temporary failure in name resolution
+2026-06-05 20:08:14.96 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: [Errno -3] Temporary failure in name resolution
+2026-06-05 20:08:14.97 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: [Errno -3] Temporary failure in name resolution
+2026-06-05 20:08:14.97 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: [Errno -3] Temporary failure in name resolution
+2026-06-05 20:08:14.98 | WARNING | Failed to fetch Bitcoin price for USD from yadio: [Errno -3] Temporary failure in name resolution
+2026-06-05 20:08:14.98 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: [Errno -3] Temporary failure in name resolution
+2026-06-05 20:08:41.17 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:09:41.17 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:10:41.18 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:11:41.19 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:12:41.20 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:13:18.64 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: 
+2026-06-05 20:13:18.64 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-05 20:13:18.64 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-05 20:13:41.21 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:14:41.22 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:15:33.34 | INFO | 172.20.0.1:52136 - "POST /api/v1/payments HTTP/1.1" 307
+2026-06-05 20:15:33.36 | INFO | 172.20.0.1:52138 - "GET /api/v1/payments/AgEEbW...mock_macaroon_signature HTTP/1.1" 307
+2026-06-05 20:15:33.63 | INFO | 172.20.0.1:52146 - "GET /first_install HTTP/1.1" 200
+2026-06-05 20:15:41.22 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:16:41.23 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:16:55.56 | INFO | 172.20.0.1:57560 - "POST /api/v1/payments HTTP/1.1" 307
+2026-06-05 20:16:55.58 | INFO | 172.20.0.1:57570 - "GET /api/v1/payments/AgEEbW...mock_macaroon_signature HTTP/1.1" 307
+2026-06-05 20:16:55.80 | INFO | 172.20.0.1:57576 - "GET /first_install HTTP/1.1" 200
+2026-06-05 20:17:41.24 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:18:22.24 | WARNING | Failed to fetch Bitcoin price for USD from Exir: 
+2026-06-05 20:18:41.25 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:18:46.67 | INFO | 172.20.0.1:44476 - "GET / HTTP/1.1" 307
+2026-06-05 20:18:47.02 | INFO | 172.20.0.1:44476 - "GET /first_install HTTP/1.1" 200
+2026-06-05 20:18:47.17 | INFO | 172.20.0.1:44476 - "GET /static/bundle.min.css?v=1780682842 HTTP/1.1" 200
+2026-06-05 20:18:47.21 | INFO | 172.20.0.1:44490 - "GET /static/bundle.min.js?v=1780682842 HTTP/1.1" 200
+2026-06-05 20:18:47.22 | INFO | 172.20.0.1:44496 - "GET /static/bundle-components.min.js?v=1780682842 HTTP/1.1" 200
+2026-06-05 20:18:47.86 | INFO | 172.20.0.1:44490 - "GET /service-worker.js HTTP/1.1" 307
+2026-06-05 20:18:48.09 | INFO | 172.20.0.1:44490 - "GET /static/images/logos/lnbits.svg HTTP/1.1" 200
+2026-06-05 20:18:48.11 | INFO | 172.20.0.1:44496 - "GET /static/fonts/material-icons-v50.woff2?v=1780682842 HTTP/1.1" 200
+2026-06-05 20:18:48.56 | INFO | 172.20.0.1:44496 - "GET /favicon.ico HTTP/1.1" 307
+2026-06-05 20:18:48.97 | INFO | 172.20.0.1:44496 - "GET /first_install HTTP/1.1" 200
+2026-06-05 20:19:41.26 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:20:41.26 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:21:41.27 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:22:41.28 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:23:26.02 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: 
+2026-06-05 20:23:41.28 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:24:41.29 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:25:41.30 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:26:41.31 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:27:41.32 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:28:30.21 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: 
+2026-06-05 20:28:30.21 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-05 20:28:30.21 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-05 20:28:41.32 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:29:41.33 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:30:41.34 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:31:41.35 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:32:41.36 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:33:41.37 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:34:41.38 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:35:41.38 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:36:41.39 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:37:34.37 | WARNING | Task: skipping pending check for VoidWallet
+2026-06-05 20:37:41.40 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:38:37.36 | WARNING | Failed to fetch Bitcoin price for USD from Exir: 
+2026-06-05 20:38:37.36 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: 
+2026-06-05 20:38:37.37 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: 
+2026-06-05 20:38:37.37 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-05 20:38:37.37 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-05 20:38:37.37 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: 
+2026-06-05 20:38:41.41 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:39:41.42 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:40:41.42 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:41:41.43 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:42:41.44 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:43:41.01 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: 
+2026-06-05 20:43:41.02 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-05 20:43:41.46 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:44:41.46 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:45:41.47 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:46:41.48 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:47:41.49 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:48:41.66 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:48:44.66 | WARNING | Failed to fetch Bitcoin price for USD from Exir: 
+2026-06-05 20:48:44.66 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: 
+2026-06-05 20:48:44.66 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: 
+2026-06-05 20:48:44.66 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: 
+2026-06-05 20:48:44.66 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-05 20:48:44.66 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-05 20:49:41.67 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:50:41.68 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:51:41.69 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:52:41.70 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:53:41.70 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:53:48.34 | WARNING | Failed to fetch Bitcoin price for USD from Exir: 
+2026-06-05 20:53:48.34 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: 
+2026-06-05 20:53:48.34 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-05 20:53:48.34 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-05 20:54:41.71 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:55:41.72 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:56:41.72 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:57:41.73 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:58:41.74 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 20:58:51.95 | WARNING | Failed to fetch Bitcoin price for USD from Exir: 
+2026-06-05 20:58:51.95 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: 
+2026-06-05 20:58:51.95 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-05 20:58:51.95 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-05 20:58:51.95 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: 
+2026-06-05 20:59:41.75 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:00:41.75 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:01:41.76 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:02:41.79 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:03:41.80 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:03:55.62 | WARNING | Failed to fetch Bitcoin price for USD from Blockchain: 
+2026-06-05 21:03:55.63 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-05 21:03:55.63 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-05 21:04:41.81 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:05:41.81 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:06:41.82 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:07:34.37 | WARNING | Task: skipping pending check for VoidWallet
+2026-06-05 21:07:41.83 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:08:41.85 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:08:59.25 | WARNING | Failed to fetch Bitcoin price for USD from Exir: 
+2026-06-05 21:08:59.25 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: 
+2026-06-05 21:08:59.26 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: 
+2026-06-05 21:08:59.26 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-05 21:08:59.26 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-05 21:09:41.85 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:10:41.86 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:11:41.87 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:12:41.88 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:13:41.88 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:14:03.00 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: 
+2026-06-05 21:14:03.01 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-05 21:14:41.89 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:15:41.90 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:16:41.90 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:17:41.91 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:18:41.92 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:19:06.64 | WARNING | Failed to fetch Bitcoin price for USD from Exir: 
+2026-06-05 21:19:06.64 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: 
+2026-06-05 21:19:06.64 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-05 21:19:06.65 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-05 21:19:41.93 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:20:41.93 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:21:41.94 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:22:41.95 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:23:41.96 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:24:10.49 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: 
+2026-06-05 21:24:10.50 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-05 21:24:10.50 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-05 21:24:41.97 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:25:41.98 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:26:41.99 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:27:41.99 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:28:42.00 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:29:14.49 | WARNING | Failed to fetch Bitcoin price for USD from Exir: 
+2026-06-05 21:29:14.49 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: 
+2026-06-05 21:29:14.49 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: 
+2026-06-05 21:29:14.49 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: 
+2026-06-05 21:29:14.49 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-05 21:29:14.49 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-05 21:29:42.01 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:30:42.02 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:31:42.02 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:32:42.03 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:33:42.04 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:34:18.19 | WARNING | Failed to fetch Bitcoin price for USD from Exir: 
+2026-06-05 21:34:18.19 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: 
+2026-06-05 21:34:18.19 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: 
+2026-06-05 21:34:18.19 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: 
+2026-06-05 21:34:18.19 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-05 21:34:18.19 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-05 21:34:42.04 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:35:42.05 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:36:42.06 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:37:34.38 | WARNING | Task: skipping pending check for VoidWallet
+2026-06-05 21:37:42.06 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:38:42.07 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:39:21.90 | WARNING | Failed to fetch Bitcoin price for USD from Blockchain: 
+2026-06-05 21:39:21.90 | WARNING | Failed to fetch Bitcoin price for USD from Exir: 
+2026-06-05 21:39:21.90 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: 
+2026-06-05 21:39:21.90 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: 
+2026-06-05 21:39:21.90 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: 
+2026-06-05 21:39:21.90 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-05 21:39:21.90 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-05 21:39:42.08 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:40:42.09 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:41:42.09 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:42:42.10 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:43:42.11 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:44:25.55 | WARNING | Failed to fetch Bitcoin price for USD from Binance: 
+2026-06-05 21:44:25.55 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: 
+2026-06-05 21:44:25.56 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: 
+2026-06-05 21:44:25.56 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: 
+2026-06-05 21:44:25.56 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-05 21:44:25.56 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-05 21:44:25.56 | WARNING | Failed to fetch Bitcoin price for USD from Exir: 
+2026-06-05 21:44:42.12 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:45:42.13 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:46:42.13 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:47:42.14 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:48:42.15 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-05 21:49:29.29 | WARNING | Failed to fetch Bitcoin price for USD from Exir: 
+2026-06-05 21:49:29.29 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: 
+2026-06-05 21:49:29.29 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: 
+2026-06-05 21:49:29.29 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: 
+2026-06-05 21:49:29.30 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-05 21:49:29.30 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-05 21:49:42.16 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:34:20.54 | INFO | Started server process [11]
+2026-06-15 16:34:20.55 | INFO | Waiting for application startup.
+2026-06-15 16:34:20.55 | INFO | Starting LNbits Version: 1.5.4
+2026-06-15 16:34:20.58 | INFO | ✔️ All migrations done.
+2026-06-15 16:34:20.88 | SUCCESS | ✔️ Admin UI is enabled. run `uv run lnbits-cli superuser` to get the superuser.
+2026-06-15 16:34:20.88 | INFO | Initialized webpush settings with generated VAPID key pair.
+2026-06-15 16:34:20.88 | INFO | Pubkey: BEsWxrG8QmGaHnyt-3_LQRfXspC2HYwpOgzJAb17O6Y42A9wvt3ym09gQP9muKht9Rw0EnPYIUSFxlcNOOUIv6o
+2026-06-15 16:34:20.89 | INFO | Installed Extensions (0):
+2026-06-15 16:34:20.89 | INFO | LNbits Info
+2026-06-15 16:34:20.89 | SUCCESS | This is a fresh install of LNbits.
+2026-06-15 16:34:20.89 | INFO | Version: 1.5.4
+2026-06-15 16:34:20.89 | INFO | Baseurl: http://127.0.0.1:5000/
+2026-06-15 16:34:20.89 | INFO | Host: 0.0.0.0
+2026-06-15 16:34:20.89 | INFO | Port: 5000
+2026-06-15 16:34:20.89 | INFO | Debug: False
+2026-06-15 16:34:20.89 | INFO | Site title: LNbits
+2026-06-15 16:34:20.90 | INFO | Funding source: VoidWallet
+2026-06-15 16:34:20.90 | INFO | Data folder: /data
+2026-06-15 16:34:20.90 | INFO | Database: SQLite
+2026-06-15 16:34:20.90 | INFO | Service fee: 0.0
+2026-06-15 16:34:20.90 | INFO | Service fee max: 0
+2026-06-15 16:34:20.90 | INFO | Service fee wallet: None
+2026-06-15 16:34:20.90 | INFO | Connecting to backend VoidWallet...
+2026-06-15 16:34:20.90 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:34:20.90 | SUCCESS | ✔️ Backend VoidWallet connected and with a balance of 0 msat.
+2026-06-15 16:34:21.27 | SUCCESS | LNbits started in 0.71 seconds.
+2026-06-15 16:34:21.27 | WARNING | Task: skipping pending check for VoidWallet
+2026-06-15 16:34:21.27 | INFO | got a payment notification 
+2026-06-15 16:34:21.27 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:34:21.27 | INFO | Application startup complete.
+2026-06-15 16:34:21.91 | INFO | Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
+2026-06-15 16:34:21.91 | WARNING | No payment found for ''.
+2026-06-15 16:34:21.95 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:34:24.91 | WARNING | Failed to fetch Bitcoin price for USD from Exir: 
+2026-06-15 16:34:24.91 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: 
+2026-06-15 16:34:24.91 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: 
+2026-06-15 16:34:24.91 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: 
+2026-06-15 16:34:24.91 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-15 16:34:24.91 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-15 16:34:27.03 | WARNING | Manifest https://raw.githubusercontent.com/lnbits/lnbits-extensions/main/extensions.json failed with ''
+2026-06-15 16:34:27.91 | INFO | 172.20.0.1:37038 - "GET /api/v1/wallet HTTP/1.1" 307
+2026-06-15 16:34:41.21 | INFO | 172.20.0.1:52572 - "GET /api/v1/wallet HTTP/1.1" 307
+2026-06-15 16:35:19.71 | INFO | 172.20.0.1:55150 - "GET / HTTP/1.1" 307
+2026-06-15 16:35:20.13 | INFO | 172.20.0.1:55150 - "GET /first_install HTTP/1.1" 200
+2026-06-15 16:35:20.22 | INFO | 172.20.0.1:55164 - "GET /static/bundle-components.min.js?v=1781541256 HTTP/1.1" 200
+2026-06-15 16:35:20.22 | INFO | 172.20.0.1:55152 - "GET /static/bundle.min.js?v=1781541256 HTTP/1.1" 200
+2026-06-15 16:35:20.22 | INFO | 172.20.0.1:55150 - "GET /static/bundle.min.css?v=1781541256 HTTP/1.1" 200
+2026-06-15 16:35:20.78 | INFO | 172.20.0.1:55152 - "GET /service-worker.js HTTP/1.1" 307
+2026-06-15 16:35:21.14 | INFO | 172.20.0.1:55152 - "GET /static/fonts/material-icons-v50.woff2?v=1781541256 HTTP/1.1" 200
+2026-06-15 16:35:21.15 | INFO | 172.20.0.1:55150 - "GET /static/images/logos/lnbits.svg HTTP/1.1" 200
+2026-06-15 16:35:21.28 | INFO | 172.20.0.1:55152 - "GET /favicon.ico HTTP/1.1" 307
+2026-06-15 16:35:21.64 | INFO | 172.20.0.1:55152 - "GET /first_install HTTP/1.1" 200
+2026-06-15 16:35:27.03 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:36:27.04 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:36:43.60 | INFO | 172.20.0.1:42778 - "PUT /api/v1/auth/first_install HTTP/1.1" 200
+2026-06-15 16:36:44.04 | INFO | 172.20.0.1:42778 - "GET /api/v1/auth HTTP/1.1" 200
+2026-06-15 16:36:44.17 | INFO | 172.20.0.1:42792 - "WebSocket /api/v1/ws/662622109558445387b0c821933e538d" [accepted]
+2026-06-15 16:36:44.17 | INFO | connection open
+2026-06-15 16:36:44.29 | INFO | 172.20.0.1:42778 - "GET /api/v1/extension HTTP/1.1" 200
+2026-06-15 16:36:44.38 | INFO | 172.20.0.1:42778 - "GET /admin/api/v1/settings HTTP/1.1" 200
+2026-06-15 16:36:44.41 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:36:44.42 | INFO | 172.20.0.1:42778 - "GET /admin/api/v1/audit HTTP/1.1" 200
+2026-06-15 16:36:44.92 | INFO | 172.20.0.1:42778 - "GET /favicon.ico HTTP/1.1" 307
+2026-06-15 16:36:45.04 | INFO | 172.20.0.1:42778 - "GET /static/images/favicon_qr_logo.png HTTP/1.1" 200
+2026-06-15 16:37:27.05 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:38:11.53 | INFO | 172.20.0.1:53594 - "POST /api/v1/wallet HTTP/1.1" 200
+2026-06-15 16:38:11.56 | INFO | 172.20.0.1:53596 - "WebSocket /api/v1/ws/2fa85e6a964847f6ab82eb840427fc0c" [accepted]
+2026-06-15 16:38:11.56 | INFO | connection open
+2026-06-15 16:38:11.85 | INFO | 172.20.0.1:53594 - "GET /api/v1/payments/paginated?limit=10&offset=0&sortby=time&direction=desc&status%5Bne%5D=failed HTTP/1.1" 200
+2026-06-15 16:38:12.92 | INFO | 172.20.0.1:53602 - "GET /api/v1/payments/stats/daily?wallet_id=4bf967c6fd6749d79ab44548994af448 HTTP/1.1" 200
+2026-06-15 16:38:15.89 | WARNING | Failed to fetch Bitcoin price for USD from Binance: 
+2026-06-15 16:38:15.90 | INFO | 172.20.0.1:53594 - "GET /api/v1/rate/USD HTTP/1.1" 200
+2026-06-15 16:38:27.06 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:39:27.07 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:39:28.85 | WARNING | Failed to fetch Bitcoin price for USD from Exir: 
+2026-06-15 16:39:28.86 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: 
+2026-06-15 16:39:28.86 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: 
+2026-06-15 16:39:28.86 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: 
+2026-06-15 16:39:28.86 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-15 16:39:28.86 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-15 16:40:27.08 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:41:27.08 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:42:27.09 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:42:48.56 | INFO | 172.20.0.1:43532 - "GET /api/v1/wallet HTTP/1.1" 200
+2026-06-15 16:42:52.55 | WARNING | Failed to fetch Bitcoin price for USD from Blockchain: 
+2026-06-15 16:42:52.55 | WARNING | Failed to fetch Bitcoin price for USD from Exir: 
+2026-06-15 16:42:52.56 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: 
+2026-06-15 16:42:52.56 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: 
+2026-06-15 16:42:52.56 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: 
+2026-06-15 16:42:52.56 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-15 16:42:52.56 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-15 16:42:52.56 | WARNING | Could only fetch one Bitcoin price.
+2026-06-15 16:42:52.56 | ERROR | VoidWallet cannot create invoices., Status: pending
+2026-06-15 16:42:52.56 | INFO | 172.20.0.1:43538 - "POST /api/v1/payments HTTP/1.1" 520
+2026-06-15 16:43:18.87 | ERROR | VoidWallet cannot create invoices., Status: pending
+2026-06-15 16:43:18.87 | INFO | 172.20.0.1:34234 - "POST /api/v1/payments HTTP/1.1" 520
+2026-06-15 16:43:27.10 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:44:13.65 | INFO | Started server process [26]
+2026-06-15 16:44:13.65 | INFO | Waiting for application startup.
+2026-06-15 16:44:13.65 | INFO | Starting LNbits Version: 1.5.4
+2026-06-15 16:44:13.69 | INFO | ✔️ All migrations done.
+2026-06-15 16:44:13.99 | SUCCESS | ✔️ Admin UI is enabled. run `uv run lnbits-cli superuser` to get the superuser.
+2026-06-15 16:44:13.99 | INFO | Initialized webpush settings with generated VAPID key pair.
+2026-06-15 16:44:13.99 | INFO | Pubkey: BEsWxrG8QmGaHnyt-3_LQRfXspC2HYwpOgzJAb17O6Y42A9wvt3ym09gQP9muKht9Rw0EnPYIUSFxlcNOOUIv6o
+2026-06-15 16:44:14.00 | INFO | Installed Extensions (0):
+2026-06-15 16:44:14.00 | INFO | LNbits Info
+2026-06-15 16:44:14.00 | INFO | Version: 1.5.4
+2026-06-15 16:44:14.00 | INFO | Baseurl: http://127.0.0.1:5000/
+2026-06-15 16:44:14.00 | INFO | Host: 0.0.0.0
+2026-06-15 16:44:14.00 | INFO | Port: 5000
+2026-06-15 16:44:14.00 | INFO | Debug: False
+2026-06-15 16:44:14.00 | INFO | Site title: LNbits
+2026-06-15 16:44:14.00 | INFO | Funding source: VoidWallet
+2026-06-15 16:44:14.00 | INFO | Data folder: /data
+2026-06-15 16:44:14.00 | INFO | Database: SQLite
+2026-06-15 16:44:14.00 | INFO | Service fee: 0.0
+2026-06-15 16:44:14.00 | INFO | Service fee max: 0
+2026-06-15 16:44:14.00 | INFO | Service fee wallet: None
+2026-06-15 16:44:14.00 | INFO | Connecting to backend VoidWallet...
+2026-06-15 16:44:14.01 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:44:14.01 | SUCCESS | ✔️ Backend VoidWallet connected and with a balance of 0 msat.
+2026-06-15 16:44:14.41 | SUCCESS | LNbits started in 0.76 seconds.
+2026-06-15 16:44:14.41 | WARNING | Task: skipping pending check for VoidWallet
+2026-06-15 16:44:14.42 | INFO | got a payment notification 
+2026-06-15 16:44:14.42 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:44:14.42 | INFO | Application startup complete.
+2026-06-15 16:44:15.27 | INFO | Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
+2026-06-15 16:44:15.28 | WARNING | No payment found for ''.
+2026-06-15 16:44:15.35 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:44:16.59 | INFO | 172.20.0.1:50514 - "WebSocket /api/v1/ws/662622109558445387b0c821933e538d" [accepted]
+2026-06-15 16:44:16.59 | INFO | connection open
+2026-06-15 16:44:16.61 | INFO | 172.20.0.1:50524 - "WebSocket /api/v1/ws/2fa85e6a964847f6ab82eb840427fc0c" [accepted]
+2026-06-15 16:44:16.61 | INFO | connection open
+2026-06-15 16:44:18.26 | WARNING | Failed to fetch Bitcoin price for USD from Exir: 
+2026-06-15 16:44:37.00 | ERROR | VoidWallet cannot create invoices., Status: pending
+2026-06-15 16:44:37.00 | INFO | 172.20.0.1:40760 - "POST /api/v1/payments HTTP/1.1" 520
+2026-06-15 16:45:16.01 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:45:38.72 | INFO | Started server process [12]
+2026-06-15 16:45:38.72 | INFO | Waiting for application startup.
+2026-06-15 16:45:38.73 | INFO | Starting LNbits Version: 1.5.4
+2026-06-15 16:45:38.75 | INFO | ✔️ All migrations done.
+2026-06-15 16:45:39.03 | SUCCESS | ✔️ Admin UI is enabled. run `uv run lnbits-cli superuser` to get the superuser.
+2026-06-15 16:45:39.03 | INFO | Initialized webpush settings with generated VAPID key pair.
+2026-06-15 16:45:39.03 | INFO | Pubkey: BEsWxrG8QmGaHnyt-3_LQRfXspC2HYwpOgzJAb17O6Y42A9wvt3ym09gQP9muKht9Rw0EnPYIUSFxlcNOOUIv6o
+2026-06-15 16:45:39.04 | INFO | Installed Extensions (0):
+2026-06-15 16:45:39.04 | INFO | LNbits Info
+2026-06-15 16:45:39.04 | INFO | Version: 1.5.4
+2026-06-15 16:45:39.04 | INFO | Baseurl: http://127.0.0.1:5000/
+2026-06-15 16:45:39.04 | INFO | Host: 0.0.0.0
+2026-06-15 16:45:39.04 | INFO | Port: 5000
+2026-06-15 16:45:39.04 | INFO | Debug: False
+2026-06-15 16:45:39.04 | INFO | Site title: LNbits
+2026-06-15 16:45:39.04 | INFO | Funding source: VoidWallet
+2026-06-15 16:45:39.05 | INFO | Data folder: /data
+2026-06-15 16:45:39.05 | INFO | Database: SQLite
+2026-06-15 16:45:39.05 | INFO | Service fee: 0.0
+2026-06-15 16:45:39.05 | INFO | Service fee max: 0
+2026-06-15 16:45:39.05 | INFO | Service fee wallet: None
+2026-06-15 16:45:39.05 | INFO | Connecting to backend VoidWallet...
+2026-06-15 16:45:39.05 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:45:39.05 | SUCCESS | ✔️ Backend VoidWallet connected and with a balance of 0 msat.
+2026-06-15 16:45:39.39 | SUCCESS | LNbits started in 0.67 seconds.
+2026-06-15 16:45:39.39 | WARNING | Task: skipping pending check for VoidWallet
+2026-06-15 16:45:39.40 | INFO | got a payment notification 
+2026-06-15 16:45:39.40 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:45:39.40 | INFO | Application startup complete.
+2026-06-15 16:45:40.00 | INFO | Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
+2026-06-15 16:45:40.00 | WARNING | No payment found for ''.
+2026-06-15 16:45:40.03 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:45:43.58 | INFO | 172.20.0.1:59516 - "WebSocket /api/v1/ws/662622109558445387b0c821933e538d" [accepted]
+2026-06-15 16:45:43.58 | INFO | connection open
+2026-06-15 16:45:43.60 | INFO | 172.20.0.1:59532 - "WebSocket /api/v1/ws/2fa85e6a964847f6ab82eb840427fc0c" [accepted]
+2026-06-15 16:45:43.60 | INFO | connection open
+2026-06-15 16:46:39.62 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: 
+2026-06-15 16:46:39.62 | ERROR | VoidWallet cannot create invoices., Status: pending
+2026-06-15 16:46:39.63 | INFO | 172.20.0.1:44686 - "POST /api/v1/payments HTTP/1.1" 520
+2026-06-15 16:46:41.90 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:48:09.74 | INFO | Started server process [32]
+2026-06-15 16:48:09.74 | INFO | Waiting for application startup.
+2026-06-15 16:48:09.74 | INFO | Starting LNbits Version: 1.5.4
+2026-06-15 16:48:09.78 | INFO | ✔️ All migrations done.
+2026-06-15 16:48:10.11 | SUCCESS | ✔️ Admin UI is enabled. run `uv run lnbits-cli superuser` to get the superuser.
+2026-06-15 16:48:10.11 | INFO | Initialized webpush settings with generated VAPID key pair.
+2026-06-15 16:48:10.11 | INFO | Pubkey: BEsWxrG8QmGaHnyt-3_LQRfXspC2HYwpOgzJAb17O6Y42A9wvt3ym09gQP9muKht9Rw0EnPYIUSFxlcNOOUIv6o
+2026-06-15 16:48:10.12 | INFO | Installed Extensions (0):
+2026-06-15 16:48:10.12 | INFO | LNbits Info
+2026-06-15 16:48:10.12 | INFO | Version: 1.5.4
+2026-06-15 16:48:10.12 | INFO | Baseurl: http://127.0.0.1:5000/
+2026-06-15 16:48:10.13 | INFO | Host: 0.0.0.0
+2026-06-15 16:48:10.13 | INFO | Port: 5000
+2026-06-15 16:48:10.13 | INFO | Debug: False
+2026-06-15 16:48:10.13 | INFO | Site title: LNbits
+2026-06-15 16:48:10.13 | INFO | Funding source: VoidWallet
+2026-06-15 16:48:10.13 | INFO | Data folder: /data
+2026-06-15 16:48:10.13 | INFO | Database: SQLite
+2026-06-15 16:48:10.13 | INFO | Service fee: 0.0
+2026-06-15 16:48:10.13 | INFO | Service fee max: 0
+2026-06-15 16:48:10.13 | INFO | Service fee wallet: None
+2026-06-15 16:48:10.13 | INFO | Connecting to backend VoidWallet...
+2026-06-15 16:48:10.13 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:48:10.13 | SUCCESS | ✔️ Backend VoidWallet connected and with a balance of 0 msat.
+2026-06-15 16:48:10.60 | SUCCESS | LNbits started in 0.85 seconds.
+2026-06-15 16:48:10.60 | WARNING | Task: skipping pending check for VoidWallet
+2026-06-15 16:48:10.60 | INFO | got a payment notification 
+2026-06-15 16:48:10.60 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:48:10.60 | INFO | Application startup complete.
+2026-06-15 16:48:11.41 | INFO | Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
+2026-06-15 16:48:11.42 | WARNING | No payment found for ''.
+2026-06-15 16:48:11.47 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:48:14.41 | WARNING | Failed to fetch Bitcoin price for USD from Blockchain: 
+2026-06-15 16:48:15.48 | INFO | 172.20.0.1:51318 - "WebSocket /api/v1/ws/662622109558445387b0c821933e538d" [accepted]
+2026-06-15 16:48:15.48 | INFO | connection open
+2026-06-15 16:48:15.50 | INFO | 172.20.0.1:51328 - "WebSocket /api/v1/ws/2fa85e6a964847f6ab82eb840427fc0c" [accepted]
+2026-06-15 16:48:15.50 | INFO | connection open
+2026-06-15 16:48:39.06 | INFO | Started server process [12]
+2026-06-15 16:48:39.06 | INFO | Waiting for application startup.
+2026-06-15 16:48:39.07 | INFO | Starting LNbits Version: 1.5.4
+2026-06-15 16:48:39.10 | INFO | ✔️ All migrations done.
+2026-06-15 16:48:39.39 | SUCCESS | ✔️ Admin UI is enabled. run `uv run lnbits-cli superuser` to get the superuser.
+2026-06-15 16:48:39.39 | INFO | Initialized webpush settings with generated VAPID key pair.
+2026-06-15 16:48:39.40 | INFO | Pubkey: BEsWxrG8QmGaHnyt-3_LQRfXspC2HYwpOgzJAb17O6Y42A9wvt3ym09gQP9muKht9Rw0EnPYIUSFxlcNOOUIv6o
+2026-06-15 16:48:39.40 | INFO | Installed Extensions (0):
+2026-06-15 16:48:39.40 | INFO | LNbits Info
+2026-06-15 16:48:39.40 | INFO | Version: 1.5.4
+2026-06-15 16:48:39.41 | INFO | Baseurl: http://127.0.0.1:5000/
+2026-06-15 16:48:39.41 | INFO | Host: 0.0.0.0
+2026-06-15 16:48:39.41 | INFO | Port: 5000
+2026-06-15 16:48:39.41 | INFO | Debug: False
+2026-06-15 16:48:39.41 | INFO | Site title: LNbits
+2026-06-15 16:48:39.41 | INFO | Funding source: VoidWallet
+2026-06-15 16:48:39.41 | INFO | Data folder: /data
+2026-06-15 16:48:39.41 | INFO | Database: SQLite
+2026-06-15 16:48:39.41 | INFO | Service fee: 0.0
+2026-06-15 16:48:39.41 | INFO | Service fee max: 0
+2026-06-15 16:48:39.41 | INFO | Service fee wallet: None
+2026-06-15 16:48:39.41 | INFO | Connecting to backend VoidWallet...
+2026-06-15 16:48:39.41 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:48:39.41 | SUCCESS | ✔️ Backend VoidWallet connected and with a balance of 0 msat.
+2026-06-15 16:48:39.87 | SUCCESS | LNbits started in 0.81 seconds.
+2026-06-15 16:48:39.87 | WARNING | Task: skipping pending check for VoidWallet
+2026-06-15 16:48:39.87 | INFO | got a payment notification 
+2026-06-15 16:48:39.88 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:48:39.88 | INFO | Application startup complete.
+2026-06-15 16:48:40.67 | INFO | Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
+2026-06-15 16:48:40.68 | WARNING | No payment found for ''.
+2026-06-15 16:48:40.74 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:48:42.85 | INFO | 172.20.0.1:50110 - "WebSocket /api/v1/ws/662622109558445387b0c821933e538d" [accepted]
+2026-06-15 16:48:42.86 | INFO | connection open
+2026-06-15 16:48:42.99 | INFO | 172.20.0.1:50118 - "WebSocket /api/v1/ws/2fa85e6a964847f6ab82eb840427fc0c" [accepted]
+2026-06-15 16:48:42.99 | INFO | connection open
+2026-06-15 16:48:43.00 | ERROR | VoidWallet cannot create invoices., Status: pending
+2026-06-15 16:48:43.00 | INFO | 172.20.0.1:50102 - "POST /api/v1/payments HTTP/1.1" 520
+2026-06-15 16:49:41.46 | WARNING | This backend does nothing, it is here just as a placeholder, you must configure an actual backend before being able to do anything useful with LNbits.
+2026-06-15 16:50:18.83 | INFO | Started server process [11]
+2026-06-15 16:50:18.83 | INFO | Waiting for application startup.
+2026-06-15 16:50:18.83 | INFO | Starting LNbits Version: 1.5.4
+2026-06-15 16:50:18.86 | INFO | ✔️ All migrations done.
+2026-06-15 16:50:19.16 | SUCCESS | ✔️ Admin UI is enabled. run `uv run lnbits-cli superuser` to get the superuser.
+2026-06-15 16:50:19.16 | INFO | Initialized webpush settings with generated VAPID key pair.
+2026-06-15 16:50:19.16 | INFO | Pubkey: BEsWxrG8QmGaHnyt-3_LQRfXspC2HYwpOgzJAb17O6Y42A9wvt3ym09gQP9muKht9Rw0EnPYIUSFxlcNOOUIv6o
+2026-06-15 16:50:19.17 | INFO | Installed Extensions (0):
+2026-06-15 16:50:19.17 | INFO | LNbits Info
+2026-06-15 16:50:19.17 | INFO | Version: 1.5.4
+2026-06-15 16:50:19.17 | INFO | Baseurl: http://127.0.0.1:5000/
+2026-06-15 16:50:19.17 | INFO | Host: 0.0.0.0
+2026-06-15 16:50:19.17 | INFO | Port: 5000
+2026-06-15 16:50:19.17 | INFO | Debug: False
+2026-06-15 16:50:19.17 | INFO | Site title: LNbits
+2026-06-15 16:50:19.17 | INFO | Funding source: FakeWallet
+2026-06-15 16:50:19.17 | INFO | Data folder: /data
+2026-06-15 16:50:19.17 | INFO | Database: SQLite
+2026-06-15 16:50:19.17 | INFO | Service fee: 0.0
+2026-06-15 16:50:19.18 | INFO | Service fee max: 0
+2026-06-15 16:50:19.18 | INFO | Service fee wallet: None
+2026-06-15 16:50:19.18 | INFO | Connecting to backend FakeWallet...
+2026-06-15 16:50:19.18 | INFO | FakeWallet funding source is for using LNbits as a centralised, stand-alone payment system with brrrrrr.
+2026-06-15 16:50:19.18 | SUCCESS | ✔️ Backend FakeWallet connected and with a balance of 1000000000 msat.
+2026-06-15 16:50:19.55 | SUCCESS | LNbits started in 0.72 seconds.
+2026-06-15 16:50:19.56 | INFO | FakeWallet funding source is for using LNbits as a centralised, stand-alone payment system with brrrrrr.
+2026-06-15 16:50:19.56 | INFO | Application startup complete.
+2026-06-15 16:50:20.18 | INFO | Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
+2026-06-15 16:50:20.23 | INFO | FakeWallet funding source is for using LNbits as a centralised, stand-alone payment system with brrrrrr.
+2026-06-15 16:50:21.31 | INFO | 172.20.0.1:58936 - "GET /api/v1/wallet HTTP/1.1" 200
+2026-06-15 16:50:22.64 | INFO | 172.20.0.1:58958 - "WebSocket /api/v1/ws/662622109558445387b0c821933e538d" [accepted]
+2026-06-15 16:50:22.64 | INFO | connection open
+2026-06-15 16:50:22.65 | INFO | 172.20.0.1:58962 - "WebSocket /api/v1/ws/2fa85e6a964847f6ab82eb840427fc0c" [accepted]
+2026-06-15 16:50:22.65 | INFO | connection open
+2026-06-15 16:50:23.18 | WARNING | Failed to fetch Bitcoin price for USD from Binance: 
+2026-06-15 16:50:23.18 | WARNING | Failed to fetch Bitcoin price for USD from Exir: 
+2026-06-15 16:50:23.18 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: 
+2026-06-15 16:50:23.18 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: 
+2026-06-15 16:50:23.18 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: 
+2026-06-15 16:50:23.18 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-15 16:50:23.18 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-15 16:50:25.04 | WARNING | Failed to fetch Bitcoin price for USD from Binance: 
+2026-06-15 16:50:25.04 | WARNING | Failed to fetch Bitcoin price for USD from Blockchain: 
+2026-06-15 16:50:25.04 | WARNING | Failed to fetch Bitcoin price for USD from Exir: 
+2026-06-15 16:50:25.04 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: 
+2026-06-15 16:50:25.04 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: 
+2026-06-15 16:50:25.04 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: 
+2026-06-15 16:50:25.04 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-15 16:50:25.04 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-15 16:50:25.04 | WARNING | Could not fetch any Bitcoin price.
+2026-06-15 16:50:25.04 | ERROR | Error calculating fiat amount for wallet '4bf967c6fd6749d79ab44548994af448': Could not get exchange rate for USD.
+2026-06-15 16:50:25.08 | INFO | 172.20.0.1:58944 - "POST /api/v1/payments HTTP/1.1" 201
+2026-06-15 16:50:51.50 | INFO | 172.20.0.1:45228 - "GET /api/v1/auth/acl HTTP/1.1" 200
+2026-06-15 16:50:51.66 | INFO | 172.20.0.1:45228 - "GET /api/v1/assets/paginated?limit=6&offset=0&sortby=&direction=asc HTTP/1.1" 200
+2026-06-15 16:51:09.84 | INFO | 172.20.0.1:40484 - "POST /api/v1/payments HTTP/1.1" 201
+2026-06-15 16:51:24.98 | INFO | FakeWallet funding source is for using LNbits as a centralised, stand-alone payment system with brrrrrr.
+2026-06-15 16:52:24.99 | INFO | FakeWallet funding source is for using LNbits as a centralised, stand-alone payment system with brrrrrr.
+2026-06-15 16:53:24.99 | INFO | FakeWallet funding source is for using LNbits as a centralised, stand-alone payment system with brrrrrr.
+2026-06-15 16:54:25.00 | INFO | FakeWallet funding source is for using LNbits as a centralised, stand-alone payment system with brrrrrr.
+2026-06-15 16:55:25.01 | INFO | FakeWallet funding source is for using LNbits as a centralised, stand-alone payment system with brrrrrr.
+2026-06-15 16:55:26.78 | WARNING | Failed to fetch Bitcoin price for USD from Exir: 
+2026-06-15 16:55:58.70 | INFO | 172.20.0.1:60606 - "GET /api/v1/payments/paginated?limit=10&offset=0&sortby=time&direction=desc&status%5Bne%5D=failed HTTP/1.1" 200
+2026-06-15 16:55:59.45 | INFO | 172.20.0.1:60606 - "GET /api/v1/payments/stats/daily?wallet_id=e79a580dced143d9b8326edd1419f024 HTTP/1.1" 200
+2026-06-15 16:56:02.43 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-15 16:56:02.43 | INFO | 172.20.0.1:60614 - "GET /api/v1/rate/USD HTTP/1.1" 200
+2026-06-15 16:56:25.02 | INFO | FakeWallet funding source is for using LNbits as a centralised, stand-alone payment system with brrrrrr.
+2026-06-15 16:57:25.02 | INFO | FakeWallet funding source is for using LNbits as a centralised, stand-alone payment system with brrrrrr.
+2026-06-15 16:58:25.03 | INFO | FakeWallet funding source is for using LNbits as a centralised, stand-alone payment system with brrrrrr.
+2026-06-15 16:59:25.04 | INFO | FakeWallet funding source is for using LNbits as a centralised, stand-alone payment system with brrrrrr.
+2026-06-15 17:00:25.05 | INFO | FakeWallet funding source is for using LNbits as a centralised, stand-alone payment system with brrrrrr.
+2026-06-15 17:00:30.38 | WARNING | Failed to fetch Bitcoin price for USD from Blockchain: 
+2026-06-15 17:00:30.39 | WARNING | Failed to fetch Bitcoin price for USD from Exir: 
+2026-06-15 17:00:30.39 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: 
+2026-06-15 17:00:30.39 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: 
+2026-06-15 17:00:30.39 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: 
+2026-06-15 17:00:30.39 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-15 17:00:30.39 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-15 17:01:25.06 | INFO | FakeWallet funding source is for using LNbits as a centralised, stand-alone payment system with brrrrrr.
+2026-06-15 17:02:25.06 | INFO | FakeWallet funding source is for using LNbits as a centralised, stand-alone payment system with brrrrrr.
+2026-06-15 17:03:25.07 | INFO | FakeWallet funding source is for using LNbits as a centralised, stand-alone payment system with brrrrrr.
+2026-06-15 17:04:25.08 | INFO | FakeWallet funding source is for using LNbits as a centralised, stand-alone payment system with brrrrrr.
+2026-06-15 17:05:25.09 | INFO | FakeWallet funding source is for using LNbits as a centralised, stand-alone payment system with brrrrrr.
+2026-06-15 17:05:34.06 | WARNING | Failed to fetch Bitcoin price for USD from Exir: 
+2026-06-15 17:05:34.06 | WARNING | Failed to fetch Bitcoin price for USD from Bitfinex: 
+2026-06-15 17:05:34.06 | WARNING | Failed to fetch Bitcoin price for USD from Bitstamp: 
+2026-06-15 17:05:34.06 | WARNING | Failed to fetch Bitcoin price for USD from Coinbase: 
+2026-06-15 17:05:34.06 | WARNING | Failed to fetch Bitcoin price for USD from Kraken: 
+2026-06-15 17:05:34.06 | WARNING | Failed to fetch Bitcoin price for USD from yadio: 
+2026-06-15 17:06:25.09 | INFO | FakeWallet funding source is for using LNbits as a centralised, stand-alone payment system with brrrrrr.
+2026-06-15 17:07:25.10 | INFO | FakeWallet funding source is for using LNbits as a centralised, stand-alone payment system with brrrrrr.
+2026-06-15 17:08:25.10 | INFO | FakeWallet funding source is for using LNbits as a centralised, stand-alone payment system with brrrrrr.
+2026-06-15 17:09:25.11 | INFO | FakeWallet funding source is for using LNbits as a centralised, stand-alone payment system with brrrrrr.
+2026-06-15 17:10:25.12 | INFO | FakeWallet funding source is for using LNbits as a centralised, stand-alone payment system with brrrrrr.
