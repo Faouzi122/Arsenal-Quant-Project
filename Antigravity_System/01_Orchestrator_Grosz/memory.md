@@ -1006,3 +1006,17 @@ INFO:     Started server process [953]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+
+[HORODATAGE: CONSOLIDATION MASTER STATE - VPS DEPLOY & DISCIPLINE FABULEUSE]
+- INFRASTRUCTURE EN PRODUCTION:
+  * Hébergement: VPS Vultr (Francfort, 199.247.19.249, 1Go RAM, Swap 2Go actif). L'environnement Lenovo local n'est plus qu'un terminal de développement.
+  * Réseau: Cloudflare Tunnel actif (`api.arsenal-quant.com`) routé vers le réseau Docker interne.
+  * Monétisation: Passerelle L402 en production (connectée à demo.lnbits.com).
+- DISTRIBUTION M2M / A2A:
+  * Focus sur le référencement Agent-to-Agent (A2A). Cibles: Catalogues MCP (Smithery.ai, Glama.ai) et plugins (ElizaOS, LangChain).
+- PROTOCOLE DE DOCTRINE OPÉRATIONNELLE "FABULEUX":
+  * Intégration de `02_discipline_fabuleuse.md` comme règle d'or pour tous les agents.
+  * Directives strictes: Ancrage déterministe (zéro supposition), Contrat de succès (critères mesurables en amont), Boucle de preuve (simulations d'attaque sur fork local) et Soustraction implacable (-20% de bruit).
+- PREMIÈRE CIBLE DEFI SÉLECTIONNÉE:
+  * Détection de vulnérabilité au MEV (Sandwich Attacks) & Slippage sur les pools AMM, modélisée via le paramètre $S_{MEV}$ dans l'équation de rendement net $R_{net}$.
+
