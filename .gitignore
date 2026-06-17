@@ -13,6 +13,8 @@
 !/Antigravity_System/
 !/Antigravity_System/scripts/
 !/Antigravity_System/scripts/abi_guardrail.py
+!/Antigravity_System/scripts/client_zero.py
+
 !/Antigravity_System/06_Router_MCP/
 !/Antigravity_System/06_Router_MCP/**
 !/Antigravity_System/01_Orchestrator_Grosz/
