@@ -21,6 +21,8 @@
 !/Antigravity_System/04_Strategy_Gerber/
 !/Antigravity_System/04_Strategy_Gerber/Audit_Factory/
 !/Antigravity_System/04_Strategy_Gerber/Audit_Factory/**
+!/Antigravity_System/02_Developer_UncleBob/
+!/Antigravity_System/02_Developer_UncleBob/**
 
 # Exclude virtual environments, environment secrets, and caches inside whitelisted folders
 **/venv/
