@@ -40,19 +40,31 @@ def load_env_variables():
     
     # Fallback to system env
     lnbits_url = env_vars.get("LNBITS_URL") or os.getenv("LNBITS_URL") or "https://demo.lnbits.com"
-    lnbits_key = env_vars.get("LNBITS_INVOICE_KEY") or os.getenv("LNBITS_INVOICE_KEY")
     
-    return lnbits_url, lnbits_key
+    # Check if an explicit admin key is provided in env, else fallback to invoice key
+    lnbits_key = os.getenv("LNBITS_ADMIN_KEY") or env_vars.get("LNBITS_ADMIN_KEY")
+    is_admin = True
+    
+    if not lnbits_key:
+        lnbits_key = os.getenv("LNBITS_INVOICE_KEY") or env_vars.get("LNBITS_INVOICE_KEY")
+        is_admin = False
+    
+    return lnbits_url, lnbits_key, is_admin
 
 def main():
     print(f"{BOLD}================================================================{RESET}")
     print(f"{BOLD}       ANTIGRAVITY CLIENT ZERO : AUTOMATED L402 A2A AGENT       {RESET}")
     print(f"{BOLD}================================================================{RESET}")
     
-    lnbits_url, lnbits_key = load_env_variables()
+    lnbits_url, lnbits_key, is_admin = load_env_variables()
     if not lnbits_key:
         log_error("LNbits Admin/Invoice Key not found in 06_Router_MCP/.env or environment.")
         sys.exit(1)
+        
+    if not is_admin:
+        log_warn("Using Read-only Invoice Key. Payments will fail unless a valid Admin Key is set via LNBITS_ADMIN_KEY.")
+    else:
+        log_success("Admin Key detected. Authorized to execute out-of-wallet payments.")
         
     log_success(f"LNbits Wallet connection initialized: {lnbits_url}")
     
@@ -143,6 +155,12 @@ def main():
         log_success(f"Invoice settled! Preimage: {preimage}")
     except Exception as e:
         log_error(f"Failed to pay Lightning invoice: {e}")
+        if isinstance(e, requests.exceptions.HTTPError) and e.response.status_code == 403:
+            print(f"\n{YELLOW}{BOLD}[DIAGNOSTIC - ACCÈS REFUSÉ (403)]{RESET}")
+            print(f"La clé d'API fournie est une clé d'écriture de factures en lecture seule (Invoice Key).")
+            print(f"Pour régler la facture, vous devez utiliser la clé d'administration (Admin Key) de votre wallet LNbits.")
+            print(f"Exemple d'exécution :")
+            print(f"  {BOLD}LNBITS_ADMIN_KEY=votre_cle_admin_ici python3 scripts/client_zero.py{RESET}\n")
         sys.exit(1)
 
     # Phase 5: Execute request with Authorization header
