@@ -1068,4 +1068,11 @@ INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
   * Cas avec Debug Bypass : Le serveur distant répond `HTTP/2 200 OK` en 108 ms, avec signal `EXECUTE`, preuve d'asymétrie (`avoided_loss_usd`: 0.0) et signature cryptographique HMAC-SHA256 valide.
 - STATUT : Phase d'intégration d'asymétrie MEV et monétisation M2M finalisée avec succès.
 
+[HORODATAGE: DEPLOIEMENT MCP DISCOVERY ET CLIENT ZERO]
+- MANIFESTE DE DECOUVERTE MCP : Fusion et déploiement de `/06_Router_MCP/.well-known/mcp/server-card.json` exposant les outils `mev_security_audit`, `circuit_breaker` et `cache_manager`.
+- VITRINE AEO : Restructuration de `PUBLIC_README.md` optimisée pour les robots et agents autonomes (documentation de l'API MEV, latence, pricing L402, auto-discovery).
+- CLIENT ZERO OPERATIONNEL : Création du script Python `scripts/client_zero.py` pour simuler le cycle complet de l'agent M2M (téléchargement de la carte MCP, appel non authentifié, récupération de la facture L402, paiement automatique via LNbits, appel final avec jeton L402).
+- CODE ENREGISTRÉ : Commit `723ce65` prêt à être poussé et déployé sur le VPS.
+
+
 
