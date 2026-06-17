@@ -1031,3 +1031,12 @@ INFO:     Started server process [1056]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+
+[HORODATAGE: VALIDATION AUDITEUR MEV & SOUSTRACTION DOCUMENTAIRE]
+- SOUSTRACTION LEAN: Nettoyage complet de `PUBLIC_README.md` et `AGENTS.md`. Les modules hors-DeFi (Maritime Freight et Market Psychology) ont été supprimés pour focaliser l'API et l'explication à 100% sur le DeFAI et la monétisation L402.
+- ADAPTATEUR RPC OPÉRATIONNEL: Création de `rpc_adapter.py` implémentant le contrat `IBlockchainStateReader` avec Circuit Breaker (1.5s).
+- EXÉCUTION DE LA PREUVE:
+  * Local (Lenovo) : Succès total sur pool réelle Uniswap V2 USDC/WETH.
+  * Production (VPS Vultr) : Installation de `web3` et test validé avec une latence d'appel RPC de 45.90 ms.
+  * Résultat: Calcul déterministe $O(1)$ spot price 1773.80 USDC/WETH, sandwich non profitable (S_mev = -1 WETH), émission du signal EXECUTE nominale.
+- CODE VERSIONNÉ: Commit `6c04889` poussé vers GitHub et récupéré sur le VPS.
