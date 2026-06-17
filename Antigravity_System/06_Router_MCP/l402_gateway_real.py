@@ -1,5 +1,6 @@
 import os
 import json
+import httpx
 from fastapi import FastAPI, HTTPException, Header, Response, Request
 from fastapi.responses import PlainTextResponse
 from lnbits_client import LNbitsClient
@@ -216,6 +217,38 @@ async def get_latest_audit(request: Request, authorization: str = Header(None)):
         
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal error loading the paid audit payload.")
+
+# Catch-all route to proxy non-gateway requests to decision_engine
+@app.api_route("/{path_name:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"])
+async def catch_all_proxy(request: Request, path_name: str):
+    async with httpx.AsyncClient() as client:
+        # Forward to decision_engine on the docker network
+        target_url = f"http://decision_engine:8002/{path_name}"
+        params = dict(request.query_params)
+        headers = {k: v for k, v in request.headers.items() if k.lower() != "host"}
+        body = await request.body()
+        
+        try:
+            response = await client.request(
+                method=request.method,
+                url=target_url,
+                params=params,
+                headers=headers,
+                content=body,
+                timeout=15.0
+            )
+            # Reconstruct response with same status code and headers
+            return Response(
+                content=response.content,
+                status_code=response.status_code,
+                headers=dict(response.headers),
+                media_type=response.headers.get("content-type")
+            )
+        except httpx.RequestError as e:
+            raise HTTPException(
+                status_code=502, 
+                detail=f"Proxy error connecting to Decision Engine backend: {str(e)}"
+            )
 
 if __name__ == "__main__":
     import uvicorn
