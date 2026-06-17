@@ -1062,3 +1062,10 @@ INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 - RÉSOLUTION : Ajout explicite de `web3>=6.0.0` et `requests>=2.25.1` dans `API_Factory/Sentiment_Alpha_v1/requirements.txt` (via le chemin relatif depuis le root git `/home/faouzi`).
 - CODE ENREGISTRÉ : Commit `2f6a0ea` prêt à être poussé et déployé sur le VPS.
 
+[HORODATAGE: VALIDATION PRODUCTION DE BOUT EN BOUT]
+- INFRASTRUCTURE L402 ET PROXY OPÉRATIONNELS :
+  * Cas sans token : Le serveur distant répond avec succès `HTTP/2 402 Payment Required` et fournit le header L402 contenant la facture de 150 SATs générée via l'intégration demo.lnbits.com.
+  * Cas avec Debug Bypass : Le serveur distant répond `HTTP/2 200 OK` en 108 ms, avec signal `EXECUTE`, preuve d'asymétrie (`avoided_loss_usd`: 0.0) et signature cryptographique HMAC-SHA256 valide.
+- STATUT : Phase d'intégration d'asymétrie MEV et monétisation M2M finalisée avec succès.
+
+
