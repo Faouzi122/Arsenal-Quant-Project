@@ -1040,3 +1040,14 @@ INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
   * Production (VPS Vultr) : Installation de `web3` et test validé avec une latence d'appel RPC de 45.90 ms.
   * Résultat: Calcul déterministe $O(1)$ spot price 1773.80 USDC/WETH, sandwich non profitable (S_mev = -1 WETH), émission du signal EXECUTE nominale.
 - CODE VERSIONNÉ: Commit `6c04889` poussé vers GitHub et récupéré sur le VPS.
+
+[HORODATAGE: ROUTE API MEV & GATING L402 COMPLETS]
+- ARCHITECTURE PROPRE (Uncle Bob) : Création de la route REST FastAPI `/api/v1/arbitrage/mev` mappée sur `mev_service.evaluate_sandwich_risk`.
+- CONTRÔLE D'ACCÈS L402 : Intégration de l'endpoint dans le middleware de filtrage paywall. Les requêtes anonymes ou sans macaroon sont correctement rejetées avec une réponse standardisée `402 Payment Required` (150 sats).
+- SÉCURITÉ ET SCEAU CRYPTOGRAPHIQUE : Intégration de signatures HMAC-SHA256 basées sur la clé `GATEWAY_SECRET_KEY` ou fallback pour certifier l'intégrité et la provenance des calculs d'audit Antigravity.
+- PREUVE D'INTÉGRATION LOCALE :
+  * Cas sans token : Retour HTTP 402 Paywall nominal (avec Macaroon et Facture).
+  * Cas avec Debug Bypass (`X-Debug-Mode: 2026`) :
+    - Test standard : Retour HTTP 200 avec signal `EXECUTE` (zéro risque MEV) et signature cryptographique. Latence de ~670ms.
+    - Test sandwich profitable (`victim_weth_in = 100.0`, `attacker_weth_in = 10.0`) : Le signal bascule en `DELAY` avec un `avoided_loss_usd` de $618.89 USD (ROI immédiat prouvé).
+- CODE SOURCE ENREGISTRÉ : Commit `cca54b8` prêt à être poussé et déployé sur le VPS.
