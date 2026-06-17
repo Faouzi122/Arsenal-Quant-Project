@@ -1056,3 +1056,9 @@ INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 - PROBLÈME : Les requêtes vers `api.arsenal-quant.com/api/v1/arbitrage/mev` retournaient un code HTTP 404 car le tunnel Cloudflare route vers le conteneur `l402_gateway` (port 8088), lequel ne déclarait pas cette route.
 - RÉSOLUTION : Intégration d'un reverse-proxy catch-all (`catch_all_proxy`) via `httpx` dans `l402_gateway_real.py` pour transférer automatiquement tout trafic non intercepté par la Gateway vers le conteneur `decision_engine` (port 8002).
 - CODE ENREGISTRÉ : Commit `f374c94` poussé vers GitHub.
+
+[HORODATAGE: RESOLUTION DEPENDANCE WEB3 DOCKER]
+- PROBLÈME : Lors du redémarrage du conteneur `decision_engine` avec le nouveau code, uvicorn a planté sur un `ModuleNotFoundError: No module named 'web3'`. Les dépendances du projet AMM MEV n'étaient pas déclarées dans le fichier `requirements.txt` de l'API.
+- RÉSOLUTION : Ajout explicite de `web3>=6.0.0` et `requests>=2.25.1` dans `API_Factory/Sentiment_Alpha_v1/requirements.txt` (via le chemin relatif depuis le root git `/home/faouzi`).
+- CODE ENREGISTRÉ : Commit `2f6a0ea` prêt à être poussé et déployé sur le VPS.
+
