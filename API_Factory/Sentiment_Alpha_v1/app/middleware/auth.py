@@ -40,7 +40,8 @@ async def api_key_auth(request: Request, call_next):
             )
 
     # Protect A2A / MCP endpoints via the PaymentGateway interface
-    if request.url.path == "/mcp/v1/tools/execute":
+    normalized_path = request.url.path.rstrip("/")
+    if normalized_path in ("/mcp/v1/tools/execute", "/api/v1/arbitrage/mev"):
         # 1. CEO debug bypass
         debug_mode = request.headers.get("X-Debug-Mode")
         if debug_mode == DEBUG_BYPASS_KEY:

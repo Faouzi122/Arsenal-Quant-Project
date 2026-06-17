@@ -16,6 +16,7 @@ from app.services.news_sensor import sensor
 from app.services.carbon_scraper import carbon_scraper
 from app.middleware.auth import api_key_auth
 from fastapi import Request
+from app.api.routes.arbitrage import router as arbitrage_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -33,6 +34,8 @@ app = FastAPI(
     version="4.0.0",
     lifespan=lifespan
 )
+
+app.include_router(arbitrage_router)
 
 @app.middleware("http")
 async def add_auth_middleware(request: Request, call_next):
