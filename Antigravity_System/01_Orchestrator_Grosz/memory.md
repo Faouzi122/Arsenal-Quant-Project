@@ -1050,4 +1050,9 @@ INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
   * Cas avec Debug Bypass (`X-Debug-Mode: 2026`) :
     - Test standard : Retour HTTP 200 avec signal `EXECUTE` (zéro risque MEV) et signature cryptographique. Latence de ~670ms.
     - Test sandwich profitable (`victim_weth_in = 100.0`, `attacker_weth_in = 10.0`) : Le signal bascule en `DELAY` avec un `avoided_loss_usd` de $618.89 USD (ROI immédiat prouvé).
-- CODE SOURCE ENREGISTRÉ : Commit `cca54b8` prêt à être poussé et déployé sur le VPS.
+- CODE VERSIONNÉ: Commit `cca54b8` prêt à être poussé et déployé sur le VPS.
+
+[HORODATAGE: ROUTAGE REVERSE-PROXY L402 GATEWAY]
+- PROBLÈME : Les requêtes vers `api.arsenal-quant.com/api/v1/arbitrage/mev` retournaient un code HTTP 404 car le tunnel Cloudflare route vers le conteneur `l402_gateway` (port 8088), lequel ne déclarait pas cette route.
+- RÉSOLUTION : Intégration d'un reverse-proxy catch-all (`catch_all_proxy`) via `httpx` dans `l402_gateway_real.py` pour transférer automatiquement tout trafic non intercepté par la Gateway vers le conteneur `decision_engine` (port 8002).
+- CODE ENREGISTRÉ : Commit `f374c94` poussé vers GitHub.
