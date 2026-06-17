@@ -1020,3 +1020,14 @@ INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 - PREMIÈRE CIBLE DEFI SÉLECTIONNÉE:
   * Détection de vulnérabilité au MEV (Sandwich Attacks) & Slippage sur les pools AMM, modélisée via le paramètre $S_{MEV}$ dans l'équation de rendement net $R_{net}$.
 
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [953]
+[KERNEL] : Surveillance active sur /home/faouzi/Antigravity_Knowledge_Base
+Setting up watches.  Beware: since -r was given, this may take a while!
+Watches established.
+INFO:     Started server process [1056]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
