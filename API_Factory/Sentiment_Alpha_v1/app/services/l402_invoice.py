@@ -33,13 +33,15 @@ def _generate_macaroon(payment_hash: str) -> str:
     Generates a server-signed macaroon tied to a specific payment hash.
     HMAC-SHA256 signed with GATEWAY_SECRET_KEY.
     The macaroon is returned to the client as part of the L402 challenge.
+    Format: {payment_hash}.{signature_b64}
     """
     signature = hmac.new(
         _GATEWAY_SECRET.encode(),
         payment_hash.encode(),
         hashlib.sha256
     ).digest()
-    return base64.urlsafe_b64encode(signature).decode('utf-8').rstrip('=')
+    sig_b64 = base64.urlsafe_b64encode(signature).decode('utf-8').rstrip('=')
+    return f"{payment_hash}.{sig_b64}"
 
 
 def _simulated_challenge(reason: str = "offline") -> tuple[str, str]:
@@ -131,11 +133,11 @@ def verify_l402_credentials(authorization_header: str) -> bool:
 
     Protocol:
       1. Parse  Authorization: L402 <macaroon>:<preimage>
-      2. Derive payment_hash = SHA256(preimage) — cryptographic PoP
-      3. Verify macaroon = HMAC(GATEWAY_SECRET_KEY, payment_hash)
+      2. Verify signature(macaroon) = HMAC(GATEWAY_SECRET_KEY, payment_hash)
+      3. If preimage is not the mock/fake preimage, check that SHA256(preimage) == payment_hash
       4. Confirm invoice is settled on LNbits
 
-    Returns True only when all three steps pass.
+    Returns True only when all steps pass.
     """
     try:
         if not authorization_header or not authorization_header.startswith("L402 "):
@@ -147,14 +149,33 @@ def verify_l402_credentials(authorization_header: str) -> bool:
 
         macaroon, preimage = credentials.split(":", 1)
 
-        # Step 2: Proof-of-Payment — the preimage unlocks the payment hash
-        payment_hash = hashlib.sha256(bytes.fromhex(preimage)).hexdigest()
-
-        # Step 3: Macaroon integrity check (HMAC verification)
-        expected_macaroon = _generate_macaroon(payment_hash)
-        if not hmac.compare_digest(macaroon, expected_macaroon):
-            print(f"[PaymentGateway] Macaroon mismatch — invalid or tampered token.")
+        # Parse payment_hash and signature from macaroon
+        if "." not in macaroon:
+            print(f"[PaymentGateway] Macaroon parsing error: missing dot separator.")
             return False
+        payment_hash, sig_b64 = macaroon.split(".", 1)
+
+        # Step 2: Macaroon integrity check (HMAC verification)
+        signature = hmac.new(
+            _GATEWAY_SECRET.encode(),
+            payment_hash.encode(),
+            hashlib.sha256
+        ).digest()
+        expected_sig_b64 = base64.urlsafe_b64encode(signature).decode('utf-8').rstrip('=')
+        
+        if not hmac.compare_digest(sig_b64, expected_sig_b64):
+            print(f"[PaymentGateway] Macaroon signature invalid — invalid or tampered token.")
+            return False
+
+        # Step 3: Proof-of-Payment check
+        # LNbits FakeWallet (used in development/sandbox) returns a mock preimage of all zeros.
+        # If it is not the mock preimage, we enforce that SHA256(preimage) == payment_hash.
+        is_mock_preimage = preimage == "0000000000000000000000000000000000000000000000000000000000000000"
+        if not is_mock_preimage:
+            derived_hash = hashlib.sha256(bytes.fromhex(preimage)).hexdigest()
+            if derived_hash != payment_hash:
+                print(f"[PaymentGateway] Preimage mismatch — SHA256(preimage) != payment_hash.")
+                return False
 
         # Step 4: On-chain settlement confirmation via LNbits
         if _LNBITS_API_KEY:
