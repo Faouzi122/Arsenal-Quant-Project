@@ -149,9 +149,39 @@ def main():
         pay_resp.raise_for_status()
         pay_data = pay_resp.json()
         preimage = pay_data.get("preimage")
+        payment_hash = pay_data.get("payment_hash")
+        
+        # If preimage is missing/None, poll the payment details GET endpoint
+        if not preimage and payment_hash:
+            log_warn("Preimage not in POST response. Querying payment details...")
+            import time
+            status_url = f"{lnbits_url.rstrip('/')}/api/v1/payments/{payment_hash}"
+            for attempt in range(6):
+                time.sleep(1)
+                try:
+                    status_resp = requests.get(status_url, headers={"X-Api-Key": lnbits_key}, timeout=10)
+                    status_resp.raise_for_status()
+                    status_data = status_resp.json()
+                    
+                    # Log for debugging
+                    # print(f"Poll attempt {attempt+1} response: {status_data}")
+                    
+                    # Extract preimage from multiple potential locations in LNbits schema
+                    preimage = (
+                        status_data.get("preimage") or 
+                        status_data.get("details", {}).get("preimage") or 
+                        status_data.get("payment", {}).get("preimage")
+                    )
+                    
+                    if preimage and preimage != "0000000000000000000000000000000000000000000000000000000000000000":
+                        break
+                except Exception as poll_err:
+                    log_warn(f"Poll attempt {attempt+1} failed: {poll_err}")
+                    
         if not preimage:
-            log_error(f"Preimage not returned by LNbits: {pay_data}")
+            log_error(f"Preimage not returned by LNbits (even after polling): {pay_data}")
             sys.exit(1)
+            
         log_success(f"Invoice settled! Preimage: {preimage}")
     except Exception as e:
         log_error(f"Failed to pay Lightning invoice: {e}")
