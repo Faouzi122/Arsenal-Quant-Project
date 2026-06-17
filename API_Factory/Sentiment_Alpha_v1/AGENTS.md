@@ -30,8 +30,7 @@ Engine output: { signal: "DELAY", r_net: -23.4, confidence_score: 0.78, ... }
 
 ### 1. MEV / Sandwich Attack Risk Assessment
 
-Before signing a transaction, submit your trade parameters to evaluate the
-expected cost of a sandwich attack against your potential yield:
+Before signing a transaction, submit your trade parameters to evaluate the expected cost of a sandwich attack against your potential yield:
 
 ```python
 import httpx, json
@@ -164,8 +163,7 @@ decision = resp.json()["content"][0]["text"]
 
 ## Dynamic Uncertainty Pricing (DUP)
 
-The L402 invoice amount scales with the **market volatility level** observed
-by the engine (Prospect Theory — Kahneman & Tversky, 1979):
+The L402 invoice amount scales with the **market volatility level** observed by the engine (Prospect Theory — Kahneman & Tversky, 1979):
 
 | Volatility | Invoice | Use case |
 |-----------|---------|----------|
@@ -174,8 +172,7 @@ by the engine (Prospect Theory — Kahneman & Tversky, 1979):
 | `HIGH`    | 1 500 sats (~$1.50) | Capital at risk |
 | `EXTREME` | 5 000 sats (~$5.00) | Loss-avoidance signal |
 
-The `decision_intelligence_fee.dynamic_amount` field in the 402 response
-always shows the current tier — even in Shadow Mode (before strict enforcement).
+The `decision_intelligence_fee.dynamic_amount` field in the 402 response always shows the current tier — even in Shadow Mode (before strict enforcement).
 
 ---
 
@@ -184,9 +181,6 @@ always shows the current tier — even in Shadow Mode (before strict enforcement
 | Tool name | Description | Latency p95 |
 |-----------|-------------|-------------|
 | `evaluate_arbitrage_opportunity` | R_net + 6 quant filters + IL/MEV/Funding | < 2ms |
-| `analyze_market_psychology` | Fear/Greed Index from news text | < 2ms |
-| `analyze_maritime_freight_risk` | Freight disruption risk per corridor | < 3ms |
-| `compare_freight_corridors` | True Price: Transpacific vs Suez | < 5ms |
 
 Full schema: [mcp-server.json](./mcp-server.json) · Live: [server-card.json](https://api.arsenal-quant.com/.well-known/mcp/server-card.json)
 

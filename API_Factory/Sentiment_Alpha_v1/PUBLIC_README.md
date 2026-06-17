@@ -9,17 +9,15 @@
 
 > **Mission**: Transform economic uncertainty into actionable decisions.
 
-An API that consumes raw text (news, RSS feeds, market data) and returns
-machine-parseable **decision signals** — not data dumps. Built for autonomous
-agents operating in the A2A economy.
+An API that consumes raw transaction parameters and returns machine-parseable **decision signals** — not data dumps. Built for autonomous agents operating in the A2A economy.
 
 ```json
 {
   "signal":           "EXECUTE",
   "value":            80,
-  "volatility":       "EXTREME",
-  "confidence_score": 0.9,
-  "context":          "Routes:suez_europe Risk:80 Carriers:maersk,msc",
+  "volatility":       "LOW",
+  "confidence_score": 0.95,
+  "context":          "R_net: +145.20 USD | Slippage: 0.15% | MEV sandwich protection active",
   "source":           "Arsenal Decision Engine v1.0"
 }
 ```
@@ -28,13 +26,13 @@ agents operating in the A2A economy.
 
 ## What This Engine Does
 
-The Decision Intelligence Layer covers three economic domains:
+The Decision Intelligence Layer focuses on DeFi security and yields:
 
 | Domain | What it detects | Output signal |
 |---|---|---|
-| **Market Psychology** | Fear/Greed in financial news | `EXECUTE` / `HEDGE` / `DELAY` |
-| **Maritime Freight** | Disruption risk per corridor + True Price | `ALERT` / `MONITOR` / `HEDGE` |
 | **DeFi Arbitrage** | R_net vs flash loan cost (6-filter matrix) | `EXECUTE` / `HEDGE` / `DELAY` |
+| **MEV Protection** | Slippage tolerance vs expected sandwich loss | `EXECUTE` / `HEDGE` / `DELAY` |
+| **IL Guard** | Impermanent Loss risk relative to LP yields | `EXECUTE` / `HEDGE` / `DELAY` |
 
 The engine does **not** expose raw scores. Every response is a decision.
 
@@ -47,9 +45,9 @@ All endpoints return the **§4 Standard Decision Output**. Read `signal` first:
 | Signal | Meaning | Recommended agent action |
 |---|---|---|
 | `EXECUTE` | All conditions confirmed, positive expected value | Proceed if `confidence_score` ≥ 0.85 |
-| `HEDGE` | Negative expected value or extreme fear | Exit / protect positions |
+| `HEDGE` | Negative expected value or high volatility risk | Exit / protect positions |
 | `DELAY` | Insufficient signal or conditions misaligned | Re-evaluate in 15–60 min |
-| `ALERT` | Urgent disruption detected | Escalate immediately |
+| `ALERT` | Severe slippage or flash loan exploit risk detected | Escalate immediately |
 | `MONITOR` | Neutral — no immediate action needed | Schedule re-evaluation |
 
 **Confidence gating rule** (mandatory for autonomous agents):
@@ -67,43 +65,7 @@ arbitration_required=true → human review mandatory (overrides score)
 
 Contact the provisioning endpoint or subscribe via the billing portal.
 
-### 2. Analyze a news headline
-
-```bash
-curl -X POST https://api.arsenal-quant.com/analyze \
-  -H "X-API-Key: YOUR_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"text": "Markets crash in panic sell-off. Banks face bankruptcy amid recession fears."}'
-```
-
-**Response:**
-```json
-{
-  "value": 10,
-  "change_pct": 0.0,
-  "volatility": "HIGH",
-  "trend": "DOWN",
-  "confidence_score": 0.9,
-  "signal": "HEDGE",
-  "context": "Bull:0 Bear:3 Net:-3 Hits:3",
-  "data_freshness_seconds": 0,
-  "source": "Arsenal Decision Engine v1.0"
-}
-```
-
-### 3. Maritime freight risk
-
-```bash
-curl -X POST https://api.arsenal-quant.com/analyze/maritime \
-  -H "X-API-Key: YOUR_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "text": "Houthi missile strikes in Red Sea. Maersk rerouting via Cape of Good Hope.",
-    "zone": "suez_europe"
-  }'
-```
-
-### 4. DeFi arbitrage evaluation
+### 2. DeFi arbitrage and MEV evaluation
 
 ```bash
 curl -X POST https://api.arsenal-quant.com/analyze/arbitrage \
@@ -126,11 +88,26 @@ curl -X POST https://api.arsenal-quant.com/analyze/arbitrage \
   }'
 ```
 
+**Response:**
+```json
+{
+  "value": 1420,
+  "change_pct": 14.2,
+  "volatility": "LOW",
+  "trend": "UP",
+  "confidence_score": 0.95,
+  "signal": "EXECUTE",
+  "context": "R_net positive, F1-F6 filters passed.",
+  "data_freshness_seconds": 0,
+  "source": "Arsenal Decision Engine v1.0"
+}
+```
+
 ---
 
 ## Authentication
 
-### REST Endpoints (`/analyze/*`, `/pulse`)
+### REST Endpoints (`/analyze/arbitrage`, `/pulse`)
 
 All REST endpoints require an API key:
 
@@ -140,15 +117,13 @@ X-API-Key: YOUR_SUBSCRIPTION_KEY
 
 ### MCP Tool Execution (`/mcp/v1/tools/execute`)
 
-The MCP execution endpoint uses the **L402 Lightning Network protocol** for
-pay-per-decision billing.
+The MCP execution endpoint uses the **L402 Lightning Network protocol** for pay-per-decision billing.
 
 ---
 
 ## L402 Monetization — How It Works
 
-The `/mcp/v1/tools/execute` endpoint implements native A2A paywall using
-the L402 protocol (RFC-compatible Lightning Network authentication).
+The `/mcp/v1/tools/execute` endpoint implements native A2A paywall using the L402 protocol (RFC-compatible Lightning Network authentication).
 
 ### The Payment Flow
 
@@ -187,7 +162,7 @@ the L402 protocol (RFC-compatible Lightning Network authentication).
 | Access tier | Method | Price | Scope |
 |---|---|---|---|
 | **Pay-per-decision** | L402 Lightning | **$0.15 / call** | `/mcp/v1/tools/execute` |
-| **Subscription** | API Key | Negotiated | All REST `/analyze/*` endpoints |
+| **Subscription** | API Key | Negotiated | REST `/analyze/arbitrage` endpoint |
 
 ### L402 Integration — Agent Code Examples
 
@@ -198,7 +173,17 @@ import httpx
 # Step 1: Request (will return 402)
 resp = httpx.post(
     "https://api.arsenal-quant.com/mcp/v1/tools/execute",
-    json={"name": "analyze_maritime_freight_risk", "arguments": {"text": "Suez disruption"}}
+    json={
+        "name": "evaluate_arbitrage_opportunity", 
+        "arguments": {
+            "entry_price_usd": 2450.0,
+            "exit_price_usd": 2510.0,
+            "stop_loss_price_usd": 2420.0,
+            "position_size_usd": 50000.0,
+            "gross_yield_usd": 3000.0,
+            "gas_usd": 12.0
+        }
+    }
 )
 
 if resp.status_code == 402:
@@ -215,7 +200,17 @@ if resp.status_code == 402:
     resp = httpx.post(
         "https://api.arsenal-quant.com/mcp/v1/tools/execute",
         headers={"Authorization": f"L402 {macaroon}:{preimage}"},
-        json={"name": "analyze_maritime_freight_risk", "arguments": {"text": "Suez disruption"}}
+        json={
+            "name": "evaluate_arbitrage_opportunity", 
+            "arguments": {
+                "entry_price_usd": 2450.0,
+                "exit_price_usd": 2510.0,
+                "stop_loss_price_usd": 2420.0,
+                "position_size_usd": 50000.0,
+                "gross_yield_usd": 3000.0,
+                "gas_usd": 12.0
+            }
+        }
     )
 
 decision = resp.json()
@@ -227,26 +222,38 @@ print(decision["content"][0]["text"])
 from langchain.tools import Tool
 import requests
 
-def analyze_maritime(text: str, zone: str = None) -> dict:
+def evaluate_arbitrage(
+    entry_price_usd: float,
+    exit_price_usd: float,
+    stop_loss_price_usd: float,
+    position_size_usd: float,
+    gross_yield_usd: float,
+    gas_usd: float
+) -> dict:
     """
-    Analyzes maritime freight disruption risk. Returns signal=ALERT if freight
-    rates will surge. signal=HEDGE if unusual drop detected. signal=MONITOR if stable.
+    Evaluates a DeFi arbitrage trade setup. Returns signal=EXECUTE if expected yield is safe,
+    signal=HEDGE if impermanent loss or MEV risk is too high.
     Always read confidence_score before acting — threshold for autonomous action: 0.85.
     """
-    payload = {"text": text}
-    if zone:
-        payload["zone"] = zone
+    payload = {
+        "entry_price_usd": entry_price_usd,
+        "exit_price_usd": exit_price_usd,
+        "stop_loss_price_usd": stop_loss_price_usd,
+        "position_size_usd": position_size_usd,
+        "gross_yield_usd": gross_yield_usd,
+        "gas_usd": gas_usd
+    }
     resp = requests.post(
-        "https://api.arsenal-quant.com/analyze/maritime",
+        "https://api.arsenal-quant.com/analyze/arbitrage",
         headers={"X-API-Key": "YOUR_KEY"},
         json=payload
     )
     return resp.json()
 
-maritime_tool = Tool(
-    name="analyze_maritime_freight_risk",
-    func=analyze_maritime,
-    description=analyze_maritime.__doc__
+arbitrage_tool = Tool(
+    name="evaluate_arbitrage_opportunity",
+    func=evaluate_arbitrage,
+    description=evaluate_arbitrage.__doc__
 )
 ```
 
@@ -259,8 +266,7 @@ toolset = MCPToolset.from_server_card(
     url="https://api.arsenal-quant.com/.well-known/mcp/server-card.json",
     auth={"type": "api_key", "value": "YOUR_KEY"}
 )
-# Tools available: analyze_market_psychology, analyze_maritime_freight_risk,
-#                  compare_freight_corridors, evaluate_arbitrage_opportunity
+# Tools available: evaluate_arbitrage_opportunity
 ```
 
 ---
@@ -278,9 +284,6 @@ MCP Server Card: [`mcp-server.json`](./mcp-server.json)
 
 | Method | Path | Description | Auth |
 |---|---|---|---|
-| `POST` | `/analyze` | Market Psychology Index (Fear/Greed) | API Key |
-| `POST` | `/analyze/maritime` | Maritime freight risk per corridor | API Key |
-| `POST` | `/analyze/compare` | True Price corridor comparison (Transpacific vs Suez) | API Key |
 | `POST` | `/analyze/arbitrage` | DeFi arbitrage decision (6-filter matrix + R_net) | API Key |
 | `GET`  | `/pulse` | Live market pulse event feed | API Key |
 | `GET`  | `/mcp/v1/tools` | MCP tool registry | API Key |
@@ -311,7 +314,6 @@ The stack includes:
 | `ENGINE_API_KEY` | ✅ | Primary subscription key for REST endpoints |
 | `LIGHTNING_API_KEY` | For L402 | API key for the Lightning wallet backend |
 | `LIGHTNING_URL` | For L402 | Lightning wallet API URL (default: demo instance) |
-| `SENSOR_INTERVAL` | No | RSS scan interval in seconds (default: 900) |
 | `PORT` | No | Exposed port (default: 8002) |
 
 ---
@@ -319,43 +321,27 @@ The stack includes:
 ## Architecture
 
 ```
-External News / RSS Feeds
-          │
-          ▼
-  ┌───────────────────┐
-  │  Autonomous       │  Scans feeds every 15min
-  │  Execution Core   │  Detects critical signals (risk > 65 or < 35)
-  │  (RSS Sensor)     │  Writes to MARKET_PULSE.json
-  └───────┬───────────┘
-          │
-          ▼
-  ┌───────────────────────────────────────────────────────┐
-  │            Decision Intelligence Layer                 │
-  │                                                       │
-  │  ┌─────────────────┐  ┌──────────────────────────┐   │
-  │  │ Market Psychology│  │ Autonomous Execution Core│   │
-  │  │ Index Engine     │  │ Maritime Module          │   │
-  │  │ (Fear/Greed)     │  │ (Freight Risk + Pricing) │   │
-  │  └─────────────────┘  └──────────────────────────┘   │
-  │                                                       │
-  │  ┌─────────────────────────────────────────────────┐  │
-  │  │ Autonomous Execution Core — Arbitrage Module    │  │
-  │  │ (6-filter quant. matrix + R_net + FL cost)      │  │
-  │  └─────────────────────────────────────────────────┘  │
-  │                                                       │
-  │  ┌──────────────────────────────────────────────────┐ │
-  │  │ Payment Gateway (L402 interface — §9)            │ │
-  │  │ Current impl: L402/Lightning. Swappable to x402. │ │
-  │  └──────────────────────────────────────────────────┘ │
-  └───────────────────────────────────────────────────────┘
-          │
-          ▼
-  HTTP REST + MCP Bridge
-  (FastAPI · Port 8002 · <2ms p95 latency)
+   ┌───────────────────────────────────────────────────────┐
+   │            Decision Intelligence Layer                 │
+   │                                                       │
+   │  ┌─────────────────────────────────────────────────┐  │
+   │  │ Autonomous Execution Core — Arbitrage Module    │  │
+   │  │ (6-filter quant. matrix + R_net + FL cost)      │  │
+   │  └─────────────────────────────────────────────────┘  │
+   │                                                       │
+   │  ┌──────────────────────────────────────────────────┐ │
+   │  │ Payment Gateway (L402 interface — §9)            │ │
+   │  │ Current impl: L402/Lightning. Swappable to x402. │ │
+   │  └──────────────────────────────────────────────────┘ │
+   └───────────────────────────────────────────────────────┘
+           │
+           ▼
+   HTTP REST + MCP Bridge
+   (FastAPI · Port 8002 · <2ms p95 latency)
 ```
 
 **Performance target**: < 15ms end-to-end for all decision endpoints.
-**Optimization**: O(1) set operations — no external NLP models, no GPU required.
+**Optimization**: O(1) operations — no external NLP models, no GPU required.
 
 ---
 
