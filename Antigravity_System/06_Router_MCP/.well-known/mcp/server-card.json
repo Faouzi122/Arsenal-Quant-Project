@@ -22,7 +22,7 @@
   ],
   "tools": [
     {
-      "name": "mev_security_audit",
+      "name": "protect_capital_from_mev",
       "description": "Analyzes Uniswap V2 transactions for MEV sandwich risks and calculates ROI-based capital protection signals. O(1) mathematical determinism. Zéro hallucination.",
       "inputSchema": {
         "type": "object",
