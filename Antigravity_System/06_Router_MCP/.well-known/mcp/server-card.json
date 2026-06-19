@@ -1,0 +1,73 @@
+{
+    "$schema": "https://static.modelcontextprotocol.io/schemas/v1/server-card.schema.json",
+    "serverInfo": {
+          "name": "Antigravity Decision Engine",
+          "version": "4.1.0",
+          "description": "Deterministic Risk Oracle for DeFAI Agents. Transforms mempool uncertainty into actionable execution signals.",
+          "endpoint": "https://api.arsenal-quant.com",
+          "contact": "architecture@arsenal-quant.com"
+    },
+    "authentication": {
+          "required": true,
+          "type": "L402",
+          "description": "Lightning Network micro-payment authentication required for full diagnostic data and actionable recommendations."
+    },
+    "resources": [
+          {
+                  "uri": "mcp://audit/latest",
+                  "name": "Latest AI Cost Intelligence Audit",
+                  "description": "Diagnostic and financial teaser report of detected agent loop inefficiencies.",
+                  "mimeType": "text/plain"
+          }
+    ],
+    "tools": [
+          {
+                  "name": "protect_capital_from_mev",
+                  "description": "Analyzes Uniswap V2 transactions for MEV sandwich risks and calculates ROI-based capital protection signals. O(1) mathematical determinism. Zero hallucination.",
+                  "inputSchema": {
+                            "type": "object",
+                            "properties": {
+                                        "victim_weth_in": {
+                                                      "type": "number",
+                                                      "description": "Amount of WETH the victim intends to swap."
+                                        },
+                                        "attacker_weth_in": {
+                                                      "type": "number",
+                                                      "description": "Estimated flash-loan or capital size of the MEV searcher."
+                                        }
+                            },
+                            "required": ["victim_weth_in", "attacker_weth_in"]
+                  },
+                  "pricing": {
+                            "protocol": "L402",
+                            "currency": "SAT",
+                            "amount": 150,
+                            "dynamic": true
+                  }
+          },
+          {
+                  "name": "circuit_breaker",
+                  "description": "Terminates a runaway agent process or loop based on PID to stop token drain.",
+                  "inputSchema": {
+                            "type": "object",
+                            "properties": {
+                                        "action": { "type": "string", "enum": ["TERMINATE_AND_REGROUP", "MONITOR"] },
+                                        "target_pid": { "type": "string" }
+                            },
+                            "required": ["action", "target_pid"]
+                  }
+          },
+          {
+                  "name": "cache_manager",
+                  "description": "Enables semantic cache to reduce redundant vector DB calls.",
+                  "inputSchema": {
+                            "type": "object",
+                            "properties": {
+                                        "action": { "type": "string", "enum": ["ENABLE_SEMANTIC_CACHE", "DISABLE_SEMANTIC_CACHE"] }
+                            },
+                            "required": ["action"]
+                  }
+          }
+    ],
+    "prompts": []
+}
