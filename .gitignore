@@ -5,6 +5,10 @@
 *
 !/README.md
 !/LICENSE
+!/Dockerfile
+!/06_Router_MCP/
+!/06_Router_MCP/**
+
 
 # Whitelist the new Arsenal Quant API codebase
 !/API_Factory/
