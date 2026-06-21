@@ -6,21 +6,22 @@ from fastapi.responses import PlainTextResponse
 from lnbits_client import LNbitsClient
 
 def load_environment():
-      env_path = os.path.join(os.path.dirname(__file__), ".env")
-      if os.path.exists(env_path):
-                with open(env_path, "r") as f:
-                              for line in f:
-                                                clean_line = line.strip()
-                                                if clean_line and not clean_line.startswith("#"):
-                                                                      if "=" in clean_line:
+    env_path = os.path.join(os.path.dirname(__file__), ".env")
+    if os.path.exists(env_path):
+        with open(env_path, "r") as f:
+            for line in f:
+                clean_line = line.strip()
+                if clean_line and not clean_line.startswith("#"):
+                    if "=" in clean_line:
                         key, val = clean_line.split("=", 1)
                         os.environ[key.strip()] = val.strip()
 load_environment()
 
-                  app = FastAPI(title="Antigravity AI Cost Intelligence - Mainnet Gateway")
-        lnbits = LNbitsClient()
+app = FastAPI(title="Antigravity AI Cost Intelligence - Mainnet Gateway")
+lnbits = LNbitsClient()
 
 @app.get("/")
+
 async def root_endpoint():
       return {
           "system": "Antigravity Engine - Decision Layer",
