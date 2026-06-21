@@ -13,10 +13,9 @@ def load_environment():
                                                 clean_line = line.strip()
                                                 if clean_line and not clean_line.startswith("#"):
                                                                       if "=" in clean_line:
-                                                                                                key, val = clean_line.split("=", 1)
-                                                                                                os.environ[key.strip()] = val.strip()
-
-                                                  load_environment()
+                        key, val = clean_line.split("=", 1)
+                        os.environ[key.strip()] = val.strip()
+load_environment()
 
                   app = FastAPI(title="Antigravity AI Cost Intelligence - Mainnet Gateway")
         lnbits = LNbitsClient()
