@@ -114,9 +114,7 @@ async def get_latest_audit(request: Request, authorization: str = Header(None)):
         try:
             with open(latest_audit_path, "r") as f:
                 content = f.read()
-            free_content = content + f"
-
-[FREE LAYER - {requests_count + 1}/3]"
+            free_content = content + f"\n\n[FREE LAYER - {requests_count + 1}/3]"
             return PlainTextResponse(content=free_content)
         except Exception:
             raise HTTPException(status_code=500, detail="Error loading audit.")
