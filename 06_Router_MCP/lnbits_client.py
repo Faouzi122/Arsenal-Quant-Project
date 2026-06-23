@@ -22,7 +22,7 @@ class LNbitsClient:
                                                                 response = await client.post(url, json=payload, headers=headers, timeout=10.0)
                                                                 if response.status_code in (200, 201):
                                                                                           return response.json()
-                                                                                      return {}
+                                                                                                          return {}
             except Exception:
                     return {}
 
