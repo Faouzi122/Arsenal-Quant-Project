@@ -23,8 +23,8 @@ class LNbitsClient:
                                                                 if response.status_code in (200, 201):
                                                                                           return response.json()
                                                                                       return {}
-except Exception:
-                return {}
+            except Exception:
+                    return {}
 
     async def check_invoice(self, payment_hash: str) -> bool:
                   url = f"{self.api_url}/api/v1/payments/{payment_hash}"
@@ -38,5 +38,5 @@ except Exception:
                                                                                     data = response.json()
                                                                                     return data.get("paid", False)
                                                                                 return False
-except Exception:
-                return False
+            except Exception:
+                    return False
