@@ -96,7 +96,7 @@ async def get_server_card():
     return {
         "$schema": "https://static.modelcontextprotocol.io/schemas/v1/server-card.schema.json",
         "serverInfo": {"name": "Antigravity Engine - Decision Layer", "version": "1.0.0"},
-        "authentication": {"required": true, "type": "L402"}
+        "authentication": {"required": True, "type": "L402"}
     }
 
 @app.get("/mcp/audit/latest")
