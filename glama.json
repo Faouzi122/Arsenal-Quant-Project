@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "1.0.0",
+  "name": "Antigravity Decision Engine",
+  "description": "Deterministic Risk Oracle for DeFAI Agents. Analyzes MEV sandwich attack risks, calculates capital protection signals, and manages agent execution loops. O(1) mathematical determinism, zero ML dependencies.",
+  "categories": [
+    "finance",
+    "blockchain",
+    "autonomous-agents"
+  ],
+  "tools": [
+    {
+      "name": "protect_capital_from_mev",
+      "priority": 1
+    },
+    {
+      "name": "circuit_breaker",
+      "priority": 2
+    },
+    {
+      "name": "cache_manager",
+      "priority": 3
+    }
+  ],
+  "repository": "https://github.com/Faouzi122/Arsenal-Quant-Project",
+  "support": {
+    "documentation": "https://github.com/Faouzi122/Arsenal-Quant-Project/blob/master/README.md"
+  }
+}
