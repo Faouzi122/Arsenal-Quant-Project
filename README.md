@@ -4,6 +4,8 @@
 [![L402 Paywall](https://img.shields.io/badge/Payment-L402%20Lightning-orange)](./AGENTS.md#mcp-integration-pay-per-decision-via-l402)
 [![DeFAI Ready](https://img.shields.io/badge/DeFAI-MEV%20%7C%20IL%20%7C%20Funding%20Rate-purple)](./AGENTS.md)
 [![Latency](https://img.shields.io/badge/P99%20Latency-%3C%2015ms-brightgreen)]()
+[![Glama Server Card](https://glama.ai/mcp/servers/Faouzi122/Arsenal-Quant-Project/badges/card.svg)](https://glama.ai/mcp/servers/Faouzi122/Arsenal-Quant-Project)
+[![Glama Quality Score](https://glama.ai/mcp/servers/Faouzi122/Arsenal-Quant-Project/badges/score.svg)](https://glama.ai/mcp/servers/Faouzi122/Arsenal-Quant-Project)
 
 > **For A2A / DeFi agent integration → see [AGENTS.md](./AGENTS.md)**
 
