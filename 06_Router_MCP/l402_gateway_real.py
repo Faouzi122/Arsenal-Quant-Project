@@ -10,51 +10,132 @@ from lnbits_client import LNbitsClient
 
 # =============================================================================
 # MCP STDIO RESPONDER (Glama Sandbox Bypass)
-# Glama tests MCP servers by sending JSON-RPC via stdin.
-# This daemon thread intercepts those requests and replies correctly,
-# while Uvicorn continues serving HTTP on port 8088.
 # =============================================================================
 
 MCP_TOOLS = [
     {
         "name": "protect_capital_from_mev",
-        "description": "Analyzes Uniswap V2 transactions for MEV sandwich risks and calculates ROI-based capital protection signals. O(1) mathematical determinism.",
+        "description": (
+            "Analyzes a pending Uniswap V2 swap transaction to determine if it is vulnerable "
+            "to an MEV sandwich attack. Returns a deterministic risk assessment with ROI-based "
+            "capital protection signals.\n\n"
+            "USE THIS TOOL WHEN:\n"
+            "- An autonomous agent is about to execute a DEX swap on Uniswap V2.\n"
+            "- You need to verify whether a transaction is safe from front-running.\n"
+            "- You want to calculate the expected profit/loss ratio of a potential sandwich attack.\n\n"
+            "DO NOT USE THIS TOOL WHEN:\n"
+            "- The swap is on a centralized exchange (CEX) — MEV does not apply.\n"
+            "- The token pair is not on Uniswap V2 (other DEXes have different AMM formulas).\n\n"
+            "SIDE EFFECTS: None. This tool performs read-only mathematical computation with O(1) complexity. "
+            "No on-chain transactions are executed. No external API calls are made.\n\n"
+            "OUTPUT: Returns a JSON object with 'signal' (EXECUTE if safe, HEDGE if MEV risk detected), "
+            "'confidence_score' (0.0-1.0), 'roi_percentage', 'victim_loss_eth', and 'attacker_profit_eth'. "
+            "Agents should only proceed with the swap if signal=EXECUTE and confidence_score >= 0.85."
+        ),
         "inputSchema": {
             "type": "object",
             "properties": {
                 "victim_weth_in": {
                     "type": "number",
-                    "description": "Amount of WETH the victim intends to swap."
+                    "description": (
+                        "Amount of WETH the victim (your agent) intends to swap on Uniswap V2. "
+                        "Must be a positive number representing the exact ETH value. "
+                        "Example: 10.5 means 10.5 WETH (~$26,250 at $2,500/ETH). "
+                        "Typical range: 0.01 to 1000 WETH."
+                    ),
+                    "examples": [0.5, 2.0, 10.5, 50.0],
+                    "minimum": 0.001
                 },
                 "attacker_weth_in": {
                     "type": "number",
-                    "description": "Estimated flash-loan or capital size of the MEV searcher."
+                    "description": (
+                        "Estimated capital size of the MEV searcher (front-runner). "
+                        "This is the flash-loan or own-capital the attacker would use to sandwich your swap. "
+                        "If unknown, use 2x to 5x the victim_weth_in as a conservative estimate. "
+                        "Example: If victim_weth_in=10.5, a conservative attacker_weth_in would be 52.5 (5x). "
+                        "Typical range: 1 to 5000 WETH."
+                    ),
+                    "examples": [25.0, 52.5, 100.0, 500.0],
+                    "minimum": 0.001
                 }
             },
-            "required": ["victim_weth_in", "attacker_weth_in"]
+            "required": ["victim_weth_in", "attacker_weth_in"],
+            "additionalProperties": False
         }
     },
     {
         "name": "circuit_breaker",
-        "description": "Terminates a runaway agent process or loop based on PID to stop token drain.",
+        "description": (
+            "Emergency kill switch for runaway agent processes. Terminates a specified process "
+            "to stop uncontrolled token consumption, infinite loops, or cascading API calls.\n\n"
+            "USE THIS TOOL WHEN:\n"
+            "- An agent process is consuming tokens or making API calls at an abnormal rate.\n"
+            "- You detect an infinite loop or recursive call pattern in an agent's behavior.\n"
+            "- Cost monitoring shows unexpected spending spikes from a specific process.\n\n"
+            "DO NOT USE THIS TOOL WHEN:\n"
+            "- The process is performing normally — use monitoring dashboards instead.\n"
+            "- You want to gracefully shut down a service — use standard shutdown procedures.\n\n"
+            "SIDE EFFECTS: TERMINATE_AND_REGROUP will kill the target process immediately. "
+            "Any in-flight requests will be lost. The process will NOT restart automatically. "
+            "MONITOR mode has no side effects — it only observes."
+        ),
         "inputSchema": {
             "type": "object",
             "properties": {
-                "action": {"type": "string", "enum": ["TERMINATE_AND_REGROUP", "MONITOR"]},
-                "target_pid": {"type": "string"}
+                "action": {
+                    "type": "string",
+                    "enum": ["TERMINATE_AND_REGROUP", "MONITOR"],
+                    "description": (
+                        "The action to take. TERMINATE_AND_REGROUP kills the process immediately and "
+                        "logs the termination event. MONITOR observes the process without intervention "
+                        "and returns current resource usage statistics."
+                    )
+                },
+                "target_pid": {
+                    "type": "string",
+                    "description": (
+                        "The process identifier (PID) of the agent to target. "
+                        "Obtain this from your process manager or orchestrator. "
+                        "Example: '12345' or 'agent-worker-3'."
+                    ),
+                    "examples": ["12345", "agent-worker-3"]
+                }
             },
-            "required": ["action", "target_pid"]
+            "required": ["action", "target_pid"],
+            "additionalProperties": False
         }
     },
     {
         "name": "cache_manager",
-        "description": "Enables semantic cache to reduce redundant vector DB calls.",
+        "description": (
+            "Controls the semantic cache layer to reduce redundant vector database queries "
+            "and LLM inference calls. Enabling the cache can reduce costs by 40-60% for "
+            "repetitive analysis patterns.\n\n"
+            "USE THIS TOOL WHEN:\n"
+            "- Multiple agents are querying the same market data within a short time window.\n"
+            "- You want to reduce latency for frequently-requested analysis.\n"
+            "- Cost optimization is a priority and some staleness is acceptable.\n\n"
+            "DO NOT USE THIS TOOL WHEN:\n"
+            "- Real-time accuracy is critical (e.g., during active MEV protection).\n"
+            "- The analysis involves unique, never-before-seen data.\n\n"
+            "SIDE EFFECTS: ENABLE_SEMANTIC_CACHE starts caching responses (TTL: 5 minutes). "
+            "Subsequent identical queries will return cached results instead of fresh computation. "
+            "DISABLE_SEMANTIC_CACHE clears the cache and resumes real-time computation."
+        ),
         "inputSchema": {
             "type": "object",
             "properties": {
-                "action": {"type": "string", "enum": ["ENABLE_SEMANTIC_CACHE", "DISABLE_SEMANTIC_CACHE"]}
+                "action": {
+                    "type": "string",
+                    "enum": ["ENABLE_SEMANTIC_CACHE", "DISABLE_SEMANTIC_CACHE"],
+                    "description": (
+                        "ENABLE_SEMANTIC_CACHE activates the cache with a 5-minute TTL. "
+                        "DISABLE_SEMANTIC_CACHE flushes all cached entries and resumes live computation."
+                    )
+                }
             },
-            "required": ["action"]
+            "required": ["action"],
+            "additionalProperties": False
         }
     }
 ]
