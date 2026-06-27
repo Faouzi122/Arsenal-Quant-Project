@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "name": "Antigravity Decision Engine",
-  "description": "Deterministic Risk Oracle for DeFAI Agents. Analyzes MEV sandwich attack risks, calculates capital protection signals, and manages agent execution loops. O(1) mathematical determinism, zero ML dependencies.",
+  "name": "Arsenal Decision Engine",
+  "description": "Deterministic Risk Oracle for DeFAI Agents. Protects capital from MEV and execution risks.",
   "categories": [
     "finance",
     "blockchain",
