@@ -210,7 +210,7 @@ def load_environment():
 
 load_environment()
 
-app = FastAPI(title="Antigravity AI Cost Intelligence - Mainnet Gateway")
+app = FastAPI(title="Arsenal Decision Engine - Mainnet Gateway")
 lnbits = LNbitsClient()
 
 @app.get("/")
