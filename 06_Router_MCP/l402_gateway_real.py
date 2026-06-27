@@ -165,7 +165,7 @@ def mcp_stdio_responder():
                     "tools": {"listChanged": False}
                 },
                 "serverInfo": {
-                    "name": "Antigravity Decision Engine",
+                    "name": "Arsenal Decision Engine",
                     "version": "1.0.0"
                 }
             }
@@ -216,7 +216,7 @@ lnbits = LNbitsClient()
 @app.get("/")
 async def root_endpoint():
     return {
-        "system": "Antigravity Engine - Decision Layer",
+        "system": "Arsenal Decision Engine",
         "status": "MAINNET ACTIVE",
         "protocol": "M2M L402 Paywall",
         "message": "Human access detected. This API is designed for autonomous agents.",
@@ -287,7 +287,7 @@ async def get_server_card():
             return json.load(f)
     return {
         "$schema": "https://static.modelcontextprotocol.io/schemas/v1/server-card.schema.json",
-        "serverInfo": {"name": "Antigravity Engine - Decision Layer", "version": "1.0.0"},
+        "serverInfo": {"name": "Arsenal Decision Engine", "version": "1.0.0"},
         "authentication": {"required": True, "type": "L402"}
     }
 
