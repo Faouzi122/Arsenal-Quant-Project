@@ -11,7 +11,10 @@ class LNbitsClient:
     
     def __init__(self):
         # Retrieve configuration from environment or use default fallbacks
-        self.base_url = os.getenv("LNBITS_URL", "http://localhost:5000").rstrip("/")
+        base = os.getenv("LNBITS_URL", "http://localhost:5000").rstrip("/")
+        if base.endswith("/api/v1"):
+            base = base[:-7]
+        self.base_url = base
         self.api_key = os.getenv("LNBITS_INVOICE_KEY", "votre_cle_api_lnbits_ici")
         
     def create_invoice(self, amount_sats: int, memo: str) -> dict:
