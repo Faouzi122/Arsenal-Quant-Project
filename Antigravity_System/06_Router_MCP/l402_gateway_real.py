@@ -4,6 +4,7 @@ import httpx
 from fastapi import FastAPI, HTTPException, Header, Response, Request
 from fastapi.responses import PlainTextResponse
 from lnbits_client import LNbitsClient
+from torvalds_shield import check_rate_limit, sign_audit_payload
 
 # Parse .env configurations manually to avoid external dependencies
 def load_environment():
@@ -77,14 +78,15 @@ def increment_client_requests(client_id: str):
 
 # Dynamic Pricing Helper
 def get_dynamic_price(audit_path: str) -> int:
+    override = os.getenv("L402_OVERRIDE_PRICE")
+    if override:
+        return int(override)
     price = 50000  # Fallback: 50,000 SATs (~$20 USD)
     if not os.path.exists(audit_path):
         return price
     try:
         with open(audit_path, "r") as f:
             content = f.read()
-        for line in f.read().splitlines():
-            pass # Reset just in case, read content already fetched
         for line in content.splitlines():
             if "Financial Loss Level:" in line:
                 level = line.split("Financial Loss Level:")[1].strip().upper()
@@ -142,10 +144,12 @@ async def get_server_card():
 async def get_latest_audit(request: Request, authorization: str = Header(None)):
     """
     Exposes latest diagnostic audit report.
-    Free Quota: First 3 requests from a client ID or IP are free.
+    Free Quota: Protected by O(1) in-memory Torvalds Shield rate limiting (first 3 free).
     Subsequent requests: Gated by dynamically priced L402 Lightning challenges.
     """
     client_id = request.headers.get("x-agent-id", request.client.host)
+    raw_ip = request.headers.get("cf-connecting-ip", request.headers.get("x-forwarded-for", request.client.host))
+    client_ip = raw_ip.split(",")[0].strip() if "," in raw_ip else raw_ip.strip()
     
     # Check directory
     if not os.path.exists(AUDIT_DIR):
@@ -157,61 +161,82 @@ async def get_latest_audit(request: Request, authorization: str = Header(None)):
         
     latest_audit_path = os.path.join(AUDIT_DIR, files[0])
     
-    # 1. Quota Check (Option B: Free Tier)
-    requests_count = get_client_requests(client_id)
-    if requests_count < 3:
-        increment_client_requests(client_id)
-        try:
-            with open(latest_audit_path, 'r') as f:
-                content = f.read()
-            free_content = (
-                content + 
-                f"\n\n[FREE LAYER - Discovery Access: {requests_count + 1}/3]\n"
-                "- Free tier validation successful.\n"
-                "- Upcoming requests will require L402 micro-payments."
-            )
-            return PlainTextResponse(content=free_content)
-        except Exception as e:
-            raise HTTPException(status_code=500, detail="Error loading free audit payload.")
-
-    # 2. Paid L402 Verification Flow
-    price_sats = get_dynamic_price(latest_audit_path)
-
-    if not authorization or not authorization.startswith("L402 "):
-        # Call LNbits node API to create dynamic invoice
-        invoice_data = lnbits.create_invoice(price_sats, f"Antigravity Audit Unlock ({client_id})")
+    # Verify if client already has a valid payment (L402 verification)
+    is_paid = False
+    payment_hash = None
+    if authorization and authorization.startswith("L402 "):
+        payment_hash = authorization.split(" ")[1]
+        is_paid = lnbits.check_invoice(payment_hash)
         
-        if not invoice_data or "payment_request" not in invoice_data:
-            raise HTTPException(status_code=503, detail="Payment Gateway Node is Offline or Unauthorized")
-            
-        pr = invoice_data.get("payment_request")
-        payment_hash = invoice_data.get("payment_hash")
-        
-        # Issue HTTP 402 challenge with macaroon/invoice credentials
-        headers = {
-            "WWW-Authenticate": f'L402 token="{payment_hash}", invoice="{pr}"'
-        }
-        return Response(
-            content=json.dumps({"error": "Payment Required", "price_sats": price_sats, "client_id": client_id}),
-            status_code=402,
-            headers=headers,
-            media_type="application/json"
-        )
-    
-    # Extract macaroon proof and query node to check payment status
-    payment_hash = authorization.split(" ")[1]
-    is_paid = lnbits.check_invoice(payment_hash)
-    
     if not is_paid:
-        raise HTTPException(status_code=403, detail="L402 Payment verification failed or invoice unpaid.")
+        # Check rate limit for free tier
+        if check_rate_limit(client_ip):
+            try:
+                with open(latest_audit_path, 'r') as f:
+                    content = f.read()
+                
+                # Sceau de l'Oracle (HMAC-SHA256 signature)
+                oracle_secret = os.getenv("ORACLE_SECRET_KEY", "default_secret")
+                payload_to_sign = {
+                    "audit_content": content,
+                    "client_ip": client_ip,
+                    "type": "FREE_TIER"
+                }
+                signature = sign_audit_payload(payload_to_sign, oracle_secret)
+                
+                free_content = (
+                    content + 
+                    f"\n\n[FREE LAYER - Discovery Access]\n"
+                    "- Free tier validation successful.\n"
+                    "- Upcoming requests will require L402 micro-payments.\n\n"
+                    f"{{\n  \"oracle_signature\": \"{signature}\",\n  \"layer\": \"FREE\"\n}}"
+                )
+                return PlainTextResponse(content=free_content)
+            except Exception as e:
+                raise HTTPException(status_code=500, detail="Error loading free audit payload.")
+        else:
+            # Quota exhausted, trigger payment flow
+            price_sats = get_dynamic_price(latest_audit_path)
+            # Call LNbits node API to create dynamic invoice
+            invoice_data = lnbits.create_invoice(price_sats, f"Arsenal Audit Unlock ({client_id})")
+            
+            if not invoice_data or "payment_request" not in invoice_data:
+                raise HTTPException(status_code=503, detail="Payment Gateway Node is Offline or Unauthorized")
+                
+            pr = invoice_data.get("payment_request")
+            payment_hash = invoice_data.get("payment_hash")
+            
+            # Issue HTTP 402 challenge with macaroon/invoice credentials
+            headers = {
+                "WWW-Authenticate": f'L402 token="{payment_hash}", invoice="{pr}"'
+            }
+            return Response(
+                content=json.dumps({"error": "Payment Required", "price_sats": price_sats, "client_id": client_id}),
+                status_code=402,
+                headers=headers,
+                media_type="application/json"
+            )
 
-    # Read latest compiled audit file
+    # Read latest compiled audit file (Paid Path)
     try:
         with open(latest_audit_path, 'r') as f:
             content = f.read()
             
         recommendation = get_mapper_recommendation(latest_audit_path)
-        premium_content = content + recommendation
+        
+        # Sceau de l'Oracle (HMAC-SHA256 signature)
+        oracle_secret = os.getenv("ORACLE_SECRET_KEY", "default_secret")
+        payload_to_sign = {
+            "audit_content": content,
+            "payment_hash": payment_hash,
+            "type": "PREMIUM_TIER"
+        }
+        signature = sign_audit_payload(payload_to_sign, oracle_secret)
+        
+        premium_content = (
+            content + recommendation + 
+            f"\n\n{{\n  \"oracle_signature\": \"{signature}\",\n  \"layer\": \"PREMIUM\"\n}}"
+        )
         
         return PlainTextResponse(content=premium_content)
         
