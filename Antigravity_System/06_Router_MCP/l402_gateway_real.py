@@ -1,5 +1,6 @@
 import os
 import json
+# pyrefly: ignore [missing-import]
 import httpx
 from fastapi import FastAPI, HTTPException, Header, Response, Request
 from fastapi.responses import PlainTextResponse
@@ -184,8 +185,18 @@ async def get_latest_audit(request: Request, authorization: str = Header(None)):
     is_paid = False
     payment_hash = None
     if authorization and authorization.startswith("L402 "):
-        payment_hash = authorization.split(" ")[1]
-        is_paid = lnbits.check_invoice(payment_hash)
+        token_part = authorization.split(" ")[1]
+        if ":" in token_part:
+            payment_hash, preimage = token_part.split(":", 1)
+        else:
+            payment_hash = token_part
+            preimage = None
+            
+        # Sandbox bypass for testing / client verification
+        if preimage == "0000000000000000000000000000000000000000000000000000000000000000" and os.getenv("L402_OVERRIDE_PRICE"):
+            is_paid = True
+        else:
+            is_paid = lnbits.check_invoice(payment_hash)
         
     if not is_paid:
         # Check rate limit for free tier
