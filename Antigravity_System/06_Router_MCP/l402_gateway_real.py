@@ -78,23 +78,41 @@ def increment_client_requests(client_id: str):
         print(f"[QUOTA ERROR] Failed to save quotas: {e}")
 
 # Dynamic Pricing Helper
-def get_dynamic_price(audit_path: str) -> int:
+def get_dynamic_price(audit_payload) -> int:
+    """[DETERMINISTIC L402 PRICING] 2-Tier SLA"""
+    import os, json
+    
+    # Override option for testing
     override = os.getenv("L402_OVERRIDE_PRICE")
     if override:
         return int(override)
-    price = 50000  # Fallback: 50,000 SATs (~$20 USD)
-    if not os.path.exists(audit_path):
-        return price
-    try:
-        with open(audit_path, "r") as f:
-            content = f.read()
-        for line in content.splitlines():
-            if "Financial Loss Level:" in line:
-                level = line.split("Financial Loss Level:")[1].strip().upper()
-                return PRICING_MAP.get(level, price)
-    except Exception as e:
-        print(f"[PRICING ERROR] Failed to determine dynamic price: {e}")
-    return price
+        
+    # Standard logic: Extract signal (or level) from the audit report payload
+    signal = 'EXECUTE'
+    if isinstance(audit_payload, dict):
+        signal = audit_payload.get('signal', 'EXECUTE')
+    elif isinstance(audit_payload, str) and os.path.exists(audit_payload):
+        # The payload is the path to the text report
+        try:
+            with open(audit_payload, 'r') as f:
+                content = f.read()
+            # If the file contains HEDGE or DELAY, or if it is a backtest report containing them
+            if 'HEDGE' in content or 'DELAY' in content or 'CRITICAL' in content or 'FATAL' in content:
+                signal = 'HEDGE'
+            else:
+                # Let's check if it's JSON (like backtest_report.json)
+                try:
+                    data = json.loads(content)
+                    signal = data.get('signal', 'EXECUTE')
+                except:
+                    pass
+        except:
+            pass
+            
+    # Apply deterministic tiered SLA pricing (50 or 500 sats)
+    if signal in ['HEDGE', 'DELAY']:
+        return 500  # Premium: High-risk anomaly / hedge active / capital protected
+    return 50       # Standard: Routine monitoring / low-risk
 
 # Dynamic Recommendation Helper
 def get_mapper_recommendation(audit_path: str) -> str:

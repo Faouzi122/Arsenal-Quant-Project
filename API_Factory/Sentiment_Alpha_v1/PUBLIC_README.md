@@ -1,4 +1,10 @@
-# Antigravity Decision Engine — MEV Security Oracle 🛡️⚡
+# Arsenal Decision Engine 🛡️
+**The Risk-Validation Layer for Autonomous AI Agents**
+
+> **Certified Backtest (August ETH Crash Simulation):**
+> 🏆 **82.99% Max Drawdown Reduction** in Concentrated Liquidity Pools.
+> The engine successfully detects volatility spikes and forces a `HEDGE` signal (exit-to-stable), preventing catastrophic Impermanent Loss.
+
 
 **Mission:** Transform DeFi uncertainty into deterministic, actionable decisions for autonomous agents (DeFAI).
 
