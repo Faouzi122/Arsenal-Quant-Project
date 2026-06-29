@@ -3,6 +3,7 @@
 
 # Ignore everything by default
 *
+!/README.md
 
 # Whitelist the new Arsenal Quant API codebase
 !/API_Factory/

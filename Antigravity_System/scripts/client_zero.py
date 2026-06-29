@@ -1,232 +1,223 @@
 #!/usr/bin/env python3
-import sys
-import os
-import re
+"""
+CLIENT ZÉRO : Testeur de Paywall L402 M2M
+============================================
+Arsenal Decision Engine — Épreuve du Feu
+
+Action : Tente d'accéder à l'Arsenal Decision Engine, intercepte l'erreur 402,
+paie la facture Lightning, et récupère la décision.
+
+Prérequis :
+- Un wallet LNbits approvisionné (au moins 150 sats)
+- Remplacer CLIENT_API_KEY par votre clé Admin LNbits
+
+Usage : python3 client_zero.py
+"""
+import urllib.request
+import urllib.error
 import json
-import requests
+import re
+import sys
+import time
 
-# Set output color coding for professional log messages
-GREEN = "\033[92m"
-YELLOW = "\033[93m"
-RED = "\033[91m"
-BLUE = "\033[94m"
-BOLD = "\033[1m"
-RESET = "\033[0m"
+# ==============================================================================
+# CONFIGURATION DU CLIENT (Ce portefeuille va PAYER les 150 sats)
+# Remplacez par la clé Admin d'un wallet LNbits approvisionné
+# ==============================================================================
+CLIENT_WALLET_URL = "https://demo.lnbits.com"
+CLIENT_API_KEY = "6174e2b5057a4e16a0609e6ef87b33ed"
 
-def log_info(msg):
-    print(f"{BLUE}[*] {msg}{RESET}")
+# L'URL de votre serveur Arsenal Decision Engine
+TARGET_API = "https://api.arsenal-quant.com/mcp/audit/latest"
 
-def log_success(msg):
-    print(f"{GREEN}[✓] {msg}{RESET}")
+# ==============================================================================
+# FONCTIONS
+# ==============================================================================
 
-def log_warn(msg):
-    print(f"{YELLOW}[!] {msg}{RESET}")
+def print_banner():
+    print()
+    print("=" * 60)
+    print("  CLIENT ZÉRO — Arsenal Decision Engine L402 Tester")
+    print("  Mode : M2M (Machine-to-Machine) — Zéro Dépendance")
+    print("=" * 60)
+    print()
 
-def log_error(msg):
-    print(f"{RED}[✗] {msg}{RESET}")
-
-def load_env_variables():
-    # Attempt to load LNbits keys from the .env file in 06_Router_MCP
-    env_path = os.path.join(os.path.dirname(__file__), "..", "06_Router_MCP", ".env")
-    env_vars = {}
-    if os.path.exists(env_path):
-        with open(env_path, "r") as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith("#"):
-                    parts = line.split("=", 1)
-                    if len(parts) == 2:
-                        env_vars[parts[0].strip()] = parts[1].strip()
-    
-    # Fallback to system env
-    lnbits_url = env_vars.get("LNBITS_URL") or os.getenv("LNBITS_URL") or "https://demo.lnbits.com"
-    
-    # Check if an explicit admin key is provided in env, else fallback to invoice key
-    lnbits_key = os.getenv("LNBITS_ADMIN_KEY") or env_vars.get("LNBITS_ADMIN_KEY")
-    is_admin = True
-    
-    if not lnbits_key:
-        lnbits_key = os.getenv("LNBITS_INVOICE_KEY") or env_vars.get("LNBITS_INVOICE_KEY")
-        is_admin = False
-    
-    return lnbits_url, lnbits_key, is_admin
-
-def main():
-    print(f"{BOLD}================================================================{RESET}")
-    print(f"{BOLD}       ANTIGRAVITY CLIENT ZERO : AUTOMATED L402 A2A AGENT       {RESET}")
-    print(f"{BOLD}================================================================{RESET}")
-    
-    lnbits_url, lnbits_key, is_admin = load_env_variables()
-    if not lnbits_key:
-        log_error("LNbits Admin/Invoice Key not found in 06_Router_MCP/.env or environment.")
-        sys.exit(1)
-        
-    if not is_admin:
-        log_warn("Using Read-only Invoice Key. Payments will fail unless a valid Admin Key is set via LNBITS_ADMIN_KEY.")
-    else:
-        log_success("Admin Key detected. Authorized to execute out-of-wallet payments.")
-        
-    log_success(f"LNbits Wallet connection initialized: {lnbits_url}")
-    
-    # Phase 1: MCP Tool Discovery
-    log_info("PHASE 1: Fetching MCP Server Card (Auto-Discovery)...")
-    server_card_url = "https://api.arsenal-quant.com/.well-known/mcp/server-card.json"
-    try:
-        resp = requests.get(server_card_url, timeout=10)
-        resp.raise_for_status()
-        card = resp.json()
-        server_info = card.get("serverInfo", {})
-        log_success(f"Discovered Server: {server_info.get('name')} v{server_info.get('version')}")
-        log_info(f"Description: {server_info.get('description')}")
-        
-        # Discover mev_security_audit tool
-        tools = card.get("tools", [])
-        mev_tool = next((t for t in tools if t.get("name") == "mev_security_audit"), None)
-        if not mev_tool:
-            log_error("Failed to discover 'mev_security_audit' tool in server card.")
-            sys.exit(1)
-        log_success(f"Discovered Tool: '{mev_tool['name']}' - Pricing: 150 SATs (L402)")
-    except Exception as e:
-        log_error(f"Failed to fetch server card: {e}")
-        sys.exit(1)
-
-    # Phase 2: Call MEV audit without credentials
-    log_info("PHASE 2: Querying MEV Security Audit without L402 credentials...")
-    target_url = "https://api.arsenal-quant.com/api/v1/arbitrage/mev"
-    payload = {
-        "victim_weth_in": 100.0,
-        "attacker_weth_in": 10.0
-    }
-    
-    try:
-        resp = requests.post(target_url, json=payload, timeout=10)
-    except Exception as e:
-        log_error(f"Failed to connect to API endpoint: {e}")
-        sys.exit(1)
-        
-    if resp.status_code != 402:
-        log_error(f"Expected HTTP 402 Payment Required, got HTTP {resp.status_code}")
-        print(resp.text)
-        sys.exit(1)
-        
-    log_success("HTTP 402 Payment Required received correctly.")
-    
-    # Phase 3: Parse L402 Challenge
-    log_info("PHASE 3: Parsing WWW-Authenticate header...")
-    auth_header = resp.headers.get("WWW-Authenticate")
-    if not auth_header:
-        log_error("WWW-Authenticate header missing in 402 response.")
-        sys.exit(1)
-        
-    # Standard format: L402 macaroon="...", invoice="..."
-    macaroon_match = re.search(r'macaroon="([^"]+)"', auth_header)
-    invoice_match = re.search(r'invoice="([^"]+)"', auth_header)
-    
-    if not macaroon_match or not invoice_match:
-        log_error("Failed to extract macaroon or invoice from WWW-Authenticate header.")
-        sys.exit(1)
-        
-    macaroon = macaroon_match.group(1)
-    invoice = invoice_match.group(1)
-    
-    log_success(f"Macaroon extracted: {macaroon[:20]}...")
-    log_success(f"Lightning Invoice (Bolt11) extracted: {invoice[:30]}...")
-
-    # Phase 4: Settle Invoice via LNbits
-    log_info("PHASE 4: Settling Lightning Invoice via LNbits...")
-    pay_url = f"{lnbits_url.rstrip('/')}/api/v1/payments"
-    pay_headers = {
-        "X-Api-Key": lnbits_key,
+def pay_invoice(bolt11):
+    """Paie une facture Lightning via le wallet LNbits du client."""
+    print(f"  [💰] Initiation du paiement Lightning...")
+    url = f"{CLIENT_WALLET_URL}/api/v1/payments"
+    data = json.dumps({"out": True, "bolt11": bolt11}).encode("utf-8")
+    req = urllib.request.Request(url, data=data, headers={
+        "X-Api-Key": CLIENT_API_KEY,
         "Content-Type": "application/json"
-    }
-    pay_payload = {
-        "out": True,
-        "bolt11": invoice
-    }
-    
+    })
     try:
-        pay_resp = requests.post(pay_url, json=pay_payload, headers=pay_headers, timeout=15)
-        pay_resp.raise_for_status()
-        pay_data = pay_resp.json()
-        preimage = pay_data.get("preimage")
-        payment_hash = pay_data.get("payment_hash")
-        
-        # If preimage is missing/None, poll the payment details GET endpoint
-        if not preimage and payment_hash:
-            log_warn("Preimage not in POST response. Querying payment details...")
-            import time
-            status_url = f"{lnbits_url.rstrip('/')}/api/v1/payments/{payment_hash}"
-            for attempt in range(6):
-                time.sleep(1)
+        with urllib.request.urlopen(req, timeout=30) as response:
+            result = json.loads(response.read().decode("utf-8"))
+            payment_hash = result.get("payment_hash", "unknown")
+            print(f"  [✅] Paiement réussi ! Hash: {payment_hash[:16]}...")
+            return payment_hash
+    except urllib.error.HTTPError as e:
+        error_body = e.read().decode("utf-8")[:200]
+        print(f"  [❌] Échec du paiement : HTTP {e.code} — {error_body}")
+        return None
+    except Exception as e:
+        print(f"  [❌] Erreur réseau : {e}")
+        return None
+
+def run_mission():
+    """Exécute la mission Client Zéro : accès → rejet → paiement → accès."""
+    print_banner()
+
+    if CLIENT_API_KEY == "REMPLACEZ_PAR_VOTRE_CLE_ADMIN_LNBITS_ICI":
+        print("  [⚠️ ] ATTENTION : Vous devez configurer votre clé API LNbits.")
+        print("  [⚠️ ] Ouvrez ce fichier et remplacez CLIENT_API_KEY ligne 32.")
+        print("  [⚠️ ] Clé Admin depuis : https://demo.lnbits.com")
+        print()
+        # Mode simulation : on teste quand même la première requête
+        print("  [ℹ️ ] Lancement en mode SIMULATION (sans paiement)...")
+        print()
+
+    # ──────────────────────────────────────────────────────────
+    # PHASE 1 : Tentative d'accès (doit retourner 402)
+    # ──────────────────────────────────────────────────────────
+    print(f"  [1/3] 🔒 Tentative d'accès au serveur...")
+    print(f"        URL : {TARGET_API}")
+    print()
+
+    req = urllib.request.Request(TARGET_API, headers={
+        "User-Agent": "Client-Zero-Agent/1.0",
+        "x-agent-id": "client-zero-test"
+    })
+
+    try:
+        with urllib.request.urlopen(req, timeout=15) as response:
+            # Si on arrive ici, le serveur a donné l'accès (couche gratuite)
+            content = response.read().decode("utf-8")
+            print("  [🎁] Le serveur a accordé l'accès GRATUIT (Free Layer).")
+            print()
+            print("  " + "─" * 56)
+            print("  RÉPONSE DE L'ORACLE (Free Tier) :")
+            print("  " + "─" * 56)
+            for line in content.split("\n")[:20]:
+                print(f"  │ {line}")
+            print("  " + "─" * 56)
+            print()
+            print("  [ℹ️ ] Vous avez 3 requêtes gratuites. Après ça, L402 s'active.")
+            return True
+
+    except urllib.error.HTTPError as e:
+        if e.code == 402:
+            # ──────────────────────────────────────────────────
+            # PHASE 2 : Le mur L402 a bloqué — extraire la facture
+            # ──────────────────────────────────────────────────
+            print("  [✅] INFRASTRUCTURE VALIDÉE : Le serveur exige un paiement (402).")
+            print()
+
+            auth_header = e.headers.get("WWW-Authenticate", "")
+            body = e.read().decode("utf-8")
+
+            # Parse le body pour le prix
+            try:
+                body_json = json.loads(body)
+                price = body_json.get("price_sats", "?")
+                print(f"  [💵] Prix demandé : {price} sats")
+            except Exception:
+                pass
+
+            # Extraction du token et de la facture via regex
+            token_match = re.search(r'token="([^"]+)"', auth_header)
+            invoice_match = re.search(r'invoice="([^"]+)"', auth_header)
+
+            if not token_match or not invoice_match:
+                print("  [❌] En-tête L402 malformé. Header reçu :")
+                print(f"       {auth_header[:200]}")
+                return False
+
+            token = token_match.group(1)
+            invoice = invoice_match.group(1)
+
+            print(f"  [🔑] Token L402 : {token[:16]}...")
+            print(f"  [⚡] Facture Lightning : {invoice[:40]}...")
+            print()
+
+            if CLIENT_API_KEY == "REMPLACEZ_PAR_VOTRE_CLE_ADMIN_LNBITS_ICI":
+                print("  [⚠️ ] Mode SIMULATION : paiement non effectué.")
+                print("  [ℹ️ ] Configurez CLIENT_API_KEY pour tester le paiement réel.")
+                print()
+                print("  " + "=" * 56)
+                print("  RÉSULTAT : PHASE 1 VALIDÉE ✅")
+                print("  Le paywall L402 fonctionne. Le serveur bloque correctement.")
+                print("  " + "=" * 56)
+                return True
+
+            # ──────────────────────────────────────────────────
+            # PHASE 3 : Paiement Lightning
+            # ──────────────────────────────────────────────────
+            print(f"  [2/3] ⚡ Paiement de la facture Lightning...")
+            payment_hash = pay_invoice(invoice)
+
+            if not payment_hash:
+                print("  [❌] Le paiement a échoué. Vérifiez le solde du wallet.")
+                return False
+
+            print()
+            time.sleep(1)  # Laisser le réseau propager
+
+            # ──────────────────────────────────────────────────
+            # PHASE 4 : Soumission de la preuve cryptographique
+            # ──────────────────────────────────────────────────
+            print(f"  [3/3] 🔓 Soumission de la preuve de paiement...")
+
+            req_paid = urllib.request.Request(TARGET_API, headers={
+                "User-Agent": "Client-Zero-Agent/1.0",
+                "x-agent-id": "client-zero-test",
+                "Authorization": f"L402 {token}"
+            })
+
+            try:
+                with urllib.request.urlopen(req_paid, timeout=15) as final_resp:
+                    audit_data = final_resp.read().decode("utf-8")
+                    print()
+                    print("  " + "=" * 56)
+                    print("  ✅ ACCÈS DÉVERROUILLÉ — RÉPONSE DE L'ORACLE :")
+                    print("  " + "=" * 56)
+                    for line in audit_data.split("\n"):
+                        print(f"  │ {line}")
+                    print("  " + "=" * 56)
+                    print()
+                    print("  [🏆] BOUCLE MONÉTISATION M2M : VALIDÉE")
+                    print("  [💰] Transaction : Agent → Lightning → Arsenal → Décision")
+                    return True
+
+            except urllib.error.HTTPError as err:
+                print(f"  [❌] Preuve rejetée. Erreur {err.code}")
                 try:
-                    status_resp = requests.get(status_url, headers={"X-Api-Key": lnbits_key}, timeout=10)
-                    status_resp.raise_for_status()
-                    status_data = status_resp.json()
-                    
-                    # Log for debugging
-                    # print(f"Poll attempt {attempt+1} response: {status_data}")
-                    
-                    # Extract preimage from multiple potential locations in LNbits schema
-                    preimage = (
-                        status_data.get("preimage") or 
-                        status_data.get("details", {}).get("preimage") or 
-                        status_data.get("payment", {}).get("preimage")
-                    )
-                    
-                    if preimage and preimage != "0000000000000000000000000000000000000000000000000000000000000000":
-                        break
-                except Exception as poll_err:
-                    log_warn(f"Poll attempt {attempt+1} failed: {poll_err}")
-                    
-        if not preimage:
-            log_error(f"Preimage not returned by LNbits (even after polling): {pay_data}")
-            sys.exit(1)
-            
-        log_success(f"Invoice settled! Preimage: {preimage}")
-    except Exception as e:
-        log_error(f"Failed to pay Lightning invoice: {e}")
-        if isinstance(e, requests.exceptions.HTTPError) and e.response.status_code == 403:
-            print(f"\n{YELLOW}{BOLD}[DIAGNOSTIC - ACCÈS REFUSÉ (403)]{RESET}")
-            print(f"La clé d'API fournie est une clé d'écriture de factures en lecture seule (Invoice Key).")
-            print(f"Pour régler la facture, vous devez utiliser la clé d'administration (Admin Key) de votre wallet LNbits.")
-            print(f"Exemple d'exécution :")
-            print(f"  {BOLD}LNBITS_ADMIN_KEY=votre_cle_admin_ici python3 scripts/client_zero.py{RESET}\n")
-        sys.exit(1)
+                    err_body = err.read().decode("utf-8")
+                    print(f"       {err_body[:200]}")
+                except Exception:
+                    pass
+                return False
 
-    # Phase 5: Execute request with Authorization header
-    log_info("PHASE 5: Retrying request with paid L402 token...")
-    auth_header_value = f"L402 {macaroon}:{preimage}"
-    headers = {
-        "Authorization": auth_header_value,
-        "Content-Type": "application/json"
-    }
-    
-    try:
-        resp = requests.post(target_url, json=payload, headers=headers, timeout=10)
-        resp.raise_for_status()
+        elif e.code == 404:
+            print(f"  [⚠️ ] Serveur répond 404. L'endpoint n'existe pas encore.")
+            print(f"       Vérifiez que le conteneur Docker tourne sur le VPS.")
+            return False
+        else:
+            print(f"  [❌] Erreur inattendue : HTTP {e.code}")
+            try:
+                print(f"       {e.read().decode('utf-8')[:200]}")
+            except Exception:
+                pass
+            return False
+
     except Exception as e:
-        log_error(f"Failed during authorized execution: {e}")
-        if 'resp' in locals():
-            print(resp.text)
-        sys.exit(1)
-        
-    log_success("HTTP 200 OK received!")
-    
-    # Phase 6: Display Decision Intelligence Output
-    print(f"\n{BOLD}================================================================{RESET}")
-    print(f"{BOLD}           DECISION INTELLIGENCE OUTPUT (MEV AUDIT)             {RESET}")
-    print(f"{BOLD}================================================================{RESET}")
-    decision = resp.json()
-    print(json.dumps(decision, indent=2))
-    print(f"{BOLD}================================================================{RESET}")
-    
-    signal = decision.get("signal")
-    avoided_loss = decision.get("avoided_loss_usd", 0)
-    
-    if signal == "DELAY":
-        log_success(f"PROVE OF ROI: Agent protected! Profit/Loss saved: ${avoided_loss:.2f} USD")
-    else:
-        log_info(f"Signal: {signal} - Clear execution window.")
+        print(f"  [❌] Erreur de connexion : {e}")
+        print(f"       Le VPS est-il allumé ? Le tunnel Cloudflare est-il actif ?")
+        return False
+
 
 if __name__ == "__main__":
-    main()
+    success = run_mission()
+    print()
+    sys.exit(0 if success else 1)

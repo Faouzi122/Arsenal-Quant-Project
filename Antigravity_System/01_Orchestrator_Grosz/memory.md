@@ -1076,3 +1076,164 @@ INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 
 
 
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1056]
+[KERNEL] : Surveillance active sur /home/faouzi/Antigravity_Knowledge_Base
+Setting up watches.  Beware: since -r was given, this may take a while!
+Watches established.
+INFO:     Started server process [1029]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1029]
+[KERNEL] : Surveillance active sur /home/faouzi/Antigravity_Knowledge_Base
+Setting up watches.  Beware: since -r was given, this may take a while!
+Watches established.
+INFO:     Started server process [1006]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1006]
+[KERNEL] : Surveillance active sur /home/faouzi/Antigravity_Knowledge_Base
+Setting up watches.  Beware: since -r was given, this may take a while!
+Watches established.
+INFO:     Started server process [969]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [969]
+[KERNEL] : Surveillance active sur /home/faouzi/Antigravity_Knowledge_Base
+Setting up watches.  Beware: since -r was given, this may take a while!
+Watches established.
+INFO:     Started server process [973]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [973]
+[KERNEL] : Surveillance active sur /home/faouzi/Antigravity_Knowledge_Base
+Setting up watches.  Beware: since -r was given, this may take a while!
+Watches established.
+INFO:     Started server process [1028]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1028]
+[KERNEL] : Surveillance active sur /home/faouzi/Antigravity_Knowledge_Base
+Setting up watches.  Beware: since -r was given, this may take a while!
+Watches established.
+INFO:     Started server process [978]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [978]
+[KERNEL] : Surveillance active sur /home/faouzi/Antigravity_Knowledge_Base
+Setting up watches.  Beware: since -r was given, this may take a while!
+Watches established.
+INFO:     Started server process [1001]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+[KERNEL] : Surveillance active sur /home/faouzi/Antigravity_Knowledge_Base
+Setting up watches.  Beware: since -r was given, this may take a while!
+Watches established.
+INFO:     Started server process [994]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [994]
+[KERNEL] : Surveillance active sur /home/faouzi/Antigravity_Knowledge_Base
+Setting up watches.  Beware: since -r was given, this may take a while!
+Watches established.
+INFO:     Started server process [987]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [987]
+[KERNEL] : Surveillance active sur /home/faouzi/Antigravity_Knowledge_Base
+Setting up watches.  Beware: since -r was given, this may take a while!
+Watches established.
+INFO:     Started server process [1005]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1005]
+[KERNEL] : Surveillance active sur /home/faouzi/Antigravity_Knowledge_Base
+Setting up watches.  Beware: since -r was given, this may take a while!
+Watches established.
+INFO:     Started server process [1052]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1052]
+[KERNEL] : Surveillance active sur /home/faouzi/Antigravity_Knowledge_Base
+Setting up watches.  Beware: since -r was given, this may take a while!
+Watches established.
+INFO:     Started server process [1023]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1023]
+[KERNEL] : Surveillance active sur /home/faouzi/Antigravity_Knowledge_Base
+Setting up watches.  Beware: since -r was given, this may take a while!
+Watches established.
+INFO:     Started server process [979]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [979]
+[KERNEL] : Surveillance active sur /home/faouzi/Antigravity_Knowledge_Base
+Setting up watches.  Beware: since -r was given, this may take a while!
+Watches established.
+INFO:     Started server process [1007]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1007]
+[KERNEL] : Surveillance active sur /home/faouzi/Antigravity_Knowledge_Base
+Setting up watches.  Beware: since -r was given, this may take a while!
+Watches established.
+INFO:     Started server process [1033]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
