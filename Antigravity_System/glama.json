@@ -1,0 +1,23 @@
+{
+  "version": "1.0.0",
+  "name": "Arsenal Decision Engine",
+  "description": "The Risk-Validation Layer for Autonomous AI Agents. Certified 82.99% Max Drawdown Reduction in Concentrated Liquidity Pools.",
+  "website": "https://api.arsenal-quant.com",
+  "repository": "https://github.com/Faouzi122/Arsenal-Quant-Project",
+  "contact": {
+    "name": "Arsenal Security",
+    "url": "https://github.com/Faouzi122"
+  },
+  "tags": [
+    "defi",
+    "risk-management",
+    "l402",
+    "liquidity-providing",
+    "mcp"
+  ],
+  "mcp": {
+    "remote": {
+      "url": "https://api.arsenal-quant.com"
+    }
+  }
+}
