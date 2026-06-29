@@ -1,0 +1,18 @@
+{
+  "engine": "Decision Intelligence Layer",
+  "regime": "August High Volatility ETH Crash Simulation",
+  "steps": 10000,
+  "initial_eth_price": 3000.0,
+  "final_eth_price": 1175.5602934018757,
+  "lp_range": "[2700.0, 3300.0]",
+  "metrics": {
+    "max_drawdown_without_shield_pct": 62.39,
+    "max_drawdown_with_shield_pct": 10.61,
+    "losses_prevented_pct": 82.99,
+    "final_value_without_shield_usd": 4504.59,
+    "final_value_with_shield_usd": 9820.72,
+    "execute_signals": 5877,
+    "hedge_signals": 71,
+    "delay_signals": 4051
+  }
+}
