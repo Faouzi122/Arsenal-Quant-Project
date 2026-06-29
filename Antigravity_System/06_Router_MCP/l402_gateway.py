@@ -8,7 +8,8 @@ app = FastAPI(title="Antigravity AI Cost Intelligence - MCP Gateway")
 # Mock configurations simulating local Lightning Node (e.g., Alby Hub / LNbits REST API)
 MOCK_INVOICE = "lnbc500n1p...mock_invoice_for_50k_sats"
 MOCK_MACAROON = "AgEEbW...mock_macaroon_signature"
-AUDIT_DIR = "/home/faouzi/Antigravity_System/04_Strategy_Gerber/Audit_Factory/Strategic_Signals/"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+AUDIT_DIR = os.path.join(BASE_DIR, "04_Strategy_Gerber", "Audit_Factory", "Strategic_Signals")
 
 @app.get("/mcp/audit/latest")
 async def get_latest_audit(authorization: str = Header(None)):
@@ -16,7 +17,7 @@ async def get_latest_audit(authorization: str = Header(None)):
     Consumable endpoint for autonomous agent-to-agent clients.
     Protocol: L402 (Lightning HTTP 402 Challenge/Response)
     """
-    # 1. Torvalds Filter: O(1) authorization header presence check
+    # 1. Security Filter: O(1) authorization header presence check
     if not authorization or not authorization.startswith("L402 "):
         # Immediate rejection with HTTP 402 challenge & WWW-Authenticate header
         headers = {

@@ -4,7 +4,7 @@ import httpx
 from fastapi import FastAPI, HTTPException, Header, Response, Request
 from fastapi.responses import PlainTextResponse
 from lnbits_client import LNbitsClient
-from torvalds_shield import check_rate_limit, sign_audit_payload
+from security_shield import check_rate_limit, sign_audit_payload
 
 # Parse .env configurations manually to avoid external dependencies
 def load_environment():
@@ -37,7 +37,8 @@ async def root_endpoint():
     }
 
 
-AUDIT_DIR = "/home/faouzi/Antigravity_System/04_Strategy_Gerber/Audit_Factory/Strategic_Signals/"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+AUDIT_DIR = os.path.join(BASE_DIR, "04_Strategy_Gerber", "Audit_Factory", "Strategic_Signals")
 QUOTA_FILE = os.path.join(os.path.dirname(__file__), "client_quotas.json")
 
 # Pricing matrix based on pain level
@@ -108,7 +109,7 @@ def get_mapper_recommendation(audit_path: str) -> str:
         except Exception:
             pass
 
-    mapper_path = "/home/faouzi/Antigravity_System/04_Strategy_Gerber/Decision_Layer/pain_to_profit_mapper.json"
+    mapper_path = os.path.join(BASE_DIR, "04_Strategy_Gerber", "Decision_Layer", "pain_to_profit_mapper.json")
     if os.path.exists(mapper_path):
         try:
             with open(mapper_path, "r") as f:
@@ -144,7 +145,7 @@ async def get_server_card():
 async def get_latest_audit(request: Request, authorization: str = Header(None)):
     """
     Exposes latest diagnostic audit report.
-    Free Quota: Protected by O(1) in-memory Torvalds Shield rate limiting (first 3 free).
+    Free Quota: Protected by O(1) in-memory Security Shield rate limiting (first 3 free).
     Subsequent requests: Gated by dynamically priced L402 Lightning challenges.
     """
     client_id = request.headers.get("x-agent-id", request.client.host)

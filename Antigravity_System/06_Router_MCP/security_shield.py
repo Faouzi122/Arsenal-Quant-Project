@@ -1,5 +1,5 @@
 """
-MODULE : TORVALDS SHIELD (Security & Rate Limiting)
+MODULE : SECURITY SHIELD (Security & Rate Limiting)
 COMPLEXITÉ : O(1) en mémoire RAM (Zéro I/O disque)
 """
 import time
