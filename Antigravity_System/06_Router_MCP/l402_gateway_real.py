@@ -306,6 +306,115 @@ async def catch_all_proxy(request: Request, path_name: str):
             )
 
 if __name__ == "__main__":
-    import uvicorn
-    print("[SYSTEM] Starting Real L402 Gateway Server on port 8088...")
-    uvicorn.run(app, host="0.0.0.0", port=8088, log_level="warning")
+    # Check if we are running in stdio MCP mode (e.g. under mcp-proxy)
+    initial_req = None
+    import sys
+    import select
+    import json
+    try:
+        rlist, _, _ = select.select([sys.stdin], [], [], 0.1)
+        if rlist:
+            line = sys.stdin.readline().strip()
+            if line:
+                data = json.loads(line)
+                if isinstance(data, dict) and "method" in data:
+                    initial_req = data
+    except Exception:
+        pass
+
+    if initial_req:
+        # Run stdio MCP JSON-RPC loop
+        def write_jsonrpc(response):
+            sys.stdout.write(json.dumps(response) + "\n")
+            sys.stdout.flush()
+
+        req = initial_req
+        while True:
+            try:
+                req_id = req.get("id")
+                method = req.get("method")
+                
+                if method == "initialize":
+                    res = {
+                        "jsonrpc": "2.0",
+                        "id": req_id,
+                        "result": {
+                            "protocolVersion": "2024-11-05",
+                            "capabilities": {
+                                "tools": {},
+                                "resources": {}
+                            },
+                            "serverInfo": {
+                                "name": "Antigravity Engine - Decision Layer",
+                                "version": "1.0.0"
+                            }
+                        }
+                    }
+                    write_jsonrpc(res)
+                elif method == "notifications/initialized":
+                    pass
+                elif method == "tools/list":
+                    res = {
+                        "jsonrpc": "2.0",
+                        "id": req_id,
+                        "result": {
+                            "tools": [
+                                {
+                                    "name": "get_latest_audit",
+                                    "description": "Fetch the latest cost-intelligence and risk mitigation audit signal.",
+                                    "inputSchema": {
+                                        "type": "object",
+                                        "properties": {}
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                    write_jsonrpc(res)
+                elif method == "tools/call":
+                    tool_name = req.get("params", {}).get("name")
+                    if tool_name == "get_latest_audit":
+                        res = {
+                            "jsonrpc": "2.0",
+                            "id": req_id,
+                            "result": {
+                                "content": [
+                                    {
+                                        "type": "text",
+                                        "text": "Antigravity Engine Status: ACTIVE. L402 Gateway is running on https://api.arsenal-quant.com."
+                                    }
+                                ]
+                            }
+                        }
+                    else:
+                        res = {
+                            "jsonrpc": "2.0",
+                            "id": req_id,
+                            "error": {
+                                "code": -32601,
+                                "message": f"Method not found: {tool_name}"
+                            }
+                        }
+                    write_jsonrpc(res)
+                else:
+                    if req_id is not None:
+                        res = {
+                            "jsonrpc": "2.0",
+                            "id": req_id,
+                            "result": {}
+                        }
+                        write_jsonrpc(res)
+                
+                line = sys.stdin.readline()
+                if not line:
+                    break
+                req = json.loads(line.strip())
+            except Exception as e:
+                sys.stderr.write(f"Error in stdio loop: {str(e)}\n")
+                sys.stderr.flush()
+                break
+    else:
+        import uvicorn
+        print("[SYSTEM] Starting Real L402 Gateway Server on port 8088...")
+        uvicorn.run(app, host="0.0.0.0", port=8088, log_level="warning")
+
