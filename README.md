@@ -1,6 +1,9 @@
 # Arsenal Decision Engine 🛡️
 **The Risk-Validation Layer for Autonomous AI Agents**
 
+[![Arsenal-Quant-Project MCP server](https://glama.ai/mcp/servers/Faouzi122/Arsenal-Quant-Project/badges/card.svg)](https://glama.ai/mcp/servers/Faouzi122/Arsenal-Quant-Project)
+[![smithery badge](https://smithery.ai/badge/khelifa-faouzi16/arsenal-decision-engine)](https://smithery.ai/servers/khelifa-faouzi16/arsenal-decision-engine)
+
 > **Certified Backtest (August ETH Crash Simulation):**
 > 🏆 **82.99% Max Drawdown Reduction** in Concentrated Liquidity Pools.
 > The engine successfully detects volatility spikes and forces a `HEDGE` signal (exit-to-stable), preventing catastrophic Impermanent Loss.
