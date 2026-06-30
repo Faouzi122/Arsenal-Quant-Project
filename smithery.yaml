@@ -1,7 +1,19 @@
 name: "arsenal-decision-engine"
-description: "Decision Intelligence Layer providing predictive Impermanent Loss protection and L402 paywall integration."
+displayName: "Arsenal Decision Engine"
+description: "Decision Intelligence Layer providing predictive concentrated liquidity protection (82.99% Max Drawdown reduction) and L402 paywall gateways for autonomous agents."
 version: "1.0.0"
 category: "finance"
+author: "Faouzi122"
+homepage: "https://api.arsenal-quant.com"
+icon: "shield-lock"
+license: "MIT"
+tags:
+  - "defi"
+  - "risk-management"
+  - "l402"
+  - "lightning-network"
+  - "security"
+repository: "https://github.com/Faouzi122/Arsenal-Quant-Project"
 startCommand:
   type: stdio
 configSchema:
@@ -13,4 +25,5 @@ commandFunction: |-
     args: ['Antigravity_System/06_Router_MCP/l402_gateway_real.py'],
     env: {}
   })
+
 
