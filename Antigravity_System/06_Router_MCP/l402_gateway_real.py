@@ -26,12 +26,10 @@ lnbits = LNbitsClient()
 
 @app.get("/", response_class=HTMLResponse)
 async def root_endpoint(request: Request):
-    # Detect if user agent is an API client expecting JSON
-    user_agent = request.headers.get("user-agent", "").lower()
+    # Serve HTML by default unless client explicitly requests application/json
     accept = request.headers.get("accept", "").lower()
     
-    if "mozilla" not in user_agent and "chrome" not in user_agent and "safari" not in user_agent and "html" not in accept:
-        # Standard fallback for standard API clients
+    if "application/json" in accept and "text/html" not in accept:
         return HTMLResponse(content=json.dumps({
             "system": "Antigravity Engine - Decision Layer",
             "status": "MAINNET ACTIVE",
@@ -40,7 +38,8 @@ async def root_endpoint(request: Request):
             "endpoints": {
                 "discovery": "/.well-known/mcp/server-card.json",
                 "audit_paywall": "/mcp/audit/latest"
-            }
+            },
+            "backlink_smithery": "https://smithery.ai/servers/khelifa-faouzi16/arsenal-decision-engine"
         }), status_code=200, media_type="application/json")
 
     html_content = """
