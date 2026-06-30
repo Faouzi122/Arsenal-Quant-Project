@@ -19,5 +19,15 @@
     "remote": {
       "url": "https://api.arsenal-quant.com"
     }
-  }
+  },
+  "buildSteps": [
+    "uv venv /opt/venv --python /usr/local/bin/python",
+    "uv pip install --python /opt/venv fastapi uvicorn httpx"
+  ],
+  "cmdArguments": [
+    "mcp-proxy",
+    "--",
+    "/opt/venv/bin/python",
+    "Antigravity_System/06_Router_MCP/l402_gateway_real.py"
+  ]
 }
