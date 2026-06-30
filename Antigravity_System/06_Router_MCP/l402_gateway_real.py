@@ -371,6 +371,40 @@ if __name__ == "__main__":
                         }
                     }
                     write_jsonrpc(res)
+                elif method == "resources/list":
+                    res = {
+                        "jsonrpc": "2.0",
+                        "id": req_id,
+                        "result": {
+                            "resources": []
+                        }
+                    }
+                    write_jsonrpc(res)
+                elif method == "resources/templates/list":
+                    res = {
+                        "jsonrpc": "2.0",
+                        "id": req_id,
+                        "result": {
+                            "resourceTemplates": []
+                        }
+                    }
+                    write_jsonrpc(res)
+                elif method == "prompts/list":
+                    res = {
+                        "jsonrpc": "2.0",
+                        "id": req_id,
+                        "result": {
+                            "prompts": []
+                        }
+                    }
+                    write_jsonrpc(res)
+                elif method == "ping":
+                    res = {
+                        "jsonrpc": "2.0",
+                        "id": req_id,
+                        "result": {}
+                    }
+                    write_jsonrpc(res)
                 elif method == "tools/call":
                     tool_name = req.get("params", {}).get("name")
                     if tool_name == "get_latest_audit":
