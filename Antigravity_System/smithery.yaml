@@ -2,5 +2,14 @@ name: "arsenal-decision-engine"
 description: "Decision Intelligence Layer providing predictive Impermanent Loss protection and L402 paywall integration."
 version: "1.0.0"
 category: "finance"
-build:
-  command: "echo 'No local build required. This is a remote HTTP MCP server shielded by L402.'"
+startCommand:
+  type: stdio
+configSchema:
+  type: object
+  properties: {}
+commandFunction: |-
+  config => ({
+    command: 'python3',
+    args: ['Antigravity_System/06_Router_MCP/l402_gateway_real.py'],
+    env: {}
+  })
