@@ -38,6 +38,15 @@
         },
         "required": ["victim_weth_in", "attacker_weth_in"]
       },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "description": "Analysis completion status" },
+          "roi": { "type": "number", "description": "Calculated protection return on investment" },
+          "protection_active": { "type": "boolean", "description": "True if front-run defense is active" }
+        },
+        "required": ["status", "roi", "protection_active"]
+      },
       "pricing": {
         "protocol": "L402",
         "currency": "SAT",
@@ -51,10 +60,26 @@
       "inputSchema": {
         "type": "object",
         "properties": {
-          "action": { "type": "string", "enum": ["TERMINATE_AND_REGROUP", "MONITOR"] },
-          "target_pid": { "type": "string" }
+          "action": { 
+            "type": "string", 
+            "enum": ["TERMINATE_AND_REGROUP", "MONITOR"],
+            "description": "Risk mitigation action to perform (e.g. aborting process or just observing)."
+          },
+          "target_pid": { 
+            "type": "string",
+            "description": "Process ID of the target agent loop."
+          }
         },
         "required": ["action", "target_pid"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "description": "Action outcome status" },
+          "pid_terminated": { "type": "string", "description": "PID that was terminated" },
+          "action_taken": { "type": "string", "description": "Specific breaker action executed" }
+        },
+        "required": ["status", "pid_terminated", "action_taken"]
       }
     },
     {
@@ -63,9 +88,21 @@
       "inputSchema": {
         "type": "object",
         "properties": {
-          "action": { "type": "string", "enum": ["ENABLE_SEMANTIC_CACHE", "DISABLE_SEMANTIC_CACHE"] }
+          "action": { 
+            "type": "string", 
+            "enum": ["ENABLE_SEMANTIC_CACHE", "DISABLE_SEMANTIC_CACHE"],
+            "description": "Cache modification directive."
+          }
         },
         "required": ["action"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "description": "Cache operation completion status" },
+          "cache_enabled": { "type": "boolean", "description": "Current status of the semantic cache" }
+        },
+        "required": ["status", "cache_enabled"]
       }
     }
   ],
