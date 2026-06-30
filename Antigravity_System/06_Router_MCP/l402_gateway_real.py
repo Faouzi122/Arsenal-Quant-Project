@@ -3,7 +3,7 @@ import json
 # pyrefly: ignore [missing-import]
 import httpx
 from fastapi import FastAPI, HTTPException, Header, Response, Request
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import PlainTextResponse, HTMLResponse
 from lnbits_client import LNbitsClient
 from security_shield import check_rate_limit, sign_audit_payload
 
@@ -24,18 +24,196 @@ load_environment()
 app = FastAPI(title="Antigravity AI Cost Intelligence - Mainnet Gateway")
 lnbits = LNbitsClient()
 
-@app.get("/")
-async def root_endpoint():
-    return {
-        "system": "Antigravity Engine - Decision Layer",
-        "status": "MAINNET ACTIVE",
-        "protocol": "M2M L402 Paywall",
-        "message": "Human access detected. This API is designed for autonomous agents.",
-        "endpoints": {
-            "discovery": "/.well-known/mcp/server-card.json",
-            "audit_paywall": "/mcp/audit/latest"
-        }
-    }
+@app.get("/", response_class=HTMLResponse)
+async def root_endpoint(request: Request):
+    # Detect if user agent is an API client expecting JSON
+    user_agent = request.headers.get("user-agent", "").lower()
+    accept = request.headers.get("accept", "").lower()
+    
+    if "mozilla" not in user_agent and "chrome" not in user_agent and "safari" not in user_agent and "html" not in accept:
+        # Standard fallback for standard API clients
+        return HTMLResponse(content=json.dumps({
+            "system": "Antigravity Engine - Decision Layer",
+            "status": "MAINNET ACTIVE",
+            "protocol": "M2M L402 Paywall",
+            "message": "This is an API gateway. Access via web browser to view human documentation.",
+            "endpoints": {
+                "discovery": "/.well-known/mcp/server-card.json",
+                "audit_paywall": "/mcp/audit/latest"
+            }
+        }), status_code=200, media_type="application/json")
+
+    html_content = """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Arsenal Decision Engine — API Gateway</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+        <style>
+            :root {
+                --bg: #030712;
+                --card-bg: #1f2937;
+                --text: #f9fafb;
+                --text-muted: #9ca3af;
+                --emerald: #10b981;
+                --emerald-glow: rgba(16, 185, 129, 0.15);
+                --border: #374151;
+            }
+            body {
+                margin: 0;
+                padding: 0;
+                background-color: var(--bg);
+                color: var(--text);
+                font-family: 'Inter', sans-serif;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+            }
+            .container {
+                max-width: 800px;
+                width: 90%;
+                text-align: center;
+                padding: 40px 20px;
+            }
+            .badge-status {
+                display: inline-flex;
+                align-items: center;
+                background-color: var(--emerald-glow);
+                color: var(--emerald);
+                border: 1px solid var(--emerald);
+                padding: 6px 16px;
+                border-radius: 9999px;
+                font-weight: 600;
+                font-size: 0.875rem;
+                margin-bottom: 24px;
+                box-shadow: 0 0 15px var(--emerald-glow);
+            }
+            .pulse {
+                width: 8px;
+                height: 8px;
+                background-color: var(--emerald);
+                border-radius: 50%;
+                margin-right: 8px;
+                animation: pulse-animation 2s infinite;
+            }
+            @keyframes pulse-animation {
+                0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+                70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+            }
+            h1 {
+                font-size: 2.5rem;
+                font-weight: 800;
+                margin: 0 0 12px 0;
+                background: linear-gradient(to right, #ffffff, #9ca3af);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+            .tagline {
+                font-size: 1.125rem;
+                color: var(--text-muted);
+                margin: 0 0 40px 0;
+            }
+            .cards {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 20px;
+                margin-bottom: 40px;
+                text-align: left;
+            }
+            @media (min-width: 640px) {
+                .cards {
+                    grid-template-columns: 1fr 1fr;
+                }
+            }
+            .card {
+                background-color: #0b0f19;
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                padding: 24px;
+                transition: border-color 0.3s ease;
+            }
+            .card:hover {
+                border-color: var(--emerald);
+            }
+            .card h3 {
+                margin: 0 0 8px 0;
+                font-size: 1.25rem;
+                font-weight: 600;
+            }
+            .card p {
+                margin: 0 0 16px 0;
+                font-size: 0.875rem;
+                color: var(--text-muted);
+                line-height: 1.5;
+            }
+            .card-link {
+                display: inline-block;
+                color: var(--emerald);
+                text-decoration: none;
+                font-weight: 600;
+                font-size: 0.875rem;
+                font-family: 'JetBrains Mono', monospace;
+            }
+            .card-link:hover {
+                text-decoration: underline;
+            }
+            .badges-container {
+                margin-top: 50px;
+                border-top: 1px solid var(--border);
+                padding-top: 30px;
+                display: flex;
+                justify-content: center;
+                gap: 20px;
+                flex-wrap: wrap;
+            }
+            .badges-container a {
+                transition: transform 0.2s ease;
+            }
+            .badges-container a:hover {
+                transform: translateY(-2px);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="badge-status">
+                <div class="pulse"></div>
+                MAINNET ACTIVE
+            </div>
+            <h1>Arsenal Decision Engine</h1>
+            <p class="tagline">The Sovereign Risk-Validation Layer for Autonomous AI Agents (DeFAI)</p>
+            
+            <div class="cards">
+                <div class="card">
+                    <h3>MCP Server Card</h3>
+                    <p>Dynamic schema discoverability endpoint for agent tools integration.</p>
+                    <a href="/.well-known/mcp/server-card.json" class="card-link">/.well-known/mcp/server-card.json &rarr;</a>
+                </div>
+                <div class="card">
+                    <h3>Risk Audit Endpoint</h3>
+                    <p>Standard pay-per-decision risk validation gated by L402 paywalls.</p>
+                    <a href="/mcp/audit/latest" class="card-link">/mcp/audit/latest &rarr;</a>
+                </div>
+            </div>
+
+            <div class="badges-container">
+                <a href="https://glama.ai/mcp/servers/Faouzi122/Arsenal-Quant-Project" target="_blank">
+                    <img src="https://glama.ai/mcp/servers/Faouzi122/Arsenal-Quant-Project/badges/card.svg" alt="Arsenal-Quant-Project MCP server" />
+                </a>
+                <a href="https://smithery.ai/servers/khelifa-faouzi16/arsenal-decision-engine" target="_blank">
+                    <img src="https://smithery.ai/badge/khelifa-faouzi16/arsenal-decision-engine" alt="smithery badge" />
+                </a>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content, status_code=200)
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
