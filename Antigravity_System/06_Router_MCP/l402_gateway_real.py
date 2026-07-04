@@ -1,11 +1,17 @@
 import os
 import json
+import sys
 # pyrefly: ignore [missing-import]
 import httpx
 from fastapi import FastAPI, HTTPException, Header, Response, Request
 from fastapi.responses import PlainTextResponse, HTMLResponse
 from lnbits_client import LNbitsClient
 from security_shield import check_rate_limit, sign_audit_payload
+
+# Dynamic path setup for evaluate_pool core
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(BASE_DIR, "scripts"))
+from evaluate_pool import evaluate as evaluate_lp
 
 # Parse .env configurations manually to avoid external dependencies
 def load_environment():
@@ -337,6 +343,102 @@ async def get_server_card():
         "authentication": { "required": True, "type": "L402" }
     }
 
+@app.get("/mcp/evaluate")
+async def evaluate_pool_endpoint(
+    request: Request,
+    apy: float = 0.20,
+    price_ratio: float = 1.0,
+    days_held: int = 30,
+    authorization: str = Header(None)
+):
+    """
+    Exposes R_net evaluation, risk level, and breakeven corridor.
+    Free Quota: Protected by O(1) in-memory rate limiting (first 3 requests free).
+    Subsequent requests: Gated by dynamically priced L402 Lightning challenge (50 or 500 sats).
+    """
+    client_id = request.headers.get("x-agent-id", request.client.host)
+    raw_ip = request.headers.get("cf-connecting-ip", request.headers.get("x-forwarded-for", request.client.host))
+    client_ip = raw_ip.split(",")[0].strip() if "," in raw_ip else raw_ip.strip()
+
+    # Calculate evaluation payload in O(1) time
+    try:
+        evaluation = evaluate_lp(apy, price_ratio, days_held)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Evaluation failed: {str(e)}")
+
+    # Verify if client already has a valid payment (L402 verification)
+    is_paid = False
+    payment_hash = None
+    if authorization and authorization.startswith("L402 "):
+        token_part = authorization.split(" ")[1]
+        if ":" in token_part:
+            payment_hash, preimage = token_part.split(":", 1)
+        else:
+            payment_hash = token_part
+            preimage = None
+            
+        # Sandbox bypass for testing / dev mode
+        if preimage == "0000000000000000000000000000000000000000000000000000000000000000" and os.getenv("L402_OVERRIDE_PRICE"):
+            is_paid = True
+        else:
+            is_paid = lnbits.check_invoice(payment_hash)
+
+    if not is_paid:
+        # Check rate limit for free tier
+        if check_rate_limit(client_ip):
+            # Sign the payload for security
+            oracle_secret = os.getenv("ORACLE_SECRET_KEY", "default_secret")
+            payload_to_sign = {
+                "evaluation": evaluation,
+                "client_ip": client_ip,
+                "type": "FREE_TIER"
+            }
+            signature = sign_audit_payload(payload_to_sign, oracle_secret)
+            evaluation["oracle_signature"] = signature
+            evaluation["layer"] = "FREE"
+            return evaluation
+        else:
+            # Quota exhausted, trigger payment flow
+            risk_level = evaluation.get("risk_level", "LOW")
+            price_sats = 500 if risk_level in ["HIGH", "CRITICAL"] else 50
+            
+            # Allow environment variable override
+            override = os.getenv("L402_OVERRIDE_PRICE")
+            if override:
+                price_sats = int(override)
+
+            # Call LNbits node API to create dynamic invoice
+            invoice_data = lnbits.create_invoice(price_sats, f"Arsenal R_net Evaluation ({client_id})")
+            
+            if not invoice_data or "payment_request" not in invoice_data:
+                raise HTTPException(status_code=503, detail="Payment Gateway Node is Offline or Unauthorized")
+                
+            pr = invoice_data.get("payment_request")
+            payment_hash = invoice_data.get("payment_hash")
+            
+            # Issue HTTP 402 challenge with macaroon/invoice credentials
+            headers = {
+                "WWW-Authenticate": f'L402 token="{payment_hash}", invoice="{pr}"'
+            }
+            return Response(
+                content=json.dumps({"error": "Payment Required", "price_sats": price_sats, "client_id": client_id}),
+                status_code=402,
+                headers=headers,
+                media_type="application/json"
+            )
+
+    # Paid path
+    oracle_secret = os.getenv("ORACLE_SECRET_KEY", "default_secret")
+    payload_to_sign = {
+        "evaluation": evaluation,
+        "payment_hash": payment_hash,
+        "type": "PREMIUM_TIER"
+    }
+    signature = sign_audit_payload(payload_to_sign, oracle_secret)
+    evaluation["oracle_signature"] = signature
+    evaluation["layer"] = "PREMIUM"
+    return evaluation
+
 @app.get("/mcp/audit/latest")
 async def get_latest_audit(request: Request, authorization: str = Header(None)):
     """
@@ -543,6 +645,28 @@ if __name__ == "__main__":
                                         "type": "object",
                                         "properties": {}
                                     }
+                                },
+                                {
+                                    "name": "evaluate_pool",
+                                    "description": "Evaluate LP position risk and calculate R_net & breakeven corridor.",
+                                    "inputSchema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "apy": {
+                                                "type": "number",
+                                                "description": "Annual Percentage Yield of the pool (e.g. 0.20 for 20%)"
+                                            },
+                                            "price_ratio": {
+                                                "type": "number",
+                                                "description": "Current price ratio compared to entry price (e.g. 0.85 for 15% price drop)"
+                                            },
+                                            "days_held": {
+                                                "type": "integer",
+                                                "description": "Number of days the position has been held (default: 30)"
+                                            }
+                                        },
+                                        "required": ["apy", "price_ratio"]
+                                    }
                                 }
                             ]
                         }
@@ -597,6 +721,34 @@ if __name__ == "__main__":
                                 ]
                             }
                         }
+                    elif tool_name == "evaluate_pool":
+                        params = req.get("params", {}).get("arguments", {})
+                        apy = float(params.get("apy", 0.20))
+                        price_ratio = float(params.get("price_ratio", 1.0))
+                        days_held = int(params.get("days_held", 30))
+                        try:
+                            eval_res = evaluate_lp(apy, price_ratio, days_held)
+                            res = {
+                                "jsonrpc": "2.0",
+                                "id": req_id,
+                                "result": {
+                                    "content": [
+                                        {
+                                            "type": "text",
+                                            "text": json.dumps(eval_res, indent=2)
+                                        }
+                                    ]
+                                }
+                            }
+                        except Exception as e:
+                            res = {
+                                "jsonrpc": "2.0",
+                                "id": req_id,
+                                "error": {
+                                    "code": -32603,
+                                    "message": f"Internal error during evaluation: {str(e)}"
+                                }
+                            }
                     else:
                         res = {
                             "jsonrpc": "2.0",

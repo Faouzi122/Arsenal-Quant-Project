@@ -28,6 +28,10 @@
 ├── 04_Strategy_Gerber/                     ← Moteur mathématique IL (Entité pure)
 ├── 05_Innovation_Ries/ADK_Scout/           ← Agent ADK (adk_mission.txt avec Fabuleux)
 ├── 06_Router_MCP/l402_gateway_real.py      ← Gateway L402 (Adaptateur)
+├── 07_Backtest_Engine/                      ← Backtest empirique sur données réelles
+│   ├── fetch_real_data.py                   ← Fetcher Binance API (0 dépendance)
+│   ├── run_empirical_backtest.py            ← Validateur R_net sur 180j ETH/USDC
+│   └── data/                                ← CSV réels + rapports JSON
 ├── 08_SDK_Wrappers/COOKBOOK.md              ← Guide d'intégration CrewAI/LangChain
 ├── 09_Operations/
 │   ├── META_AUDIT_PROTOCOL.md              ← 10 questions méta-cognitives (disjoncteur N5)
@@ -44,32 +48,32 @@
 ## III. DÉCISIONS STRATÉGIQUES ACTÉES
 
 1. **Positionnement :** Middleware d'infrastructure (Niveau 3/5 "vendeur de pioches"), PAS de bot de trading.
-2. **Métrique validée :** 99.08% de réduction de Drawdown sur 30 scénarios historiques.
-3. **Pivot B2B validé :** Distribution en licence Docker privée (On-Prem) pour les fonds, en plus de l'API L402 publique.
-4. **Concierge MVP activé :** Validation manuelle du Product-Market Fit AVANT toute nouvelle ligne de code.
+2. **PIVOT R_NET (2026-07-04) :** L'ancien oracle HEDGE/EXECUTE (seuil 1.5×) a échoué sur données réelles (0% de précision à 35% APY / 30j). Pivot vers un évaluateur R_net pur. L'engine ne dicte plus l'action — il délivre l'intelligence mathématique.
+3. **Métriques validées (données réelles, 180j ETH/USDC Binance) :**
+   - Breakeven corridor → 100% de fiabilité (si le ratio reste dans le corridor, R_net est positif)
+   - Mid-checkpoint predictive accuracy : 82-97% selon les scénarios
+   - Exécution : ~310ms pour 1,350 positions simulées, O(N), 0 dépendances
+4. **Pivot B2B validé :** Distribution en licence Docker privée (On-Prem) pour les fonds, en plus de l'API L402 publique.
 5. **Doctrine Fabuleux :** Intégrée dans Uncle Bob (persona.md), ADK Scout (adk_mission.txt), et NotebookLM.
 6. **Disjoncteur méta-cognitif :** Règle injectée dans Section 10 de GEMINI.md → charge `META_AUDIT_PROTOCOL.md` en cas de doute.
-7. **Code gelé :** Aucune nouvelle fonctionnalité tant que le PMF n'est pas prouvé.
+7. **Proposition de valeur v2 :** "Étant donné votre pool, voici votre R_net exact, votre niveau de risque, et votre corridor de breakeven. Vous décidez." L'agent client garde le contrôle.
 
-## IV. MISSION ACTIVE (Phase 3 — Acquisition)
+## IV. MISSION ACTIVE (Phase 4 — R_net Infrastructure)
 
 ### Seuils de succès (falsifiables)
 - **Signal On-Chain :** 1 paiement L402 externe (HTTP 200 + preimage) capturé par `hunt_client_zero.sh`
-- **Signal Social :** 3 soumissions manuelles de paramètres de pools + 1 phrase explicite "je paierais pour automatiser ça"
+- **Signal Technique :** 1 agent externe consomme le JSON R_net et intègre le corridor dans sa logique
 - **En dessous = ÉCHEC → Pivot** (changer le prix, la cible, ou le problème)
 
-### Plan d'acquisition Reddit/Discord (CEO — action humaine)
-| Jour | Action |
-|------|--------|
-| J-0 → J-4 | Créer comptes, commenter, aider, zéro auto-promotion (farming karma > 50) |
-| J-5 | Post technique pur + test de visibilité en navigation privée |
-| J-6 | Poster le Sniper Pitch corrigé (avec pont CTA vers API L402) |
+### Plan de distribution M2M (Infrastructure Provider)
+| Phase | Action |
+|-------|--------|
+| ✅ FAIT | Backtest empirique sur 180j de données réelles ETH/USDC |
+| ✅ FAIT | Refactorisation evaluate_pool.py → évaluateur R_net pur |
+| EN COURS | Mise à jour de la gateway L402 (output JSON R_net) |
+| SUIVANT | Mise à jour README.md + registres MCP (Smithery, Glama) |
+| SUIVANT | Publication GitHub Gist avec rapport de backtest réel |
 | Continu | Vérifier `hunt_client_zero.sh` au rallumage du PC |
-
-### Sniper Pitch corrigé (avec pont API)
-> "Je développe un moteur d'Oracle déterministe (Arsenal Decision Engine) pour protéger les agents DeFi de l'Impermanent Loss (validé à 99% de drawdown reduction). Normalement, ce moteur tourne en API M2M derrière un paywall Lightning/x402 pour les agents autonomes.
-> Mais pour calibrer mon modèle, je propose des exécutions manuelles aujourd'hui. Ne me donnez pas vos clés : envoyez-moi juste les paramètres de votre pool Uniswap (Paire, TVL, APY attendu, ratio actuel) en MP. Je passe ça dans mon moteur local et je vous donne le signal HEDGE/EXECUTE.
-> Si l'analyse vous sauve de l'argent et que vous voulez l'automatiser pour votre propre agent/bot, mon endpoint public est ici : https://api.arsenal-quant.com/mcp/audit/latest (150 sats par appel)."
 
 ## V. COMMANDES OPÉRATIONNELLES ESSENTIELLES
 
@@ -77,8 +81,15 @@
 # Surveiller le trafic réel externe (Client Zéro)
 ~/Antigravity_System/scripts/hunt_client_zero.sh
 
-# Évaluer les paramètres d'un client Concierge
-python3 ~/Antigravity_System/scripts/evaluate_pool.py <APY> <RATIO_PRIX>
+# Évaluer les paramètres d'une position LP (R_net evaluator v2)
+python3 ~/Antigravity_System/scripts/evaluate_pool.py <APY> <RATIO_PRIX> [JOURS]
+# Exemple: python3 ~/Antigravity_System/scripts/evaluate_pool.py 0.20 0.85 30
+
+# Lancer le backtest empirique sur données réelles
+python3 ~/Antigravity_System/07_Backtest_Engine/run_empirical_backtest.py
+
+# Récupérer les dernières données de marché (Binance, 0 dépendance)
+python3 ~/Antigravity_System/07_Backtest_Engine/fetch_real_data.py 180
 
 # Monitoring général du gateway
 ~/Antigravity_System/scripts/monitor_m2m.sh
