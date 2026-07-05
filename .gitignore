@@ -4,37 +4,17 @@
 # Ignore everything by default
 *
 
-# --- WHITELIST PUBLIC INTERFACE LAYER ---
+# --- WHITELIST: PUBLIC INTERFACE LAYER ONLY ---
 
-# Root documentation
+# Root documentation & registry files
 !/README.md
 !/LICENSE
 !/smithery.yaml
 !/glama.json
 
-# Operational core engine (public)
-!/Antigravity_System/
-!/Antigravity_System/scripts/
-!/Antigravity_System/scripts/evaluate_pool.py
-!/Antigravity_System/scripts/client_one.py
-!/Antigravity_System/07_Backtest_Engine/
-!/Antigravity_System/07_Backtest_Engine/run_empirical_backtest.py
-!/Antigravity_System/08_SDK_Wrappers/
-!/Antigravity_System/08_SDK_Wrappers/COOKBOOK.md
-
-# L402 Gateway (public delivery layer)
-!/Antigravity_System/06_Router_MCP/
-!/Antigravity_System/06_Router_MCP/l402_gateway_real.py
-!/Antigravity_System/06_Router_MCP/security_shield.py
-!/Antigravity_System/06_Router_MCP/lnbits_client.py
-!/Antigravity_System/06_Router_MCP/.well-known/
-!/Antigravity_System/06_Router_MCP/.well-known/mcp/
-!/Antigravity_System/06_Router_MCP/.well-known/mcp/server-card.json
-
-# Registry metadata
-!/Antigravity_System/smithery.yaml
-!/Antigravity_System/glama.json
-!/Antigravity_System/README.md
+# Public engine folder (Ghost Protocol name)
+!/decision_engine/
+!/decision_engine/**
 
 # --- GLOBAL EXCLUSIONS (applied inside all whitelisted folders) ---
 **/__pycache__/
@@ -43,7 +23,6 @@
 **/.env.local
 **/.idea/
 **/.vscode/
-**/server.log
 **/venv/
 **/.venv/
 **/data/
