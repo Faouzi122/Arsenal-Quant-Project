@@ -1,20 +1,14 @@
 {
-  "version": "1.0.0",
+  "version": "2.0.0",
   "name": "Arsenal Decision Engine",
-  "description": "The Risk-Validation Layer for Autonomous AI Agents. Certified 82.99% Max Drawdown Reduction in Concentrated Liquidity Pools.",
+  "description": "Stateless R_net evaluation middleware for autonomous DeFAI agents. Computes Impermanent Loss, net yield, and Breakeven Corridor in O(1). Protected by L402 Lightning paywall. 100% Breakeven Corridor Reliability validated on 180-day Binance ETH/USDC data.",
   "website": "https://api.arsenal-quant.com",
   "repository": "https://github.com/Faouzi122/Arsenal-Quant-Project",
   "contact": {
     "name": "Arsenal Security",
     "url": "https://github.com/Faouzi122"
   },
-  "tags": [
-    "defi",
-    "risk-management",
-    "l402",
-    "liquidity-providing",
-    "mcp"
-  ],
+  "tags": ["defi", "risk-management", "l402", "lightning-network", "mcp"],
   "mcp": {
     "remote": {
       "url": "https://api.arsenal-quant.com"
@@ -25,9 +19,8 @@
     "uv pip install --python /opt/venv fastapi uvicorn httpx"
   ],
   "cmdArguments": [
-    "mcp-proxy",
-    "--",
+    "mcp-proxy", "--",
     "/opt/venv/bin/python",
-    "Antigravity_System/06_Router_MCP/l402_gateway_real.py"
+    "decision_engine/06_Router_MCP/l402_gateway_real.py"
   ]
 }
