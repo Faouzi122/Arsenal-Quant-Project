@@ -118,7 +118,7 @@ if __name__ == "__main__":
 ---
 
 ## Developer Integration
-- Integration cookbook & MCP guides: [`08_SDK_Wrappers/COOKBOOK.md`](./Autonomous_Execution_Core/08_SDK_Wrappers/COOKBOOK.md)
+- Integration cookbook & MCP guides: [`COOKBOOK.md`](./decision_engine/08_SDK_Wrappers/COOKBOOK.md)
 - MCP auto-discovery card: `https://api.arsenal-quant.com/.well-known/mcp/server-card.json`
 
 ## Why L402? (Proof of Savings)
