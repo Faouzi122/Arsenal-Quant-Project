@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "1.0",
+  "agentCard": {
+    "name": "Arsenal Decision Engine",
+    "version": "2.0.0",
+    "description": "Stateless R_net evaluation middleware for autonomous DeFAI agents. Computes Impermanent Loss, net yield, and Breakeven Corridor bounds for concentrated liquidity positions in O(1). Protected by L402 Lightning Network paywall.",
+    "url": "https://api.arsenal-quant.com",
+    "documentationUrl": "https://github.com/Faouzi122/Arsenal-Quant-Project/blob/master/decision_engine/08_SDK_Wrappers/COOKBOOK.md",
+    "iconUrl": "https://api.arsenal-quant.com/.well-known/icon.png",
+    "provider": {
+      "organization": "Arsenal Decision Engine",
+      "url": "https://github.com/Faouzi122/Arsenal-Quant-Project"
+    },
+    "capabilities": {
+      "streaming": false,
+      "pushNotifications": false,
+      "stateTransitionHistory": false
+    },
+    "authentication": {
+      "schemes": ["L402"],
+      "description": "Lightning Network L402 micro-payment. First 3 requests/hour free. 50-500 sats per evaluation depending on risk level."
+    },
+    "defaultInputModes": ["application/json"],
+    "defaultOutputModes": ["application/json"],
+    "skills": [
+      {
+        "id": "evaluate_pool",
+        "name": "LP Pool Risk Evaluation",
+        "description": "Given APY, price ratio, and days held, computes: Impermanent Loss %, accumulated yield %, R_net (net return), risk level (LOW/MODERATE/HIGH/CRITICAL), and Breakeven Corridor bounds. O(1) algebraic computation — deterministic, no LLM.",
+        "tags": ["defi", "risk", "impermanent-loss", "uniswap-v3", "l402"],
+        "examples": [
+          {
+            "input": {
+              "apy": 0.20,
+              "price_ratio": 0.85,
+              "days_held": 30
+            },
+            "output": {
+              "r_net_pct": 1.3146,
+              "risk_level": "LOW",
+              "breakeven_corridor": {
+                "lower_ratio": 0.6941,
+                "upper_ratio": 1.4407
+              }
+            }
+          }
+        ],
+        "inputModes": ["application/json"],
+        "outputModes": ["application/json"]
+      }
+    ]
+  }
+}
