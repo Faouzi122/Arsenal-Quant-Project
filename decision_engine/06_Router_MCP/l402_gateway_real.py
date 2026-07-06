@@ -27,7 +27,7 @@ def load_environment():
 
 load_environment()
 
-app = FastAPI(title="Antigravity AI Cost Intelligence - Mainnet Gateway")
+app = FastAPI(title="Arsenal Decision Engine — L402 Gateway")
 lnbits = LNbitsClient()
 
 @app.get("/", response_class=HTMLResponse)
@@ -325,7 +325,7 @@ def get_mapper_recommendation(audit_path: str) -> str:
     # Default fallback recommendation
     return "\n\n[UNLOCKED RECOMMENDATION]\n- Disable the redundant 'Routing' agent in your mcp_config.json.\n- Swap GPT-4o for Llama-3-8B-Instruct local model for base checks.\n- Validated immediate saving: $12,000 USD/month."
 
-# Discoverability Endpoints (MCP Server Card)
+# Discoverability Endpoints (MCP Server Card + A2A Agent Card)
 @app.get("/.well-known/mcp/server-card.json")
 @app.get("/well-known/mcp/server-card.json")
 async def get_server_card():
@@ -333,14 +333,27 @@ async def get_server_card():
     if os.path.exists(card_path):
         with open(card_path, "r") as f:
             return json.load(f)
-    # Inline fallback if file is missing
     return {
         "$schema": "https://static.modelcontextprotocol.io/schemas/v1/server-card.schema.json",
-        "serverInfo": {
-            "name": "Antigravity Engine - Decision Layer",
-            "version": "1.0.0"
-        },
-        "authentication": { "required": True, "type": "L402" }
+        "serverInfo": {"name": "Arsenal Decision Engine", "version": "2.0.0"},
+        "authentication": {"required": True, "type": "L402"}
+    }
+
+@app.get("/.well-known/agent-card.json")
+@app.get("/well-known/agent-card.json")
+async def get_agent_card():
+    """A2A standard discovery endpoint (spec v1.0)"""
+    card_path = os.path.join(os.path.dirname(__file__), ".well-known", "agent-card.json")
+    if os.path.exists(card_path):
+        with open(card_path, "r") as f:
+            return json.load(f)
+    return {
+        "schemaVersion": "1.0",
+        "agentCard": {
+            "name": "Arsenal Decision Engine",
+            "version": "2.0.0",
+            "url": "https://api.arsenal-quant.com"
+        }
     }
 
 @app.get("/mcp/evaluate")
@@ -624,8 +637,8 @@ if __name__ == "__main__":
                                 "resources": {}
                             },
                             "serverInfo": {
-                                "name": "Antigravity Engine - Decision Layer",
-                                "version": "1.0.0"
+                                "name": "Arsenal Decision Engine",
+                                "version": "2.0.0"
                             }
                         }
                     }
@@ -716,7 +729,7 @@ if __name__ == "__main__":
                                 "content": [
                                     {
                                         "type": "text",
-                                        "text": "Antigravity Engine Status: ACTIVE. L402 Gateway is running on https://api.arsenal-quant.com."
+                                        "text": "Arsenal Decision Engine Status: ACTIVE. L402 Gateway running on https://api.arsenal-quant.com."
                                     }
                                 ]
                             }
