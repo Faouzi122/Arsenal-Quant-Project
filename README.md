@@ -4,9 +4,9 @@
 [![Arsenal-Quant-Project MCP server](https://glama.ai/mcp/servers/Faouzi122/Arsenal-Quant-Project/badges/card.svg)](https://glama.ai/mcp/servers/Faouzi122/Arsenal-Quant-Project)
 [![smithery badge](https://smithery.ai/badge/khelifa-faouzi16/arsenal-decision-engine)](https://smithery.ai/servers/khelifa-faouzi16/arsenal-decision-engine)
 
-> **Empirical Validation (180-Day Binance ETH/USDC Data):**
-> 🏆 **100% Breakeven Corridor Reliability.** Positions that stayed within the calculated corridor completed their lifecycle with a positive net yield ($R_{net} > 0$).
-> 🎯 **82% to 97% Mid-Checkpoint Risk Level Accuracy** in predicting final position health.
+> **Validation on 180-Day Binance ETH/USDC Data ([`07_Backtest_Engine/`](./decision_engine/07_Backtest_Engine/run_empirical_backtest.py)):**
+> 🔬 **Breakeven Corridor** is a deterministic algebraic boundary (where IL = accumulated yield). Any position whose price ratio stays within `[lower_be, upper_be]` has R_net > 0 by mathematical definition — not a probabilistic model.
+> 🎯 **82% to 97% Mid-Checkpoint Predictive Accuracy** — the risk level signal correctly predicted final position health (positive/negative R_net) across all tested APY × holding-period scenarios.
 
 ---
 
