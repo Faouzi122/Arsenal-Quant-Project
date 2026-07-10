@@ -803,5 +803,5 @@ if __name__ == "__main__":
     else:
         import uvicorn
         print("[SYSTEM] Starting Real L402 Gateway Server on port 8088...")
-        uvicorn.run(app, host="0.0.0.0", port=8088, log_level="warning")
+        uvicorn.run(app, host="0.0.0.0", port=8088, log_level="info", access_log=True)
 
