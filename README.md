@@ -13,7 +13,7 @@
 ## Mission
 
 **Transform DeFi uncertainty into deterministic, actionable risk metrics for autonomous agents.**
-We do not run stateful trading bots or generate speculative prediction signals; we provide a stateless risk middleware layer that agents query before deploying or maintaining concentrated liquidity positions.
+We do not run stateful trading bots or generate speculative prediction signals; we provide a stateless risk middleware layer that agents query before deploying or maintaining standard constant-product / full-range LP positions.
 
 Built for agents, priced for agents. Pay per decision via Lightning Network (L402).
 

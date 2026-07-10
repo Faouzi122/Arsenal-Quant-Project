@@ -17,7 +17,7 @@
   "tools": [
     {
       "name": "evaluate_pool",
-      "description": "Evaluates a concentrated liquidity LP position risk. Computes R_net (net yield after IL), Breakeven Corridor bounds, and risk level (LOW/MODERATE/HIGH/CRITICAL). O(1) algebraic — no LLM, no hallucination.",
+      "description": "Evaluates a constant-product / full-range LP position risk. Computes R_net (net yield after IL), Breakeven Corridor bounds, and risk level (LOW/MODERATE/HIGH/CRITICAL). O(1) algebraic — no LLM, no hallucination.",
       "inputSchema": {
         "type": "object",
         "properties": {

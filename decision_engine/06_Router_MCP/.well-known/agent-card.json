@@ -3,7 +3,7 @@
   "agentCard": {
     "name": "Arsenal Decision Engine",
     "version": "2.0.0",
-    "description": "Stateless R_net evaluation middleware for autonomous DeFAI agents. Computes Impermanent Loss, net yield, and Breakeven Corridor bounds for concentrated liquidity positions in O(1). Protected by L402 Lightning Network paywall.",
+    "description": "Stateless R_net evaluation middleware for autonomous DeFAI agents. Computes Impermanent Loss, net yield, and Breakeven Corridor bounds for constant-product / full-range LP positions in O(1). Protected by L402 Lightning Network paywall.",
     "url": "https://api.arsenal-quant.com",
     "documentationUrl": "https://github.com/Faouzi122/Arsenal-Quant-Project/blob/master/decision_engine/08_SDK_Wrappers/COOKBOOK.md",
     "iconUrl": "https://api.arsenal-quant.com/.well-known/icon.png",
@@ -27,7 +27,7 @@
         "id": "evaluate_pool",
         "name": "LP Pool Risk Evaluation",
         "description": "Given APY, price ratio, and days held, computes: Impermanent Loss %, accumulated yield %, R_net (net return), risk level (LOW/MODERATE/HIGH/CRITICAL), and Breakeven Corridor bounds. O(1) algebraic computation — deterministic, no LLM.",
-        "tags": ["defi", "risk", "impermanent-loss", "uniswap-v3", "l402"],
+        "tags": ["defi", "risk", "impermanent-loss", "constant-product", "l402"],
         "examples": [
           {
             "input": {

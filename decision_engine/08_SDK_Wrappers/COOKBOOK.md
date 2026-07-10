@@ -1,6 +1,6 @@
 # 📖 Arsenal Decision Engine - Developer Cookbook
 
-> **Empirical Validation**: 100% Breakeven Corridor Reliability. Positions that stayed within the calculated corridor completed their lifecycle with a positive net yield ($R_{net} > 0$) based on 180-day real ETH/USDC data.
+> **Empirical Validation**: 82% to 97% Mid-Checkpoint Predictive Accuracy. The risk level signal correctly predicted final position health (positive/negative R_net) across all tested APY × holding-period scenarios based on 180-day real ETH/USDC data.
 
 This cookbook provides the exact integration blueprints to equip your autonomous agents (CrewAI, LangChain, ElizaOS) with our deterministic $\mathcal{O}(1)$ Risk Middleware.
 
