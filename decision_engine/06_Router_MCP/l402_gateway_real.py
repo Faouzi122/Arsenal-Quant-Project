@@ -326,18 +326,27 @@ def get_mapper_recommendation(audit_path: str) -> str:
     return "\n\n[UNLOCKED RECOMMENDATION]\n- Disable the redundant 'Routing' agent in your mcp_config.json.\n- Swap GPT-4o for Llama-3-8B-Instruct local model for base checks.\n- Validated immediate saving: $12,000 USD/month."
 
 # Discoverability Endpoints (MCP Server Card + A2A Agent Card)
+# Cache-Control: no-store prevents Cloudflare/CDN from serving stale discovery cards
+DISCOVERY_HEADERS = {
+    "Cache-Control": "no-store, no-cache, must-revalidate",
+    "CDN-Cache-Control": "no-store",
+    "Cloudflare-CDN-Cache-Control": "no-store",
+}
+
 @app.get("/.well-known/mcp/server-card.json")
 @app.get("/well-known/mcp/server-card.json")
 async def get_server_card():
     card_path = os.path.join(os.path.dirname(__file__), ".well-known", "mcp", "server-card.json")
     if os.path.exists(card_path):
         with open(card_path, "r") as f:
-            return json.load(f)
-    return {
+            content = f.read()
+        return Response(content=content, media_type="application/json", headers=DISCOVERY_HEADERS)
+    fallback = json.dumps({
         "$schema": "https://static.modelcontextprotocol.io/schemas/v1/server-card.schema.json",
         "serverInfo": {"name": "Arsenal Decision Engine", "version": "2.0.0"},
         "authentication": {"required": True, "type": "L402"}
-    }
+    })
+    return Response(content=fallback, media_type="application/json", headers=DISCOVERY_HEADERS)
 
 @app.get("/.well-known/agent-card.json")
 @app.get("/well-known/agent-card.json")
@@ -346,15 +355,17 @@ async def get_agent_card():
     card_path = os.path.join(os.path.dirname(__file__), ".well-known", "agent-card.json")
     if os.path.exists(card_path):
         with open(card_path, "r") as f:
-            return json.load(f)
-    return {
+            content = f.read()
+        return Response(content=content, media_type="application/json", headers=DISCOVERY_HEADERS)
+    fallback = json.dumps({
         "schemaVersion": "1.0",
         "agentCard": {
             "name": "Arsenal Decision Engine",
             "version": "2.0.0",
             "url": "https://api.arsenal-quant.com"
         }
-    }
+    })
+    return Response(content=fallback, media_type="application/json", headers=DISCOVERY_HEADERS)
 
 @app.get("/mcp/evaluate")
 async def evaluate_pool_endpoint(
