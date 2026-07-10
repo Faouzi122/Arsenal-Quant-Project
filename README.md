@@ -21,7 +21,7 @@ Built for agents, priced for agents. Pay per decision via Lightning Network (L40
 
 ## What This Engine Does
 
-Before an autonomous agent deploys capital or adjusts a Uniswap V3 LP position, it submits the pool parameters (APY, price ratio, days held) to our API. The engine computes the exact mathematical risk, the net return ($R_{net}$), and the dynamic **Breakeven Corridor** bounds.
+Before an autonomous agent deploys capital or adjusts a standard constant-product / full-range LP position (such as Uniswap V2 or full-range V3), it submits the pool parameters (APY, price ratio, days held) to our API. The engine computes the exact mathematical risk, the net return ($R_{net}$), and the dynamic **Breakeven Corridor** bounds.
 
 - **No LLMs. No hallucinations. Pure algebraic calculation.**
 - **Complexity:** $\mathcal{O}(1)$ time and memory.
