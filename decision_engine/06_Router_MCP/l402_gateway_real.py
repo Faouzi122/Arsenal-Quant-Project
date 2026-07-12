@@ -30,6 +30,34 @@ load_environment()
 app = FastAPI(title="Arsenal Decision Engine — L402 Gateway")
 lnbits = LNbitsClient()
 
+@app.middleware("http")
+async def redact_logs_middleware(request: Request, call_next):
+    raw_ip = request.headers.get("cf-connecting-ip", request.headers.get("x-forwarded-for", request.client.host if request.client else "127.0.0.1"))
+    client_ip = raw_ip.split(",")[0].strip() if "," in raw_ip else raw_ip.strip()
+    
+    # Redact sensitive parameters
+    query_params = dict(request.query_params)
+    for key in ["api_key", "token", "preimage", "authorization", "secret"]:
+        if key in query_params:
+            query_params[key] = "[REDACTED]"
+            
+    query_string = "&".join([f"{k}={v}" for k, v in query_params.items()])
+    path_with_query = request.url.path
+    if query_string:
+        path_with_query += f"?{query_string}"
+        
+    try:
+        response = await call_next(request)
+        status_code = response.status_code
+    except Exception as e:
+        sys.stderr.write(f"ERROR:    {client_ip} - \"{request.method} {path_with_query} HTTP/1.1\" 500 - {str(e)}\n")
+        sys.stderr.flush()
+        raise e
+        
+    sys.stderr.write(f"INFO:     {client_ip} - \"{request.method} {path_with_query} HTTP/1.1\" {status_code}\n")
+    sys.stderr.flush()
+    return response
+
 @app.get("/", response_class=HTMLResponse)
 async def root_endpoint(request: Request):
     # Serve HTML by default unless client explicitly requests application/json
@@ -380,9 +408,12 @@ async def evaluate_pool_endpoint(
     Free Quota: Protected by O(1) in-memory rate limiting (first 3 requests free).
     Subsequent requests: Gated by dynamically priced L402 Lightning challenge (50 or 500 sats).
     """
-    client_id = request.headers.get("x-agent-id", request.client.host)
-    raw_ip = request.headers.get("cf-connecting-ip", request.headers.get("x-forwarded-for", request.client.host))
+    raw_ip = request.headers.get("cf-connecting-ip", request.headers.get("x-forwarded-for", request.client.host if request.client else "127.0.0.1"))
     client_ip = raw_ip.split(",")[0].strip() if "," in raw_ip else raw_ip.strip()
+    client_id = request.headers.get("x-agent-id", client_ip)
+
+    # Option A: Only default parameters are free. Any custom parameters bypass rate limit and require L402 payment.
+    is_default_query = (apy == 0.20 and price_ratio == 1.0 and days_held == 30)
 
     # Calculate evaluation payload in O(1) time
     try:
@@ -408,8 +439,8 @@ async def evaluate_pool_endpoint(
             is_paid = lnbits.check_invoice(payment_hash)
 
     if not is_paid:
-        # Check rate limit for free tier
-        if check_rate_limit(client_ip):
+        # Check rate limit for free tier (only allowed for default queries)
+        if is_default_query and check_rate_limit(client_ip):
             # Sign the payload for security
             oracle_secret = os.getenv("ORACLE_SECRET_KEY", "default_secret")
             payload_to_sign = {
@@ -470,9 +501,9 @@ async def get_latest_audit(request: Request, authorization: str = Header(None)):
     Free Quota: Protected by O(1) in-memory Security Shield rate limiting (first 3 free).
     Subsequent requests: Gated by dynamically priced L402 Lightning challenges.
     """
-    client_id = request.headers.get("x-agent-id", request.client.host)
-    raw_ip = request.headers.get("cf-connecting-ip", request.headers.get("x-forwarded-for", request.client.host))
+    raw_ip = request.headers.get("cf-connecting-ip", request.headers.get("x-forwarded-for", request.client.host if request.client else "127.0.0.1"))
     client_ip = raw_ip.split(",")[0].strip() if "," in raw_ip else raw_ip.strip()
+    client_id = request.headers.get("x-agent-id", client_ip)
     
     # Check directory
     if not os.path.exists(AUDIT_DIR):
@@ -803,5 +834,13 @@ if __name__ == "__main__":
     else:
         import uvicorn
         print("[SYSTEM] Starting Real L402 Gateway Server on port 8088...")
-        uvicorn.run(app, host="0.0.0.0", port=8088, log_level="info", access_log=True)
+        uvicorn.run(
+            app,
+            host="0.0.0.0",
+            port=8088,
+            log_level="info",
+            access_log=False,
+            proxy_headers=True,
+            forwarded_allow_ips="172.19.0.0/16"
+        )
 
