@@ -252,6 +252,36 @@ async def root_endpoint(request: Request):
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 AUDIT_DIR = os.path.join(BASE_DIR, "04_Strategy_Gerber", "Audit_Factory", "Strategic_Signals")
 QUOTA_FILE = os.path.join(os.path.dirname(__file__), "client_quotas.json")
+USED_HASHES_FILE = os.path.join(os.path.dirname(__file__), "used_hashes.json")
+
+def is_hash_used(payment_hash: str) -> bool:
+    if not os.path.exists(USED_HASHES_FILE):
+        return False
+    try:
+        with open(USED_HASHES_FILE, "r") as f:
+            used = json.load(f)
+        return payment_hash in used
+    except Exception:
+        return False
+
+def mark_hash_used(payment_hash: str):
+    used = []
+    if os.path.exists(USED_HASHES_FILE):
+        try:
+            with open(USED_HASHES_FILE, "r") as f:
+                used = json.load(f)
+        except Exception:
+            pass
+    if payment_hash not in used:
+        used.append(payment_hash)
+        if len(used) > 10000:
+            used = used[-10000:]
+        try:
+            os.makedirs(os.path.dirname(USED_HASHES_FILE), exist_ok=True)
+            with open(USED_HASHES_FILE, "w") as f:
+                json.dump(used, f)
+        except Exception as e:
+            print(f"[HASH ERROR] Failed to save used hashes: {e}")
 
 # Pricing matrix based on pain level
 PRICING_MAP = {
@@ -432,11 +462,24 @@ async def evaluate_pool_endpoint(
             payment_hash = token_part
             preimage = None
             
-        # Sandbox bypass for testing / dev mode
-        if preimage == "0000000000000000000000000000000000000000000000000000000000000000" and os.getenv("L402_OVERRIDE_PRICE"):
+        # Sandbox bypass for testing / dev mode (using strict env toggle)
+        if preimage == "0000000000000000000000000000000000000000000000000000000000000000" and os.getenv("L402_SANDBOX_BYPASS") == "true":
             is_paid = True
         else:
-            is_paid = lnbits.check_invoice(payment_hash)
+            if preimage:
+                import hashlib
+                try:
+                    preimage_bytes = bytes.fromhex(preimage)
+                    hasher = hashlib.sha256()
+                    hasher.update(preimage_bytes)
+                    calculated_hash = hasher.hexdigest()
+                    if calculated_hash == payment_hash:
+                        if not is_hash_used(payment_hash):
+                            is_paid = lnbits.check_invoice(payment_hash)
+                            if is_paid:
+                                mark_hash_used(payment_hash)
+                except Exception:
+                    is_paid = False
 
     if not is_paid:
         # Check rate limit for free tier (only allowed for default queries)
@@ -527,10 +570,23 @@ async def get_latest_audit(request: Request, authorization: str = Header(None)):
             preimage = None
             
         # Sandbox bypass for testing / client verification
-        if preimage == "0000000000000000000000000000000000000000000000000000000000000000" and os.getenv("L402_OVERRIDE_PRICE"):
+        if preimage == "0000000000000000000000000000000000000000000000000000000000000000" and os.getenv("L402_SANDBOX_BYPASS") == "true":
             is_paid = True
         else:
-            is_paid = lnbits.check_invoice(payment_hash)
+            if preimage:
+                import hashlib
+                try:
+                    preimage_bytes = bytes.fromhex(preimage)
+                    hasher = hashlib.sha256()
+                    hasher.update(preimage_bytes)
+                    calculated_hash = hasher.hexdigest()
+                    if calculated_hash == payment_hash:
+                        if not is_hash_used(payment_hash):
+                            is_paid = lnbits.check_invoice(payment_hash)
+                            if is_paid:
+                                mark_hash_used(payment_hash)
+                except Exception:
+                    is_paid = False
         
     if not is_paid:
         # Check rate limit for free tier
@@ -610,12 +666,89 @@ async def get_latest_audit(request: Request, authorization: str = Header(None)):
 # Catch-all route to proxy non-gateway requests to decision_engine
 @app.api_route("/{path_name:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"])
 async def catch_all_proxy(request: Request, path_name: str):
+    # Allowlist of proxiable paths to prevent exposing hidden backend routes
+    normalized_path = path_name.strip("/")
+    if normalized_path not in ["", "mcp", "mcp/evaluate", "mcp/audit/latest", "docs", "openapi.json"]:
+        raise HTTPException(status_code=404, detail="Endpoint not found or restricted.")
+
+    raw_ip = request.headers.get("cf-connecting-ip", request.headers.get("x-forwarded-for", request.client.host if request.client else "127.0.0.1"))
+    client_ip = raw_ip.split(",")[0].strip() if "," in raw_ip else raw_ip.strip()
+
+    # Detect JSON-RPC tool calls requesting evaluate_pool
+    is_protected_tool = False
+    body = await request.body()
+    if request.method == "POST" and normalized_path in ["", "mcp"]:
+        try:
+            body_json = json.loads(body.decode('utf-8'))
+            method = body_json.get("method")
+            if method == "tools/call":
+                tool_name = body_json.get("params", {}).get("name")
+                if tool_name == "evaluate_pool":
+                    is_protected_tool = True
+            elif method == "evaluate_pool":
+                is_protected_tool = True
+        except Exception:
+            pass
+
+    # Gate JSON-RPC tool calls under L402 paywall
+    if is_protected_tool:
+        authorization = request.headers.get("authorization")
+        is_paid = False
+        payment_hash = None
+        if authorization and authorization.startswith("L402 "):
+            token_part = authorization.split(" ")[1]
+            if ":" in token_part:
+                payment_hash, preimage = token_part.split(":", 1)
+            else:
+                payment_hash = token_part
+                preimage = None
+                
+            if preimage == "0000000000000000000000000000000000000000000000000000000000000000" and os.getenv("L402_SANDBOX_BYPASS") == "true":
+                is_paid = True
+            else:
+                if preimage:
+                    import hashlib
+                    try:
+                        preimage_bytes = bytes.fromhex(preimage)
+                        hasher = hashlib.sha256()
+                        hasher.update(preimage_bytes)
+                        calculated_hash = hasher.hexdigest()
+                        if calculated_hash == payment_hash:
+                            if not is_hash_used(payment_hash):
+                                is_paid = lnbits.check_invoice(payment_hash)
+                                if is_paid:
+                                    mark_hash_used(payment_hash)
+                    except Exception:
+                        is_paid = False
+                        
+        if not is_paid:
+            price_sats = 50
+            override = os.getenv("L402_OVERRIDE_PRICE")
+            if override:
+                price_sats = int(override)
+                
+            invoice_data = lnbits.create_invoice(price_sats, f"Arsenal R_net Evaluation (JSON-RPC)")
+            if not invoice_data or "payment_request" not in invoice_data:
+                raise HTTPException(status_code=503, detail="Payment Gateway Node is Offline or Unauthorized")
+                
+            pr = invoice_data.get("payment_request")
+            pay_hash = invoice_data.get("payment_hash")
+            
+            headers = {
+                "WWW-Authenticate": f'L402 token="{pay_hash}", invoice="{pr}"'
+            }
+            return Response(
+                content=json.dumps({"error": "Payment Required", "price_sats": price_sats, "client_id": client_ip}),
+                status_code=402,
+                headers=headers,
+                media_type="application/json"
+            )
+
     async with httpx.AsyncClient() as client:
         # Forward to decision_engine on the docker network
         target_url = f"http://decision_engine:8002/{path_name}"
         params = dict(request.query_params)
         headers = {k: v for k, v in request.headers.items() if k.lower() != "host"}
-        body = await request.body()
         
         try:
             response = await client.request(
