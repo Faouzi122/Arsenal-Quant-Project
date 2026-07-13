@@ -250,7 +250,7 @@ async def root_endpoint(request: Request):
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-AUDIT_DIR = os.path.join(BASE_DIR, "04_Strategy_Gerber", "Audit_Factory", "Strategic_Signals")
+AUDIT_DIR = os.path.join(BASE_DIR, "04_Strategy_Layer", "Audit_Factory", "Strategic_Signals")
 QUOTA_FILE = os.path.join(os.path.dirname(__file__), "client_quotas.json")
 USED_HASHES_FILE = os.path.join(os.path.dirname(__file__), "used_hashes.json")
 
@@ -369,7 +369,7 @@ def get_mapper_recommendation(audit_path: str) -> str:
         except Exception:
             pass
 
-    mapper_path = os.path.join(BASE_DIR, "04_Strategy_Gerber", "Decision_Layer", "pain_to_profit_mapper.json")
+    mapper_path = os.path.join(BASE_DIR, "04_Strategy_Layer", "Decision_Layer", "pain_to_profit_mapper.json")
     if os.path.exists(mapper_path):
         try:
             with open(mapper_path, "r") as f:
