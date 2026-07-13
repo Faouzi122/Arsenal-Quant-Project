@@ -1,0 +1,9 @@
+.env
+*.env
+**/.env
+client_quotas.json
+used_hashes.json
+.git
+__pycache__
+*.pyc
+.well-known/**/private*
