@@ -4,7 +4,7 @@ import sys
 # pyrefly: ignore [missing-import]
 import httpx
 from fastapi import FastAPI, HTTPException, Header, Response, Request
-from fastapi.responses import PlainTextResponse, HTMLResponse
+from fastapi.responses import PlainTextResponse, HTMLResponse, JSONResponse
 from lnbits_client import LNbitsClient
 from security_shield import check_rate_limit, sign_audit_payload
 
@@ -424,6 +424,300 @@ async def get_agent_card():
         }
     })
     return Response(content=fallback, media_type="application/json", headers=DISCOVERY_HEADERS)
+
+async def process_mcp_jsonrpc(req: dict, client_ip: str, client_id: str, authorization: str) -> tuple[dict | None, int, dict]:
+    req_id = req.get("id")
+    method = req.get("method")
+    
+    if method == "initialize":
+        return {
+            "jsonrpc": "2.0",
+            "id": req_id,
+            "result": {
+                "protocolVersion": "2024-11-05",
+                "capabilities": {
+                    "tools": {},
+                    "resources": {}
+                },
+                "serverInfo": {
+                    "name": "Arsenal Decision Engine",
+                    "version": "2.0.0"
+                }
+            }
+        }, 200, {}
+        
+    elif method == "notifications/initialized":
+        return None, 204, {}
+        
+    elif method == "tools/list":
+        return {
+            "jsonrpc": "2.0",
+            "id": req_id,
+            "result": {
+                "tools": [
+                    {
+                        "name": "get_latest_audit",
+                        "description": "Fetch the latest cost-intelligence and risk mitigation audit signal.",
+                        "inputSchema": {
+                            "type": "object",
+                            "properties": {}
+                        }
+                    },
+                    {
+                        "name": "evaluate_pool",
+                        "description": "Evaluate LP position risk and calculate R_net & breakeven corridor.",
+                        "inputSchema": {
+                            "type": "object",
+                            "properties": {
+                                "apy": {
+                                    "type": "number",
+                                    "description": "Annual Percentage Yield of the pool (e.g. 0.20 for 20%)"
+                                },
+                                "price_ratio": {
+                                    "type": "number",
+                                    "description": "Current price ratio compared to entry price (e.g. 0.85 for 15% price drop)"
+                                },
+                                "days_held": {
+                                    "type": "integer",
+                                    "description": "Number of days the position has been held (default: 30)"
+                                }
+                            },
+                            "required": ["apy", "price_ratio"]
+                        }
+                    }
+                ]
+            }
+        }, 200, {}
+        
+    elif method in ["resources/list", "resources/templates/list", "prompts/list"]:
+        key_name = method.split("/")[0]
+        if key_name == "resources" and "templates" in method:
+            key_name = "resourceTemplates"
+        return {
+            "jsonrpc": "2.0",
+            "id": req_id,
+            "result": {
+                key_name: []
+            }
+        }, 200, {}
+        
+    elif method == "ping":
+        return {
+            "jsonrpc": "2.0",
+            "id": req_id,
+            "result": {}
+        }, 200, {}
+        
+    elif method == "tools/call":
+        params = req.get("params", {})
+        tool_name = params.get("name")
+        arguments = params.get("arguments", {})
+        
+        if tool_name == "get_latest_audit":
+            if not os.path.exists(AUDIT_DIR):
+                return {
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "error": {"code": -32603, "message": "Audit folder missing."}
+                }, 200, {}
+            files = sorted(os.listdir(AUDIT_DIR), reverse=True)
+            if not files:
+                return {
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "error": {"code": -32603, "message": "No audit reports available."}
+                }, 200, {}
+            latest_audit_path = os.path.join(AUDIT_DIR, files[0])
+            try:
+                with open(latest_audit_path, 'r') as f:
+                    content = f.read()
+                return {
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "result": {
+                        "content": [{"type": "text", "text": content}]
+                    }
+                }, 200, {}
+            except Exception as e:
+                return {
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "error": {"code": -32603, "message": f"Error loading audit: {str(e)}"}
+                }, 200, {}
+                
+        elif tool_name == "evaluate_pool":
+            apy = float(arguments.get("apy", 0.20))
+            price_ratio = float(arguments.get("price_ratio", 1.0))
+            days_held = int(arguments.get("days_held", 30))
+            
+            is_default_query = (apy == 0.20 and price_ratio == 1.0 and days_held == 30)
+            
+            # Gating check
+            is_paid = False
+            payment_hash = None
+            if authorization and authorization.startswith("L402 "):
+                token_part = authorization.split(" ")[1]
+                if ":" in token_part:
+                    payment_hash, preimage = token_part.split(":", 1)
+                else:
+                    payment_hash = token_part
+                    preimage = None
+                    
+                if preimage == "0000000000000000000000000000000000000000000000000000000000000000" and os.getenv("L402_SANDBOX_BYPASS") == "true":
+                    is_paid = True
+                else:
+                    if preimage:
+                        import hashlib
+                        try:
+                            preimage_bytes = bytes.fromhex(preimage)
+                            hasher = hashlib.sha256()
+                            hasher.update(preimage_bytes)
+                            calculated_hash = hasher.hexdigest()
+                            if calculated_hash == payment_hash:
+                                if not is_hash_used(payment_hash):
+                                    is_paid = lnbits.check_invoice(payment_hash)
+                                    if is_paid:
+                                        mark_hash_used(payment_hash)
+                        except Exception:
+                            is_paid = False
+            
+            if not is_paid:
+                if is_default_query and check_rate_limit(client_ip):
+                    try:
+                        eval_res = evaluate_lp(apy, price_ratio, days_held)
+                        oracle_secret = os.getenv("ORACLE_SECRET_KEY", "default_secret")
+                        payload_to_sign = {
+                            "evaluation": eval_res,
+                            "client_ip": client_ip,
+                            "type": "FREE_TIER"
+                        }
+                        signature = sign_audit_payload(payload_to_sign, oracle_secret)
+                        eval_res["oracle_signature"] = signature
+                        eval_res["layer"] = "FREE"
+                        return {
+                            "jsonrpc": "2.0",
+                            "id": req_id,
+                            "result": {
+                                "content": [{"type": "text", "text": json.dumps(eval_res)}]
+                            }
+                        }, 200, {}
+                    except Exception as e:
+                        return {
+                            "jsonrpc": "2.0",
+                            "id": req_id,
+                            "error": {"code": -32603, "message": f"Evaluation error: {str(e)}"}
+                        }, 200, {}
+                else:
+                    # Quota / payment trigger
+                    price_sats = 50
+                    override = os.getenv("L402_OVERRIDE_PRICE")
+                    if override:
+                        price_sats = int(override)
+                    invoice_data = lnbits.create_invoice(price_sats, f"Arsenal R_net Evaluation (JSON-RPC HTTP)")
+                    if not invoice_data or "payment_request" not in invoice_data:
+                        return {
+                            "jsonrpc": "2.0",
+                            "id": req_id,
+                            "error": {"code": -32000, "message": "Payment Gateway Node Offline"}
+                        }, 503, {}
+                    pr = invoice_data.get("payment_request")
+                    pay_hash = invoice_data.get("payment_hash")
+                    
+                    headers = {
+                        "WWW-Authenticate": f'L402 token="{pay_hash}", invoice="{pr}"'
+                    }
+                    return {
+                        "jsonrpc": "2.0",
+                        "id": req_id,
+                        "error": {
+                            "code": 402,
+                            "message": "Payment Required",
+                            "data": {"price_sats": price_sats, "client_id": client_id}
+                        }
+                    }, 402, headers
+                    
+            # Process evaluation
+            try:
+                eval_res = evaluate_lp(apy, price_ratio, days_held)
+                oracle_secret = os.getenv("ORACLE_SECRET_KEY", "default_secret")
+                payload_to_sign = {
+                    "evaluation": eval_res,
+                    "payment_hash": payment_hash,
+                    "type": "PREMIUM_TIER"
+                }
+                signature = sign_audit_payload(payload_to_sign, oracle_secret)
+                eval_res["oracle_signature"] = signature
+                eval_res["layer"] = "PREMIUM"
+                
+                return {
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "result": {
+                        "content": [{"type": "text", "text": json.dumps(eval_res)}]
+                    }
+                }, 200, {}
+            except Exception as e:
+                return {
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "error": {"code": -32603, "message": f"Evaluation error: {str(e)}"}
+                }, 200, {}
+        else:
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "error": {"code": -32601, "message": f"Method not found: {tool_name}"}
+            }, 200, {}
+            
+    return {
+        "jsonrpc": "2.0",
+        "id": req_id,
+        "error": {"code": -32601, "message": f"Method not found: {method}"}
+    }, 200, {}
+
+@app.post("/mcp")
+async def mcp_http_endpoint(request: Request, authorization: str = Header(None)):
+    """
+    Standard MCP Streamable HTTP endpoint.
+    Processes JSON-RPC 2.0 requests for tool discovery and execution.
+    """
+    raw_ip = request.headers.get("cf-connecting-ip", request.headers.get("x-forwarded-for", request.client.host if request.client else "127.0.0.1"))
+    client_ip = raw_ip.split(",")[0].strip() if "," in raw_ip else raw_ip.strip()
+    client_id = request.headers.get("x-agent-id", client_ip)
+    
+    try:
+        body = await request.body()
+        req = json.loads(body.decode("utf-8"))
+    except Exception:
+        return JSONResponse(
+            status_code=400,
+            content={
+                "jsonrpc": "2.0",
+                "id": None,
+                "error": {"code": -32700, "message": "Parse error"}
+            }
+        )
+        
+    if not isinstance(req, dict):
+        return JSONResponse(
+            status_code=400,
+            content={
+                "jsonrpc": "2.0",
+                "id": None,
+                "error": {"code": -32600, "message": "Invalid Request"}
+            }
+        )
+
+    res, status_code, headers = await process_mcp_jsonrpc(req, client_ip, client_id, authorization)
+    
+    if res is None:
+        return Response(status_code=204)
+        
+    return JSONResponse(
+        status_code=status_code,
+        content=res,
+        headers=headers
+    )
 
 @app.get("/mcp/evaluate")
 async def evaluate_pool_endpoint(
