@@ -1,13 +1,71 @@
-version: "3"
+name: arsenal
+
 services:
-  lnbits:
-    image: lnbits/lnbits:latest
-    container_name: lnbits
+  lnbits_gateway:
+    image: lnbitsdocker/lnbits:latest
+    container_name: lnbits_gateway
+    restart: unless-stopped
     ports:
-      - "5000:5000"
+      - "127.0.0.1:5001:5000"
     environment:
       - LNBITS_PORT=5000
+      - LNBITS_HOST=0.0.0.0
       - LNBITS_DATA_FOLDER=/data
       - LNBITS_BACKEND_WALLET_CLASS=FakeWallet
     volumes:
-      - ./data:/data
+      - arsenal_lnbits_volume:/data
+    networks:
+      arsenal_network:
+        ipv4_address: 172.19.0.4
+
+  decision_engine:
+    image: sentiment_alpha_v1-decision_engine
+    container_name: decision_engine
+    restart: unless-stopped
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8002"]
+    ports:
+      - "127.0.0.1:8002:8002"
+    volumes:
+      - arsenal_pulse_volume:/app/data
+    networks:
+      arsenal_network:
+        ipv4_address: 172.19.0.2
+
+  l402_gateway:
+    image: python:3.10-slim
+    container_name: l402_gateway
+    restart: unless-stopped
+    working_dir: /home/faouzi/decision_engine/06_Router_MCP
+    command: ["sh", "-c", "pip install fastapi uvicorn httpx && python3 l402_gateway_real.py"]
+    ports:
+      - "127.0.0.1:8088:8088"
+    volumes:
+      - /home/faouzi/decision_engine:/home/faouzi/decision_engine
+    networks:
+      arsenal_network:
+        ipv4_address: 172.19.0.5
+    depends_on:
+      - lnbits_gateway
+
+  cloudflare_tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflare_tunnel
+    restart: unless-stopped
+    command: ["tunnel", "--no-autoupdate", "run", "--protocol", "http2"]
+    environment:
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+    networks:
+      arsenal_network:
+        ipv4_address: 172.19.0.3
+    depends_on:
+      - l402_gateway
+
+networks:
+  arsenal_network:
+    external: true
+
+volumes:
+  arsenal_lnbits_volume:
+    external: true
+  arsenal_pulse_volume:
+    external: true
