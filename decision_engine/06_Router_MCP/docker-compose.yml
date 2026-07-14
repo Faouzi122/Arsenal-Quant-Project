@@ -1,0 +1,13 @@
+version: "3"
+services:
+  lnbits:
+    image: lnbits/lnbits:latest
+    container_name: lnbits
+    ports:
+      - "5000:5000"
+    environment:
+      - LNBITS_PORT=5000
+      - LNBITS_DATA_FOLDER=/data
+      - LNBITS_BACKEND_WALLET_CLASS=FakeWallet
+    volumes:
+      - ./data:/data
