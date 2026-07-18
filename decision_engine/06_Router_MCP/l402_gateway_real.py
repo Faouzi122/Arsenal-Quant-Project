@@ -425,10 +425,31 @@ async def get_agent_card():
     })
     return Response(content=fallback, media_type="application/json", headers=DISCOVERY_HEADERS)
 
-async def process_mcp_jsonrpc(req: dict, client_ip: str, client_id: str, authorization: str) -> tuple[dict | None, int, dict]:
+def handle_jsonrpc(req: dict, ctx: dict) -> tuple[dict | None, int, dict]:
+    """
+    Single source of truth for MCP JSON-RPC 2.0 handling, shared by every
+    transport (HTTP POST /mcp and the stdio loop). L402 gating for
+    tools/call evaluate_pool is applied identically regardless of transport.
+
+    ctx = {
+        "transport": "http" | "stdio",
+        "client_ip": str,
+        "client_id": str,
+        "authorization": str | None,
+    }
+    """
     req_id = req.get("id")
     method = req.get("method")
-    
+    client_ip = ctx["client_ip"]
+    client_id = ctx["client_id"]
+    # Defense in depth: ctx["authorization"] may originate from untrusted
+    # stdio JSON (any type). Normalize to str|None here so no downstream
+    # .startswith() call can ever crash on an int/dict/list/bool.
+    authorization = ctx.get("authorization")
+    if not isinstance(authorization, str):
+        authorization = None
+    transport = ctx.get("transport", "http")
+
     if method == "initialize":
         return {
             "jsonrpc": "2.0",
@@ -510,8 +531,15 @@ async def process_mcp_jsonrpc(req: dict, client_ip: str, client_id: str, authori
         
     elif method == "tools/call":
         params = req.get("params", {})
+        # Defense in depth: a hostile or buggy client can send any JSON type
+        # for "params" / "arguments" (string, list, int, null...). Treat
+        # anything that isn't a dict as empty rather than crashing on .get().
+        if not isinstance(params, dict):
+            params = {}
         tool_name = params.get("name")
         arguments = params.get("arguments", {})
+        if not isinstance(arguments, dict):
+            arguments = {}
         
         if tool_name == "get_latest_audit":
             if not os.path.exists(AUDIT_DIR):
@@ -555,7 +583,7 @@ async def process_mcp_jsonrpc(req: dict, client_ip: str, client_id: str, authori
             # Gating check
             is_paid = False
             payment_hash = None
-            if authorization and authorization.startswith("L402 "):
+            if isinstance(authorization, str) and authorization.startswith("L402 "):
                 token_part = authorization.split(" ")[1]
                 if ":" in token_part:
                     payment_hash, preimage = token_part.split(":", 1)
@@ -608,12 +636,12 @@ async def process_mcp_jsonrpc(req: dict, client_ip: str, client_id: str, authori
                             "error": {"code": -32603, "message": f"Evaluation error: {str(e)}"}
                         }, 200, {}
                 else:
-                    # Quota / payment trigger
+                    # Quota / payment trigger — L402 gating applies identically to every transport
                     price_sats = 50
                     override = os.getenv("L402_OVERRIDE_PRICE")
                     if override:
                         price_sats = int(override)
-                    invoice_data = lnbits.create_invoice(price_sats, f"Arsenal R_net Evaluation (JSON-RPC HTTP)")
+                    invoice_data = lnbits.create_invoice(price_sats, f"Arsenal R_net Evaluation (JSON-RPC {transport.upper()})")
                     if not invoice_data or "payment_request" not in invoice_data:
                         return {
                             "jsonrpc": "2.0",
@@ -622,7 +650,9 @@ async def process_mcp_jsonrpc(req: dict, client_ip: str, client_id: str, authori
                         }, 503, {}
                     pr = invoice_data.get("payment_request")
                     pay_hash = invoice_data.get("payment_hash")
-                    
+
+                    # WWW-Authenticate is the HTTP-native challenge; error.data carries the
+                    # same payment_hash/invoice so stdio clients (no HTTP headers) can pay too.
                     headers = {
                         "WWW-Authenticate": f'L402 token="{pay_hash}", invoice="{pr}"'
                     }
@@ -632,7 +662,12 @@ async def process_mcp_jsonrpc(req: dict, client_ip: str, client_id: str, authori
                         "error": {
                             "code": 402,
                             "message": "Payment Required",
-                            "data": {"price_sats": price_sats, "client_id": client_id}
+                            "data": {
+                                "price_sats": price_sats,
+                                "client_id": client_id,
+                                "payment_hash": pay_hash,
+                                "invoice": pr
+                            }
                         }
                     }, 402, headers
                     
@@ -669,6 +704,11 @@ async def process_mcp_jsonrpc(req: dict, client_ip: str, client_id: str, authori
                 "error": {"code": -32601, "message": f"Method not found: {tool_name}"}
             }, 200, {}
             
+    if req_id is None:
+        # JSON-RPC 2.0 spec: a request without an "id" is a notification —
+        # the server MUST NOT reply, even for an unrecognized method.
+        return None, 204, {}
+
     return {
         "jsonrpc": "2.0",
         "id": req_id,
@@ -708,8 +748,30 @@ async def mcp_http_endpoint(request: Request, authorization: str = Header(None))
             }
         )
 
-    res, status_code, headers = await process_mcp_jsonrpc(req, client_ip, client_id, authorization)
-    
+    ctx = {
+        "transport": "http",
+        "client_ip": client_ip,
+        "client_id": client_id,
+        "authorization": authorization,
+    }
+    # Symmetric with the stdio loop's defense in depth: handle_jsonrpc already
+    # guards against malformed params/arguments/authorization types, but any
+    # other unexpected exception must still surface as a structured JSON-RPC
+    # error — never a raw, unstructured HTTP 500.
+    try:
+        res, status_code, headers = handle_jsonrpc(req, ctx)
+    except Exception as e:
+        sys.stderr.write(f"Error in handle_jsonrpc (http, id={req.get('id')}): {str(e)}\n")
+        sys.stderr.flush()
+        return JSONResponse(
+            status_code=200,
+            content={
+                "jsonrpc": "2.0",
+                "id": req.get("id"),
+                "error": {"code": -32603, "message": f"Internal error: {str(e)}"}
+            }
+        )
+
     if res is None:
         return Response(status_code=204)
         
@@ -965,6 +1027,13 @@ async def catch_all_proxy(request: Request, path_name: str):
     if normalized_path not in ["", "mcp", "mcp/evaluate", "mcp/audit/latest", "docs", "openapi.json"]:
         raise HTTPException(status_code=404, detail="Endpoint not found or restricted.")
 
+    # GET/HEAD on /mcp/evaluate are served by the dedicated FastAPI route
+    # (declared earlier) and never reach this catch-all. Any other verb here
+    # would have been silently proxied to the backend WITHOUT L402 gating —
+    # close that bypass instead of forwarding it.
+    if normalized_path == "mcp/evaluate" and request.method not in ("GET", "HEAD"):
+        return Response(status_code=405, headers={"Allow": "GET"})
+
     raw_ip = request.headers.get("cf-connecting-ip", request.headers.get("x-forwarded-for", request.client.host if request.client else "127.0.0.1"))
     client_ip = raw_ip.split(",")[0].strip() if "," in raw_ip else raw_ip.strip()
 
@@ -1080,182 +1149,83 @@ if __name__ == "__main__":
                 data = json.loads(line)
                 if isinstance(data, dict) and "method" in data:
                     initial_req = data
-    except Exception:
-        pass
+    except Exception as e:
+        sys.stderr.write(f"Error probing stdio for MCP mode: {str(e)}\n")
+        sys.stderr.flush()
 
     if initial_req:
-        # Run stdio MCP JSON-RPC loop
+        # Run stdio MCP JSON-RPC loop. Same handle_jsonrpc as the HTTP
+        # transport: L402 gating for tools/call evaluate_pool is identical,
+        # no direct evaluate_lp bypass here.
         def write_jsonrpc(response):
+            if response is None:
+                return
             sys.stdout.write(json.dumps(response) + "\n")
             sys.stdout.flush()
 
+        def extract_stdio_authorization(req: dict) -> str | None:
+            # A stdio client cannot send an HTTP Authorization header, so it
+            # may carry its L402 credential in the request body instead:
+            # a top-level "authorization" field, or params.arguments._l402_authorization.
+            # A hostile or buggy client may send a non-string value (int, dict,
+            # list, bool) here — only genuine strings are ever returned, anything
+            # else is treated as "no credential" instead of propagating downstream.
+            top_level = req.get("authorization")
+            if isinstance(top_level, str) and top_level:
+                return top_level
+            params = req.get("params", {})
+            arguments = params.get("arguments", {}) if isinstance(params, dict) else {}
+            nested = arguments.get("_l402_authorization") if isinstance(arguments, dict) else None
+            return nested if isinstance(nested, str) and nested else None
+
         req = initial_req
         while True:
+            # Process the current request. Any failure here (malformed field
+            # types, unexpected exception inside handle_jsonrpc, structurally
+            # invalid request) must NOT kill the session: log it, answer with
+            # a proper JSON-RPC error, and keep the loop alive. A single
+            # hostile/buggy request must not be a trivial DoS on the session.
+            req_id_for_error = req.get("id") if isinstance(req, dict) else None
             try:
-                req_id = req.get("id")
-                method = req.get("method")
-                
-                if method == "initialize":
-                    res = {
+                if not isinstance(req, dict) or "method" not in req:
+                    write_jsonrpc({
                         "jsonrpc": "2.0",
-                        "id": req_id,
-                        "result": {
-                            "protocolVersion": "2024-11-05",
-                            "capabilities": {
-                                "tools": {},
-                                "resources": {}
-                            },
-                            "serverInfo": {
-                                "name": "Arsenal Decision Engine",
-                                "version": "2.0.0"
-                            }
-                        }
-                    }
-                    write_jsonrpc(res)
-                elif method == "notifications/initialized":
-                    pass
-                elif method == "tools/list":
-                    res = {
-                        "jsonrpc": "2.0",
-                        "id": req_id,
-                        "result": {
-                            "tools": [
-                                {
-                                    "name": "get_latest_audit",
-                                    "description": "Fetch the latest cost-intelligence and risk mitigation audit signal.",
-                                    "inputSchema": {
-                                        "type": "object",
-                                        "properties": {}
-                                    }
-                                },
-                                {
-                                    "name": "evaluate_pool",
-                                    "description": "Evaluate LP position risk and calculate R_net & breakeven corridor.",
-                                    "inputSchema": {
-                                        "type": "object",
-                                        "properties": {
-                                            "apy": {
-                                                "type": "number",
-                                                "description": "Annual Percentage Yield of the pool (e.g. 0.20 for 20%)"
-                                            },
-                                            "price_ratio": {
-                                                "type": "number",
-                                                "description": "Current price ratio compared to entry price (e.g. 0.85 for 15% price drop)"
-                                            },
-                                            "days_held": {
-                                                "type": "integer",
-                                                "description": "Number of days the position has been held (default: 30)"
-                                            }
-                                        },
-                                        "required": ["apy", "price_ratio"]
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                    write_jsonrpc(res)
-                elif method == "resources/list":
-                    res = {
-                        "jsonrpc": "2.0",
-                        "id": req_id,
-                        "result": {
-                            "resources": []
-                        }
-                    }
-                    write_jsonrpc(res)
-                elif method == "resources/templates/list":
-                    res = {
-                        "jsonrpc": "2.0",
-                        "id": req_id,
-                        "result": {
-                            "resourceTemplates": []
-                        }
-                    }
-                    write_jsonrpc(res)
-                elif method == "prompts/list":
-                    res = {
-                        "jsonrpc": "2.0",
-                        "id": req_id,
-                        "result": {
-                            "prompts": []
-                        }
-                    }
-                    write_jsonrpc(res)
-                elif method == "ping":
-                    res = {
-                        "jsonrpc": "2.0",
-                        "id": req_id,
-                        "result": {}
-                    }
-                    write_jsonrpc(res)
-                elif method == "tools/call":
-                    tool_name = req.get("params", {}).get("name")
-                    if tool_name == "get_latest_audit":
-                        res = {
-                            "jsonrpc": "2.0",
-                            "id": req_id,
-                            "result": {
-                                "content": [
-                                    {
-                                        "type": "text",
-                                        "text": "Arsenal Decision Engine Status: ACTIVE. L402 Gateway running on https://api.arsenal-quant.com."
-                                    }
-                                ]
-                            }
-                        }
-                    elif tool_name == "evaluate_pool":
-                        params = req.get("params", {}).get("arguments", {})
-                        apy = float(params.get("apy", 0.20))
-                        price_ratio = float(params.get("price_ratio", 1.0))
-                        days_held = int(params.get("days_held", 30))
-                        try:
-                            eval_res = evaluate_lp(apy, price_ratio, days_held)
-                            res = {
-                                "jsonrpc": "2.0",
-                                "id": req_id,
-                                "result": {
-                                    "content": [
-                                        {
-                                            "type": "text",
-                                            "text": json.dumps(eval_res, indent=2)
-                                        }
-                                    ]
-                                }
-                            }
-                        except Exception as e:
-                            res = {
-                                "jsonrpc": "2.0",
-                                "id": req_id,
-                                "error": {
-                                    "code": -32603,
-                                    "message": f"Internal error during evaluation: {str(e)}"
-                                }
-                            }
-                    else:
-                        res = {
-                            "jsonrpc": "2.0",
-                            "id": req_id,
-                            "error": {
-                                "code": -32601,
-                                "message": f"Method not found: {tool_name}"
-                            }
-                        }
-                    write_jsonrpc(res)
+                        "id": req_id_for_error,
+                        "error": {"code": -32600, "message": "Invalid Request"}
+                    })
                 else:
-                    if req_id is not None:
-                        res = {
-                            "jsonrpc": "2.0",
-                            "id": req_id,
-                            "result": {}
-                        }
-                        write_jsonrpc(res)
-                
+                    ctx = {
+                        "transport": "stdio",
+                        "client_ip": "stdio-local",
+                        "client_id": "stdio-local",
+                        "authorization": extract_stdio_authorization(req),
+                    }
+                    res, _status_code, _headers = handle_jsonrpc(req, ctx)
+                    write_jsonrpc(res)
+            except Exception as e:
+                sys.stderr.write(f"Error processing stdio request (id={req_id_for_error}): {str(e)}\n")
+                sys.stderr.flush()
+                write_jsonrpc({
+                    "jsonrpc": "2.0",
+                    "id": req_id_for_error,
+                    "error": {"code": -32603, "message": f"Internal error: {str(e)}"}
+                })
+
+            # Read the next line. EOF (empty read) and an unrecoverable JSON
+            # parse error on the stream are the only legitimate reasons to
+            # stop the loop.
+            try:
                 line = sys.stdin.readline()
-                if not line:
-                    break
+            except Exception as e:
+                sys.stderr.write(f"Fatal stdin read error, terminating stdio loop: {str(e)}\n")
+                sys.stderr.flush()
+                break
+            if not line:
+                break
+            try:
                 req = json.loads(line.strip())
             except Exception as e:
-                sys.stderr.write(f"Error in stdio loop: {str(e)}\n")
+                sys.stderr.write(f"Unrecoverable JSON parse error on stdio line, terminating stdio loop: {str(e)}\n")
                 sys.stderr.flush()
                 break
     else:
