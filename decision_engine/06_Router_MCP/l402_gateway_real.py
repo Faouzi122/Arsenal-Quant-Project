@@ -358,30 +358,14 @@ def get_dynamic_price(audit_payload) -> int:
 
 # Dynamic Recommendation Helper
 def get_mapper_recommendation(audit_path: str) -> str:
-    audit_type = "COST_WASTE"
-    if os.path.exists(audit_path):
-        try:
-            with open(audit_path, "r") as f:
-                for line in f:
-                    if "TYPE       :" in line:
-                        audit_type = line.split("TYPE       :")[1].strip()
-                        break
-        except Exception:
-            pass
-
-    mapper_path = os.path.join(BASE_DIR, "04_Strategy_Layer", "Decision_Layer", "pain_to_profit_mapper.json")
-    if os.path.exists(mapper_path):
-        try:
-            with open(mapper_path, "r") as f:
-                mapper = json.load(f)
-            item = mapper["AI_COST_INTELLIGENCE_MAPPER"].get(audit_type)
-            if item:
-                return f"\n\n[UNLOCKED RECOMMENDATION]\n- Actionable MCP Call: {item['actionable_mcp_call']}\n- Est. Loss: {item['estimated_loss_usd']}"
-        except Exception as e:
-            print(f"[RECOMMENDATION ERROR] Failed to parse mapper: {e}")
-
-    # Default fallback recommendation
-    return "\n\n[UNLOCKED RECOMMENDATION]\n- Disable the redundant 'Routing' agent in your mcp_config.json.\n- Swap GPT-4o for Llama-3-8B-Instruct local model for base checks.\n- Validated immediate saving: $12,000 USD/month."
+    # This engine does not compute position-specific recommendations, and it
+    # never returns a plausible-but-invented figure. The deliverable is the
+    # signed audit metrics above; anything else would be an unverifiable claim.
+    return (
+        "\n\n[NO AUTOMATED RECOMMENDATION]\n"
+        "- This engine does not compute position-specific recommendations. "
+        "The signed audit metrics above are the deliverable."
+    )
 
 # Discoverability Endpoints (MCP Server Card + A2A Agent Card)
 # Cache-Control: no-store prevents Cloudflare/CDN from serving stale discovery cards
