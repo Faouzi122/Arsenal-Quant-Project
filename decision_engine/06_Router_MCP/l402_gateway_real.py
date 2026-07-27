@@ -409,6 +409,29 @@ async def get_agent_card():
     })
     return Response(content=fallback, media_type="application/json", headers=DISCOVERY_HEADERS)
 
+def log_tool_call(tool_name, client_ip, apy, price_ratio, days_held, tier, paywalled, transport):
+    """
+    Observabilité de l'usage réel de evaluate_pool, une ligne structurée et
+    greppable sur stderr (visible dans `docker logs`), symétrique de
+    redact_logs_middleware ci-dessus.
+
+    ZÉRO SECRET : n'accepte et ne logge jamais authorization, preimage,
+    payment_hash ni macaroon/invoice — seuls les champs listés existent.
+
+    Ne retourne rien, ne modifie rien, et ne doit jamais faire échouer la
+    requête appelante : toute erreur d'écriture de log est avalée ici (elle
+    n'a aucune valeur métier), jamais silencieuse ailleurs dans le code.
+    """
+    try:
+        sys.stderr.write(
+            "TOOLCALL: tool=%s ip=%s apy=%s price_ratio=%s days_held=%s tier=%s paywalled=%s transport=%s\n"
+            % (tool_name, client_ip, apy, price_ratio, days_held, tier, paywalled, transport)
+        )
+        sys.stderr.flush()
+    except Exception as e:
+        sys.stderr.write(f"ERROR:    log_tool_call failed: {str(e)}\n")
+        sys.stderr.flush()
+
 def handle_jsonrpc(req: dict, ctx: dict) -> tuple[dict | None, int, dict]:
     """
     Single source of truth for MCP JSON-RPC 2.0 handling, shared by every
@@ -561,9 +584,7 @@ def handle_jsonrpc(req: dict, ctx: dict) -> tuple[dict | None, int, dict]:
             apy = float(arguments.get("apy", 0.20))
             price_ratio = float(arguments.get("price_ratio", 1.0))
             days_held = int(arguments.get("days_held", 30))
-            
-            is_default_query = (apy == 0.20 and price_ratio == 1.0 and days_held == 30)
-            
+
             # Gating check
             is_paid = False
             payment_hash = None
@@ -594,7 +615,7 @@ def handle_jsonrpc(req: dict, ctx: dict) -> tuple[dict | None, int, dict]:
                             is_paid = False
             
             if not is_paid:
-                if is_default_query and check_rate_limit(client_ip):
+                if check_rate_limit(client_ip, "evaluate"):
                     try:
                         eval_res = evaluate_lp(apy, price_ratio, days_held)
                         oracle_secret = os.getenv("ORACLE_SECRET_KEY", "default_secret")
@@ -606,6 +627,7 @@ def handle_jsonrpc(req: dict, ctx: dict) -> tuple[dict | None, int, dict]:
                         signature = sign_audit_payload(payload_to_sign, oracle_secret)
                         eval_res["oracle_signature"] = signature
                         eval_res["layer"] = "FREE"
+                        log_tool_call("evaluate_pool", client_ip, apy, price_ratio, days_held, "free", False, transport)
                         return {
                             "jsonrpc": "2.0",
                             "id": req_id,
@@ -614,6 +636,7 @@ def handle_jsonrpc(req: dict, ctx: dict) -> tuple[dict | None, int, dict]:
                             }
                         }, 200, {}
                     except Exception as e:
+                        log_tool_call("evaluate_pool", client_ip, apy, price_ratio, days_held, "free", False, transport)
                         return {
                             "jsonrpc": "2.0",
                             "id": req_id,
@@ -640,6 +663,7 @@ def handle_jsonrpc(req: dict, ctx: dict) -> tuple[dict | None, int, dict]:
                     headers = {
                         "WWW-Authenticate": f'L402 token="{pay_hash}", invoice="{pr}"'
                     }
+                    log_tool_call("evaluate_pool", client_ip, apy, price_ratio, days_held, "free", True, transport)
                     return {
                         "jsonrpc": "2.0",
                         "id": req_id,
@@ -654,7 +678,7 @@ def handle_jsonrpc(req: dict, ctx: dict) -> tuple[dict | None, int, dict]:
                             }
                         }
                     }, 402, headers
-                    
+
             # Process evaluation
             try:
                 eval_res = evaluate_lp(apy, price_ratio, days_held)
@@ -667,7 +691,8 @@ def handle_jsonrpc(req: dict, ctx: dict) -> tuple[dict | None, int, dict]:
                 signature = sign_audit_payload(payload_to_sign, oracle_secret)
                 eval_res["oracle_signature"] = signature
                 eval_res["layer"] = "PREMIUM"
-                
+
+                log_tool_call("evaluate_pool", client_ip, apy, price_ratio, days_held, "paid", False, transport)
                 return {
                     "jsonrpc": "2.0",
                     "id": req_id,
@@ -676,6 +701,7 @@ def handle_jsonrpc(req: dict, ctx: dict) -> tuple[dict | None, int, dict]:
                     }
                 }, 200, {}
             except Exception as e:
+                log_tool_call("evaluate_pool", client_ip, apy, price_ratio, days_held, "paid", False, transport)
                 return {
                     "jsonrpc": "2.0",
                     "id": req_id,
@@ -775,20 +801,21 @@ async def evaluate_pool_endpoint(
 ):
     """
     Exposes R_net evaluation, risk level, and breakeven corridor.
-    Free Quota: Protected by O(1) in-memory rate limiting (first 3 requests free).
-    Subsequent requests: Gated by dynamically priced L402 Lightning challenge (50 or 500 sats).
+    Free Quota: O(1) in-memory rate limiting, EVALUATE_FREE_CALLS_PER_DAY
+    (see security_shield.py) free calls per IP per day — custom parameters
+    included, not just the defaults.
+    Beyond quota: gated by a dynamically priced L402 Lightning challenge
+    (price_sats depends on risk_level, overridable via L402_OVERRIDE_PRICE).
     """
     raw_ip = request.headers.get("cf-connecting-ip", request.headers.get("x-forwarded-for", request.client.host if request.client else "127.0.0.1"))
     client_ip = raw_ip.split(",")[0].strip() if "," in raw_ip else raw_ip.strip()
     client_id = request.headers.get("x-agent-id", client_ip)
 
-    # Option A: Only default parameters are free. Any custom parameters bypass rate limit and require L402 payment.
-    is_default_query = (apy == 0.20 and price_ratio == 1.0 and days_held == 30)
-
     # Calculate evaluation payload in O(1) time
     try:
         evaluation = evaluate_lp(apy, price_ratio, days_held)
     except Exception as e:
+        log_tool_call("evaluate_pool", client_ip, apy, price_ratio, days_held, "free", False, "rest")
         raise HTTPException(status_code=400, detail=f"Evaluation failed: {str(e)}")
 
     # Verify if client already has a valid payment (L402 verification)
@@ -822,8 +849,8 @@ async def evaluate_pool_endpoint(
                     is_paid = False
 
     if not is_paid:
-        # Check rate limit for free tier (only allowed for default queries)
-        if is_default_query and check_rate_limit(client_ip):
+        # Check rate limit for free tier
+        if check_rate_limit(client_ip, "evaluate"):
             # Sign the payload for security
             oracle_secret = os.getenv("ORACLE_SECRET_KEY", "default_secret")
             payload_to_sign = {
@@ -834,12 +861,13 @@ async def evaluate_pool_endpoint(
             signature = sign_audit_payload(payload_to_sign, oracle_secret)
             evaluation["oracle_signature"] = signature
             evaluation["layer"] = "FREE"
+            log_tool_call("evaluate_pool", client_ip, apy, price_ratio, days_held, "free", False, "rest")
             return evaluation
         else:
             # Quota exhausted, trigger payment flow
             risk_level = evaluation.get("risk_level", "LOW")
             price_sats = 500 if risk_level in ["HIGH", "CRITICAL"] else 50
-            
+
             # Allow environment variable override
             override = os.getenv("L402_OVERRIDE_PRICE")
             if override:
@@ -847,17 +875,18 @@ async def evaluate_pool_endpoint(
 
             # Call LNbits node API to create dynamic invoice
             invoice_data = lnbits.create_invoice(price_sats, f"Arsenal R_net Evaluation ({client_id})")
-            
+
             if not invoice_data or "payment_request" not in invoice_data:
                 raise HTTPException(status_code=503, detail="Payment Gateway Node is Offline or Unauthorized")
-                
+
             pr = invoice_data.get("payment_request")
             payment_hash = invoice_data.get("payment_hash")
-            
+
             # Issue HTTP 402 challenge with macaroon/invoice credentials
             headers = {
                 "WWW-Authenticate": f'L402 token="{payment_hash}", invoice="{pr}"'
             }
+            log_tool_call("evaluate_pool", client_ip, apy, price_ratio, days_held, "free", True, "rest")
             return Response(
                 content=json.dumps({"error": "Payment Required", "price_sats": price_sats, "client_id": client_id}),
                 status_code=402,
@@ -875,6 +904,7 @@ async def evaluate_pool_endpoint(
     signature = sign_audit_payload(payload_to_sign, oracle_secret)
     evaluation["oracle_signature"] = signature
     evaluation["layer"] = "PREMIUM"
+    log_tool_call("evaluate_pool", client_ip, apy, price_ratio, days_held, "paid", False, "rest")
     return evaluation
 
 @app.get("/mcp/audit/latest")
@@ -930,7 +960,7 @@ async def get_latest_audit(request: Request, authorization: str = Header(None)):
         
     if not is_paid:
         # Check rate limit for free tier
-        if check_rate_limit(client_ip):
+        if check_rate_limit(client_ip, "audit"):
             try:
                 with open(latest_audit_path, 'r') as f:
                     content = f.read()
