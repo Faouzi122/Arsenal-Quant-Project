@@ -367,6 +367,45 @@ def get_mapper_recommendation(audit_path: str) -> str:
         "The signed audit metrics above are the deliverable."
     )
 
+# Audit Content Annotation Helper
+def annotate_audit_content(content: str) -> str:
+    """
+    Injects an explicit, machine-readable caveat into audit content so a
+    client that extracts ONLY the `metrics` block (or the raw JSON root)
+    can never mistake simulated/backtested figures for live trading
+    results. Applied identically to every transport that serves audit
+    content (REST free/paid tiers, JSON-RPC get_latest_audit) so the
+    caveat is present regardless of how the content is fetched.
+
+    - Valid JSON with a `metrics` dict: caveat key injected inside
+      `metrics` (visible even if a caller extracts only that sub-object).
+    - Valid JSON without a `metrics` dict: caveat key injected at the
+      JSON root.
+    - Not parsable JSON: a plain-text caveat line is prefixed, original
+      content is preserved untouched after it.
+
+    Never raises and never loses the original content: any unexpected
+    failure is logged to stderr and the function falls back to the
+    plain-text caveat prefix over the original, unmodified content.
+    """
+    CAVEAT_TEXT = "simulated scenario — not live trading results"
+    CAVEAT_PREFIX = "[SIMULATED DATA — not live trading results]\n"
+    try:
+        data = json.loads(content)
+        if isinstance(data, dict):
+            if isinstance(data.get("metrics"), dict):
+                data["metrics"]["_caveat"] = CAVEAT_TEXT
+            else:
+                data["_caveat"] = CAVEAT_TEXT
+            return json.dumps(data, indent=2, ensure_ascii=False)
+        return CAVEAT_PREFIX + content
+    except json.JSONDecodeError:
+        return CAVEAT_PREFIX + content
+    except Exception as e:
+        sys.stderr.write(f"ERROR:    annotate_audit_content failed: {str(e)}\n")
+        sys.stderr.flush()
+        return CAVEAT_PREFIX + content
+
 # Discoverability Endpoints (MCP Server Card + A2A Agent Card)
 # Cache-Control: no-store prevents Cloudflare/CDN from serving stale discovery cards
 DISCOVERY_HEADERS = {
@@ -566,11 +605,12 @@ def handle_jsonrpc(req: dict, ctx: dict) -> tuple[dict | None, int, dict]:
             try:
                 with open(latest_audit_path, 'r') as f:
                     content = f.read()
+                annotated_content = annotate_audit_content(content)
                 return {
                     "jsonrpc": "2.0",
                     "id": req_id,
                     "result": {
-                        "content": [{"type": "text", "text": content}]
+                        "content": [{"type": "text", "text": annotated_content}]
                     }
                 }, 200, {}
             except Exception as e:
@@ -964,18 +1004,22 @@ async def get_latest_audit(request: Request, authorization: str = Header(None)):
             try:
                 with open(latest_audit_path, 'r') as f:
                     content = f.read()
-                
-                # Sceau de l'Oracle (HMAC-SHA256 signature)
+
+                annotated_content = annotate_audit_content(content)
+
+                # Sceau de l'Oracle (HMAC-SHA256 signature) — signs the
+                # annotated content, i.e. exactly what is served below, so
+                # signature verification matches the served bytes.
                 oracle_secret = os.getenv("ORACLE_SECRET_KEY", "default_secret")
                 payload_to_sign = {
-                    "audit_content": content,
+                    "audit_content": annotated_content,
                     "client_ip": client_ip,
                     "type": "FREE_TIER"
                 }
                 signature = sign_audit_payload(payload_to_sign, oracle_secret)
-                
+
                 free_content = (
-                    content + 
+                    annotated_content +
                     f"\n\n[FREE LAYER - Discovery Access]\n"
                     "- Free tier validation successful.\n"
                     "- Upcoming requests will require L402 micro-payments.\n\n"
@@ -1011,23 +1055,26 @@ async def get_latest_audit(request: Request, authorization: str = Header(None)):
     try:
         with open(latest_audit_path, 'r') as f:
             content = f.read()
-            
+
+        annotated_content = annotate_audit_content(content)
         recommendation = get_mapper_recommendation(latest_audit_path)
-        
-        # Sceau de l'Oracle (HMAC-SHA256 signature)
+
+        # Sceau de l'Oracle (HMAC-SHA256 signature) — signs the annotated
+        # content, i.e. exactly what is served below, so signature
+        # verification matches the served bytes.
         oracle_secret = os.getenv("ORACLE_SECRET_KEY", "default_secret")
         payload_to_sign = {
-            "audit_content": content,
+            "audit_content": annotated_content,
             "payment_hash": payment_hash,
             "type": "PREMIUM_TIER"
         }
         signature = sign_audit_payload(payload_to_sign, oracle_secret)
-        
+
         premium_content = (
-            content + recommendation + 
+            annotated_content + recommendation +
             f"\n\n{{\n  \"oracle_signature\": \"{signature}\",\n  \"layer\": \"PREMIUM\"\n}}"
         )
-        
+
         return PlainTextResponse(content=premium_content)
         
     except Exception as e:

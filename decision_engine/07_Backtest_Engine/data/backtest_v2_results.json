@@ -1,0 +1,276 @@
+{
+  "engine": "Arsenal Decision Engine v2.0",
+  "source": "empirical backtest harness v1.0",
+  "paradigm": "R_net evaluation (measurement, not prediction)",
+  "methodology": {
+    "description": "Simulated 50/50 LP positions on real ETH/USDC daily close prices",
+    "data_source": "Binance public API (daily OHLCV, no API key)",
+    "il_formula": "IL = |2*sqrt(d)/(1+d) - 1|",
+    "r_net_formula": "R_net = Yield(APY, days) - IL(price_ratio)",
+    "validation": "Mid-checkpoint risk level vs actual maturity outcome",
+    "breakeven_validation": "Corridor boundaries vs actual R_net sign"
+  },
+  "results": {
+    "APY_10pct_Hold_7d": {
+      "assumed_apy_pct": 10,
+      "holding_period_days": 7,
+      "total_positions": 173,
+      "breakeven_corridor": [
+        0.8834,
+        1.132
+      ],
+      "r_net_distribution": {
+        "positive_positions": 156,
+        "negative_positions": 17,
+        "avg_r_net_pct": 0.0873,
+        "min_r_net_pct": -2.1306,
+        "max_r_net_pct": 0.1918
+      },
+      "risk_level_distribution": {
+        "LOW": 0,
+        "MODERATE": 156,
+        "HIGH": 16,
+        "CRITICAL": 1
+      },
+      "evaluator_accuracy": {
+        "mid_checkpoint_predictive_pct": 90.8,
+        "corridor_held_positions": 145,
+        "corridor_positive_outcome_pct": 100.0
+      },
+      "date_range": "2026-01-06 \u2192 2026-07-04",
+      "data_points": 180
+    },
+    "APY_10pct_Hold_14d": {
+      "assumed_apy_pct": 10,
+      "holding_period_days": 14,
+      "total_positions": 166,
+      "breakeven_corridor": [
+        0.8391,
+        1.1918
+      ],
+      "r_net_distribution": {
+        "positive_positions": 141,
+        "negative_positions": 25,
+        "avg_r_net_pct": 0.1447,
+        "min_r_net_pct": -2.4399,
+        "max_r_net_pct": 0.3836
+      },
+      "risk_level_distribution": {
+        "LOW": 0,
+        "MODERATE": 141,
+        "HIGH": 24,
+        "CRITICAL": 1
+      },
+      "evaluator_accuracy": {
+        "mid_checkpoint_predictive_pct": 88.0,
+        "corridor_held_positions": 132,
+        "corridor_positive_outcome_pct": 100.0
+      },
+      "date_range": "2026-01-06 \u2192 2026-07-04",
+      "data_points": 180
+    },
+    "APY_10pct_Hold_30d": {
+      "assumed_apy_pct": 10,
+      "holding_period_days": 30,
+      "total_positions": 150,
+      "breakeven_corridor": [
+        0.7731,
+        1.2934
+      ],
+      "r_net_distribution": {
+        "positive_positions": 112,
+        "negative_positions": 38,
+        "avg_r_net_pct": 0.1719,
+        "min_r_net_pct": -3.4012,
+        "max_r_net_pct": 0.8219
+      },
+      "risk_level_distribution": {
+        "LOW": 92,
+        "MODERATE": 20,
+        "HIGH": 31,
+        "CRITICAL": 7
+      },
+      "evaluator_accuracy": {
+        "mid_checkpoint_predictive_pct": 82.7,
+        "corridor_held_positions": 101,
+        "corridor_positive_outcome_pct": 100.0
+      },
+      "date_range": "2026-01-06 \u2192 2026-07-04",
+      "data_points": 180
+    },
+    "APY_20pct_Hold_7d": {
+      "assumed_apy_pct": 20,
+      "holding_period_days": 7,
+      "total_positions": 173,
+      "breakeven_corridor": [
+        0.8391,
+        1.1918
+      ],
+      "r_net_distribution": {
+        "positive_positions": 164,
+        "negative_positions": 9,
+        "avg_r_net_pct": 0.279,
+        "min_r_net_pct": -1.9389,
+        "max_r_net_pct": 0.3836
+      },
+      "risk_level_distribution": {
+        "LOW": 0,
+        "MODERATE": 164,
+        "HIGH": 9,
+        "CRITICAL": 0
+      },
+      "evaluator_accuracy": {
+        "mid_checkpoint_predictive_pct": 94.2,
+        "corridor_held_positions": 158,
+        "corridor_positive_outcome_pct": 100.0
+      },
+      "date_range": "2026-01-06 \u2192 2026-07-04",
+      "data_points": 180
+    },
+    "APY_20pct_Hold_14d": {
+      "assumed_apy_pct": 20,
+      "holding_period_days": 14,
+      "total_positions": 166,
+      "breakeven_corridor": [
+        0.78,
+        1.2821
+      ],
+      "r_net_distribution": {
+        "positive_positions": 150,
+        "negative_positions": 16,
+        "avg_r_net_pct": 0.5282,
+        "min_r_net_pct": -2.0564,
+        "max_r_net_pct": 0.7671
+      },
+      "risk_level_distribution": {
+        "LOW": 131,
+        "MODERATE": 19,
+        "HIGH": 15,
+        "CRITICAL": 1
+      },
+      "evaluator_accuracy": {
+        "mid_checkpoint_predictive_pct": 91.6,
+        "corridor_held_positions": 142,
+        "corridor_positive_outcome_pct": 100.0
+      },
+      "date_range": "2026-01-06 \u2192 2026-07-04",
+      "data_points": 180
+    },
+    "APY_20pct_Hold_30d": {
+      "assumed_apy_pct": 20,
+      "holding_period_days": 30,
+      "total_positions": 150,
+      "breakeven_corridor": [
+        0.6941,
+        1.4407
+      ],
+      "r_net_distribution": {
+        "positive_positions": 124,
+        "negative_positions": 26,
+        "avg_r_net_pct": 0.9938,
+        "min_r_net_pct": -2.5793,
+        "max_r_net_pct": 1.6438
+      },
+      "risk_level_distribution": {
+        "LOW": 116,
+        "MODERATE": 8,
+        "HIGH": 25,
+        "CRITICAL": 1
+      },
+      "evaluator_accuracy": {
+        "mid_checkpoint_predictive_pct": 88.0,
+        "corridor_held_positions": 117,
+        "corridor_positive_outcome_pct": 100.0
+      },
+      "date_range": "2026-01-06 \u2192 2026-07-04",
+      "data_points": 180
+    },
+    "APY_35pct_Hold_7d": {
+      "assumed_apy_pct": 35,
+      "holding_period_days": 7,
+      "total_positions": 173,
+      "breakeven_corridor": [
+        0.7926,
+        1.2616
+      ],
+      "r_net_distribution": {
+        "positive_positions": 167,
+        "negative_positions": 6,
+        "avg_r_net_pct": 0.5667,
+        "min_r_net_pct": -1.6512,
+        "max_r_net_pct": 0.6712
+      },
+      "risk_level_distribution": {
+        "LOW": 150,
+        "MODERATE": 17,
+        "HIGH": 6,
+        "CRITICAL": 0
+      },
+      "evaluator_accuracy": {
+        "mid_checkpoint_predictive_pct": 97.7,
+        "corridor_held_positions": 162,
+        "corridor_positive_outcome_pct": 100.0
+      },
+      "date_range": "2026-01-06 \u2192 2026-07-04",
+      "data_points": 180
+    },
+    "APY_35pct_Hold_14d": {
+      "assumed_apy_pct": 35,
+      "holding_period_days": 14,
+      "total_positions": 166,
+      "breakeven_corridor": [
+        0.7192,
+        1.3904
+      ],
+      "r_net_distribution": {
+        "positive_positions": 158,
+        "negative_positions": 8,
+        "avg_r_net_pct": 1.1036,
+        "min_r_net_pct": -1.481,
+        "max_r_net_pct": 1.3425
+      },
+      "risk_level_distribution": {
+        "LOW": 150,
+        "MODERATE": 8,
+        "HIGH": 8,
+        "CRITICAL": 0
+      },
+      "evaluator_accuracy": {
+        "mid_checkpoint_predictive_pct": 97.0,
+        "corridor_held_positions": 155,
+        "corridor_positive_outcome_pct": 100.0
+      },
+      "date_range": "2026-01-06 \u2192 2026-07-04",
+      "data_points": 180
+    },
+    "APY_35pct_Hold_30d": {
+      "assumed_apy_pct": 35,
+      "holding_period_days": 30,
+      "total_positions": 150,
+      "breakeven_corridor": [
+        0.6153,
+        1.6251
+      ],
+      "r_net_distribution": {
+        "positive_positions": 143,
+        "negative_positions": 7,
+        "avg_r_net_pct": 2.2267,
+        "min_r_net_pct": -1.3464,
+        "max_r_net_pct": 2.8767
+      },
+      "risk_level_distribution": {
+        "LOW": 139,
+        "MODERATE": 4,
+        "HIGH": 7,
+        "CRITICAL": 0
+      },
+      "evaluator_accuracy": {
+        "mid_checkpoint_predictive_pct": 94.0,
+        "corridor_held_positions": 133,
+        "corridor_positive_outcome_pct": 100.0
+      },
+      "date_range": "2026-01-06 \u2192 2026-07-04",
+      "data_points": 180
+    }
+  }
+}

@@ -1,11 +1,13 @@
 # 📖 Arsenal Decision Engine - Developer Cookbook
 
-> **Empirical Validation**: 82% to 97% Mid-Checkpoint Predictive Accuracy. The risk level signal correctly predicted final position health (positive/negative R_net) across all tested APY × holding-period scenarios based on 180-day real ETH/USDC data.
+> **Method**: the Breakeven Corridor is a deterministic algebraic boundary (where IL = accumulated yield), not a probabilistic model. The backtest script and its raw result files are published in [`07_Backtest_Engine/`](../07_Backtest_Engine/) — 180 days of real ETH/USDC daily closes. This engine measures; it does not forecast, and no predictive-accuracy figure is claimed.
 
 This cookbook provides the exact integration blueprints to equip your autonomous agents (CrewAI, LangChain, ElizaOS) with our deterministic $\mathcal{O}(1)$ Risk Middleware.
 
 ## The Concept: L402 Deterministic Paywall
-Your agent will intercept an HTTP 402, pay a microscopic Lightning Network invoice (50 or 500 sats), and retry with the cryptographic proof to unlock the decision matrix (`r_net_pct`, `risk_level`, and `breakeven_corridor`).
+`evaluate_pool` gives you **100 free calls per IP per day, custom parameters included** — you can integrate and test without any Lightning wallet. Past that quota, your agent intercepts an HTTP 402, pays a Lightning invoice (currently **150 sats**, set by server configuration — always read the amount from the 402 response rather than hard-coding it), and retries with the cryptographic proof to unlock the decision matrix (`r_net_pct`, `risk_level`, `breakeven_corridor`).
+
+Two endpoints expose the same calculation: `POST /mcp` (MCP JSON-RPC — `initialize` → `tools/list` → `tools/call`, the route advertised on the MCP registry) and `GET /mcp/evaluate` (REST convenience, GET-only). The example below uses the REST route.
 
 ## 🛠️ Python Integration (Universal / CrewAI Tool)
 
@@ -18,8 +20,11 @@ import json
 import re
 
 class ArsenalRiskShield:
-    def __init__(self, lnbits_api_key: str, lnbits_url: str = "https://demo.lnbits.com"):
-        self.lnbits_key = lnbits_api_key
+    def __init__(self, lnbits_payment_key: str, lnbits_url: str = "https://demo.lnbits.com"):
+        # LNbits needs a wallet key with send permission to pay an invoice. Use a
+        # DEDICATED wallet funded with a small working balance — never the key of a
+        # wallet holding significant funds. Load it from the environment, not code.
+        self.lnbits_key = lnbits_payment_key
         self.lnbits_url = lnbits_url
 
     def request_risk_evaluation(self, apy: float, price_ratio: float, days_held: int = 30) -> dict:
@@ -59,7 +64,7 @@ class ArsenalRiskShield:
                 raise
 
 # Example: Agent deciding to hold or exit a position
-shield = ArsenalRiskShield(lnbits_api_key="your_agent_wallet_key")
+shield = ArsenalRiskShield(lnbits_payment_key=os.getenv("LNBITS_PAYMENT_KEY"))
 evaluation = shield.request_risk_evaluation(apy=0.20, price_ratio=0.85, days_held=30)
 
 print(f"Risk Level: {evaluation['risk_level']}") 
@@ -69,4 +74,4 @@ print(f"Breakeven Corridor: [{evaluation['breakeven_corridor']['lower_ratio']}, 
 
 ## Why pay for evaluations?
 
-If your autonomous portfolio is exposed to a $50,000 Impermanent Loss wipeout, a 500 Satoshi ($0.30) deterministic risk-validation call is not a fee. It is a mathematical insurance policy protecting your LP margins.
+This engine does not prevent losses and makes no claim about how much it saves you. It computes — deterministically, in O(1), with an HMAC signature over the result — whether a position sits above or below its breakeven boundary. What a paid call buys is a reproducible, auditable number your agent can act on. Start on the free quota; pay only if the calculation earns its place in your loop.

@@ -1,6 +1,6 @@
 name: "arsenal-decision-engine"
 displayName: "Arsenal Decision Engine"
-description: "Stateless R_net evaluation middleware for autonomous DeFAI agents. Computes Impermanent Loss, net yield, and Breakeven Corridor in O(1). Protected by L402 Lightning paywall."
+description: "Stateless R_net evaluation middleware for autonomous DeFAI agents. Computes Impermanent Loss, net yield, and Breakeven Corridor in O(1). Free tier: 100 calls per IP per day, custom parameters included; L402 Lightning micro-payment beyond it. Backtest script and raw result files published."
 version: "2.0.0"
 category: "finance"
 author: "Faouzi122"

@@ -8,3 +8,11 @@ __pycache__/
 *.key
 *.pem
 .env*
+
+# Backtest evidence is published so the method can be audited: the repository
+# root ignores **/data/, so the directory is re-included here, everything inside
+# it is ignored again, and only the JSON result files are let through. Raw price
+# series (CSV) and any env/state file stay ignored.
+!07_Backtest_Engine/data/
+07_Backtest_Engine/data/*
+!07_Backtest_Engine/data/*.json

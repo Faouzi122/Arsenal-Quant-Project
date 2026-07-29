@@ -4,9 +4,9 @@
 [![Arsenal-Quant-Project MCP server](https://glama.ai/mcp/servers/Faouzi122/Arsenal-Quant-Project/badges/card.svg)](https://glama.ai/mcp/servers/Faouzi122/Arsenal-Quant-Project)
 [![smithery badge](https://smithery.ai/badge/khelifa-faouzi16/arsenal-decision-engine)](https://smithery.ai/servers/khelifa-faouzi16/arsenal-decision-engine)
 
-> **Validation on 180-Day Binance ETH/USDC Data ([`07_Backtest_Engine/`](./decision_engine/07_Backtest_Engine/run_empirical_backtest.py)):**
+> **Method and raw results are published** — [backtest script](./decision_engine/07_Backtest_Engine/run_empirical_backtest.py) · [result data](./decision_engine/07_Backtest_Engine/data/) (180 days of Binance ETH/USDC daily closes):
 > 🔬 **Breakeven Corridor** is a deterministic algebraic boundary (where IL = accumulated yield). Any position whose price ratio stays within `[lower_be, upper_be]` has R_net > 0 by mathematical definition — not a probabilistic model.
-> 🎯 **82% to 97% Mid-Checkpoint Predictive Accuracy** — the risk level signal correctly predicted final position health (positive/negative R_net) across all tested APY × holding-period scenarios.
+> 📐 This engine **measures**; it does not forecast. No predictive-accuracy figure is claimed — read the published result files and judge the method for yourself.
 
 ---
 
@@ -27,10 +27,27 @@ Before an autonomous agent deploys capital or adjusts a standard constant-produc
 - **Complexity:** $\mathcal{O}(1)$ time and memory.
 - **Latency:** $< 15\text{ms}$ local execution.
 
-### Agent Request (HTTP GET)
+### Two ways to call it
+
+**1. MCP JSON-RPC — the endpoint advertised on the MCP registry**
 ```
-https://api.arsenal-quant.com/mcp/evaluate?apy=0.20&price_ratio=0.85&days_held=30
+POST https://api.arsenal-quant.com/mcp
 ```
+```json
+{"jsonrpc":"2.0","id":1,"method":"tools/call",
+ "params":{"name":"evaluate_pool",
+           "arguments":{"apy":0.20,"price_ratio":0.85,"days_held":30}}}
+```
+Standard MCP handshake: `initialize` → `tools/list` → `tools/call`. Available over
+streamable HTTP and stdio.
+
+**2. REST convenience route — no MCP client required**
+```
+GET https://api.arsenal-quant.com/mcp/evaluate?apy=0.20&price_ratio=0.85&days_held=30
+```
+Both routes run the same calculation and the same quota. Note that
+`/mcp/evaluate` is **GET-only**: a `POST` to that path returns `405 Allow: GET`,
+because JSON-RPC belongs on `/mcp`.
 
 ### Engine Response (JSON Contract)
 ```json
@@ -51,17 +68,26 @@ https://api.arsenal-quant.com/mcp/evaluate?apy=0.20&price_ratio=0.85&days_held=3
     "days_held": 30
   },
   "source": "Arsenal Decision Engine v2.0",
-  "oracle_signature": "b5dce8268fe762fa66ffccc083b02e9b65801888cdf76004ff22b648ea80869b",
-  "layer": "PREMIUM"
+  "oracle_signature": "<HMAC-SHA256 hex — illustrative placeholder, yours will differ>",
+  "layer": "FREE"
 }
 ```
+`layer` reports how the call was served: `FREE` while inside the free quota,
+`PREMIUM` once an L402 payment has been verified. The call shown above is
+served as `FREE`.
 
 ---
 
-## API Pricing (Dynamic L402)
-- **Free Tier:** First 3 requests per IP/hour are free.
-- **Low/Moderate Risk Positions:** 50 Sats per evaluation.
-- **High/Critical Risk Positions:** 500 Sats per evaluation.
+## Access and Pricing
+
+- **Free tier — `evaluate_pool`:** **100 calls per IP per day, custom parameters
+  included.** No Lightning wallet is needed to use the engine.
+- **Beyond the free quota:** an L402 Lightning micro-payment. The amount is set by
+  server configuration and is currently **150 sats** per evaluation. Read it from
+  the `WWW-Authenticate` header or from `error.data.price_sats` in the 402 response
+  rather than hard-coding it.
+- **`get_latest_audit`:** 3 free calls per IP per hour, then L402 — this endpoint
+  is what keeps the Lightning rail live and demonstrable.
 
 ---
 
@@ -76,7 +102,11 @@ import os
 
 API_URL = "https://api.arsenal-quant.com/mcp/evaluate?apy=0.20&price_ratio=0.85&days_held=30"
 LNBITS_URL = "https://demo.lnbits.com"
-LNBITS_ADMIN_KEY = os.getenv("LNBITS_ADMIN_KEY", "your_key_here")
+
+# LNbits requires a wallet key with send permission to pay an invoice.
+# Use a DEDICATED wallet funded with a small working balance, and never the key
+# of a wallet holding significant funds. Keep it in the environment, never in code.
+LNBITS_PAYMENT_KEY = os.getenv("LNBITS_PAYMENT_KEY")
 
 def query_risk_oracle():
     req = urllib.request.Request(API_URL, method="GET")
@@ -94,7 +124,7 @@ def query_risk_oracle():
             pay_req = urllib.request.Request(
                 f"{LNBITS_URL}/api/v1/payments",
                 data=json.dumps({"out": True, "bolt11": invoice}).encode(),
-                headers={"X-Api-Key": LNBITS_ADMIN_KEY, "Content-Type": "application/json"}
+                headers={"X-Api-Key": LNBITS_PAYMENT_KEY, "Content-Type": "application/json"}
             )
             with urllib.request.urlopen(pay_req) as pay_resp:
                 preimage = json.loads(pay_resp.read().decode())["preimage"]
@@ -121,5 +151,10 @@ if __name__ == "__main__":
 - Integration cookbook & MCP guides: [`COOKBOOK.md`](./decision_engine/08_SDK_Wrappers/COOKBOOK.md)
 - MCP auto-discovery card: `https://api.arsenal-quant.com/.well-known/mcp/server-card.json`
 
-## Why L402? (Proof of Savings)
-If this engine protects your agent from a $50,000 Impermanent Loss wipeout, a 500 Satoshi ($0.30) deterministic risk-validation call is not a cost — it is a mathematical insurance policy.
+## Why pay per call?
+
+This engine does not prevent losses, and it makes no claim about how much money it
+saves you. What it does is compute — deterministically, in $\mathcal{O}(1)$, with an
+HMAC signature over the result — whether a position sits above or below its
+breakeven boundary. What you pay for is a reproducible, auditable number your agent
+can act on, priced per call so it can be budgeted like any other input.

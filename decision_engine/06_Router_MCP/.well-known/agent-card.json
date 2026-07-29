@@ -3,7 +3,7 @@
   "agentCard": {
     "name": "Arsenal Decision Engine",
     "version": "2.0.0",
-    "description": "Stateless R_net evaluation middleware for autonomous DeFAI agents. Computes Impermanent Loss, net yield, and Breakeven Corridor bounds for constant-product / full-range LP positions in O(1). Protected by L402 Lightning Network paywall.",
+    "description": "Stateless R_net evaluation middleware for autonomous DeFAI agents. Computes Impermanent Loss, net yield, and Breakeven Corridor bounds for constant-product / full-range LP positions in O(1). Free tier: 100 calls per IP per day, custom parameters included; L402 Lightning micro-payment beyond it.",
     "url": "https://api.arsenal-quant.com",
     "documentationUrl": "https://github.com/Faouzi122/Arsenal-Quant-Project/blob/master/decision_engine/08_SDK_Wrappers/COOKBOOK.md",
     "iconUrl": "https://api.arsenal-quant.com/.well-known/icon.png",
@@ -18,7 +18,7 @@
     },
     "authentication": {
       "schemes": ["L402"],
-      "description": "Lightning Network L402 micro-payment. First 3 requests/hour free. 50-500 sats per evaluation depending on risk level."
+      "description": "No authentication needed within the free quota: 100 calls per IP per day on evaluate_pool, custom parameters included. Beyond it, an L402 Lightning micro-payment is required (currently 150 sats, set by server configuration). Read the authoritative amount from the WWW-Authenticate header or error.data.price_sats of the 402 response."
     },
     "defaultInputModes": ["application/json"],
     "defaultOutputModes": ["application/json"],
