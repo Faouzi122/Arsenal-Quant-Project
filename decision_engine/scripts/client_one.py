@@ -15,7 +15,10 @@ import urllib.error
 # Configuration
 API_URL = "http://127.0.0.1:8088/mcp/evaluate?apy=0.20&price_ratio=0.85&days_held=30"
 LNBITS_URL = "https://demo.lnbits.com"
-LNBITS_ADMIN_KEY = os.getenv("LNBITS_ADMIN_KEY", "demo_admin_key_placeholder")
+# LNbits requires a wallet key with send permission to pay an invoice. Use a
+# DEDICATED wallet funded with a small working balance — never the key of a
+# wallet holding significant funds. Keep it in the environment, never in code.
+LNBITS_PAYMENT_KEY = os.getenv("LNBITS_PAYMENT_KEY")
 
 class AutonomousLPAgent:
     def __init__(self, initial_capital=10000.0):
@@ -144,7 +147,11 @@ def main():
     print("\n[SYSTEM] Starting local gateway on port 8088...")
     env = os.environ.copy()
     env["L402_OVERRIDE_PRICE"] = "150"
-    gateway_path = "/home/faouzi/Antigravity_System/06_Router_MCP/l402_gateway_real.py"
+    gateway_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "06_Router_MCP",
+        "l402_gateway_real.py"
+    )
     proc = subprocess.Popen(
         [sys.executable, gateway_path],
         env=env,

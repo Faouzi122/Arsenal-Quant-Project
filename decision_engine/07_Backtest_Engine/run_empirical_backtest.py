@@ -246,7 +246,7 @@ def save_report(results, output_path):
     """Save machine-readable JSON report."""
     report = {
         "engine": "Arsenal Decision Engine v2.0",
-        "source": "Antigravity Engine v1.0",
+        "source": "empirical backtest harness v1.0",
         "paradigm": "R_net evaluation (measurement, not prediction)",
         "methodology": {
             "description": "Simulated 50/50 LP positions on real ETH/USDC daily close prices",

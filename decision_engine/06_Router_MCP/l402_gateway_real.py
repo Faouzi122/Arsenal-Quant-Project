@@ -65,7 +65,7 @@ async def root_endpoint(request: Request):
     
     if "application/json" in accept and "text/html" not in accept:
         return HTMLResponse(content=json.dumps({
-            "system": "Antigravity Engine - Decision Layer",
+            "system": "Arsenal Decision Engine",
             "status": "MAINNET ACTIVE",
             "protocol": "M2M L402 Paywall",
             "message": "This is an API gateway. Access via web browser to view human documentation.",
