@@ -86,8 +86,8 @@ served as `FREE`.
   server configuration and is currently **150 sats** per evaluation. Read it from
   the `WWW-Authenticate` header or from `error.data.price_sats` in the 402 response
   rather than hard-coding it.
-- **`get_latest_audit`:** 3 free calls per IP per hour, then L402 — this endpoint
-  is what keeps the Lightning rail live and demonstrable.
+- **`GET /mcp/audit/latest`:** 3 free calls per IP per hour, then L402 — this
+  route is what keeps the Lightning rail live and demonstrable.
 
 ---
 

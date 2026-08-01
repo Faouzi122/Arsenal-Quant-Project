@@ -373,9 +373,9 @@ def annotate_audit_content(content: str) -> str:
     Injects an explicit, machine-readable caveat into audit content so a
     client that extracts ONLY the `metrics` block (or the raw JSON root)
     can never mistake simulated/backtested figures for live trading
-    results. Applied identically to every transport that serves audit
-    content (REST free/paid tiers, JSON-RPC get_latest_audit) so the
-    caveat is present regardless of how the content is fetched.
+    results. Applied identically to both REST tiers that serve audit
+    content (free and paid) so the caveat is present regardless of
+    which tier fetched it.
 
     - Valid JSON with a `metrics` dict: caveat key injected inside
       `metrics` (visible even if a caller extracts only that sub-object).
@@ -523,14 +523,6 @@ def handle_jsonrpc(req: dict, ctx: dict) -> tuple[dict | None, int, dict]:
             "result": {
                 "tools": [
                     {
-                        "name": "get_latest_audit",
-                        "description": "Fetch the latest cost-intelligence and risk mitigation audit signal.",
-                        "inputSchema": {
-                            "type": "object",
-                            "properties": {}
-                        }
-                    },
-                    {
                         "name": "evaluate_pool",
                         "description": "Evaluate LP position risk and calculate R_net & breakeven corridor.",
                         "inputSchema": {
@@ -587,40 +579,7 @@ def handle_jsonrpc(req: dict, ctx: dict) -> tuple[dict | None, int, dict]:
         if not isinstance(arguments, dict):
             arguments = {}
         
-        if tool_name == "get_latest_audit":
-            if not os.path.exists(AUDIT_DIR):
-                return {
-                    "jsonrpc": "2.0",
-                    "id": req_id,
-                    "error": {"code": -32603, "message": "Audit folder missing."}
-                }, 200, {}
-            files = sorted(os.listdir(AUDIT_DIR), reverse=True)
-            if not files:
-                return {
-                    "jsonrpc": "2.0",
-                    "id": req_id,
-                    "error": {"code": -32603, "message": "No audit reports available."}
-                }, 200, {}
-            latest_audit_path = os.path.join(AUDIT_DIR, files[0])
-            try:
-                with open(latest_audit_path, 'r') as f:
-                    content = f.read()
-                annotated_content = annotate_audit_content(content)
-                return {
-                    "jsonrpc": "2.0",
-                    "id": req_id,
-                    "result": {
-                        "content": [{"type": "text", "text": annotated_content}]
-                    }
-                }, 200, {}
-            except Exception as e:
-                return {
-                    "jsonrpc": "2.0",
-                    "id": req_id,
-                    "error": {"code": -32603, "message": f"Error loading audit: {str(e)}"}
-                }, 200, {}
-                
-        elif tool_name == "evaluate_pool":
+        if tool_name == "evaluate_pool":
             apy = float(arguments.get("apy", 0.20))
             price_ratio = float(arguments.get("price_ratio", 1.0))
             days_held = int(arguments.get("days_held", 30))

@@ -12,7 +12,7 @@
   "authentication": {
     "required": false,
     "type": "L402",
-    "description": "No authentication needed within the free quota: evaluate_pool allows 100 calls per IP per day, custom parameters included. Beyond that quota, an L402 Lightning micro-payment is required (currently 150 sats, set by server configuration). get_latest_audit allows 3 free calls per IP per hour, then L402. Always read the authoritative amount from the WWW-Authenticate header or error.data.price_sats of the 402 response."
+    "description": "No authentication needed within the free quota: evaluate_pool allows 100 calls per IP per day, custom parameters included. Beyond that quota, an L402 Lightning micro-payment is required (currently 150 sats, set by server configuration). GET /mcp/audit/latest allows 3 free calls per IP per hour, then L402. Always read the authoritative amount from the WWW-Authenticate header or error.data.price_sats of the 402 response."
   },
   "tools": [
     {

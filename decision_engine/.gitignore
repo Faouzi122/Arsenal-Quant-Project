@@ -9,6 +9,13 @@ __pycache__/
 *.pem
 .env*
 
+# Runtime state written by the gateway next to its own source. Already excluded
+# from Docker builds; excluded from git for the same reason — client_quotas.json
+# maps client identifiers (IP or x-agent-id) to call counts, and used_hashes.json
+# records consumed payment hashes. Neither belongs in a public repository.
+client_quotas.json
+used_hashes.json
+
 # Backtest evidence is published so the method can be audited: the repository
 # root ignores **/data/, so the directory is re-included here, everything inside
 # it is ignored again, and only the JSON result files are let through. Raw price
