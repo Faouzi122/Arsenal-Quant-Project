@@ -6,6 +6,7 @@ import time
 import hmac
 import hashlib
 import json
+import threading
 from collections import defaultdict
 
 # Stockage en RAM pour des performances maximales (< 1ms)
@@ -13,6 +14,15 @@ from collections import defaultdict
 # Clé composite (scope, ip) : les compteurs de chaque scope sont totalement
 # isolés — consommer le quota "evaluate" ne touche jamais le quota "audit".
 _RATE_LIMIT_STORE = defaultdict(list)
+
+# handle_jsonrpc (et donc check_rate_limit) peut désormais être exécuté
+# depuis un thread du threadpool FastAPI (run_in_threadpool), en plus de la
+# boucle stdio synchrone. _RATE_LIMIT_STORE est un dict partagé muté en
+# lecture-purge-test-écriture : sans verrou, deux threads concurrents
+# pourraient tous les deux lire un compteur sous le seuil puis écrire,
+# faisant fuir le quota gratuit. Le verrou couvre l'opération entière pour
+# rester atomique, pas seulement l'écriture finale.
+_RATE_LIMIT_LOCK = threading.Lock()
 
 # Configuration Lean — un seuil nommé et sa fenêtre par scope d'usage.
 # evaluate_pool : quota d'exploration ouvert pour mesurer l'usage réel.
@@ -45,21 +55,27 @@ def check_rate_limit(client_ip: str, scope: str) -> bool:
         )
 
     max_free_calls, window_seconds = _SCOPE_LIMITS[scope]
-    current_time = time.time()
     store_key = (scope, client_ip)
 
-    # Nettoyage O(N) où N <= max_free_calls (donc O(1) effectif)
-    _RATE_LIMIT_STORE[store_key] = [
-        t for t in _RATE_LIMIT_STORE[store_key]
-        if current_time - t < window_seconds
-    ]
+    # Verrou couvrant toute la section critique (lecture, purge, test,
+    # écriture) : elle doit s'exécuter comme une seule opération atomique
+    # même si deux requêtes concurrentes (threadpool) l'appellent en même
+    # temps pour la même (scope, IP).
+    with _RATE_LIMIT_LOCK:
+        current_time = time.time()
 
-    if len(_RATE_LIMIT_STORE[store_key]) >= max_free_calls:
-        return False # Quota épuisé, déclenchement du paywall L402
+        # Nettoyage O(N) où N <= max_free_calls (donc O(1) effectif)
+        _RATE_LIMIT_STORE[store_key] = [
+            t for t in _RATE_LIMIT_STORE[store_key]
+            if current_time - t < window_seconds
+        ]
 
-    # Ajout du nouvel appel
-    _RATE_LIMIT_STORE[store_key].append(current_time)
-    return True
+        if len(_RATE_LIMIT_STORE[store_key]) >= max_free_calls:
+            return False # Quota épuisé, déclenchement du paywall L402
+
+        # Ajout du nouvel appel
+        _RATE_LIMIT_STORE[store_key].append(current_time)
+        return True
 
 def sign_audit_payload(audit_data: dict, secret_key: str) -> str:
     """

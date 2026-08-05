@@ -1,11 +1,13 @@
 import os
 import json
 import sys
+import threading
 # pyrefly: ignore [missing-import]
 import httpx
 from fastapi import FastAPI, HTTPException, Header, Response, Request
 from fastapi.responses import PlainTextResponse, HTMLResponse, JSONResponse
-from lnbits_client import LNbitsClient
+from starlette.concurrency import run_in_threadpool
+from lnbits_client import LNbitsClient, PAYMENT_PAID, PAYMENT_UNKNOWN
 from security_shield import check_rate_limit, sign_audit_payload
 
 # Dynamic path setup for evaluate_pool core
@@ -254,34 +256,152 @@ AUDIT_DIR = os.path.join(BASE_DIR, "04_Strategy_Layer", "Audit_Factory", "Strate
 QUOTA_FILE = os.path.join(os.path.dirname(__file__), "client_quotas.json")
 USED_HASHES_FILE = os.path.join(os.path.dirname(__file__), "used_hashes.json")
 
-def is_hash_used(payment_hash: str) -> bool:
+def _load_used_hashes() -> dict:
+    """
+    Loads the used-hash store as {"confirmed": [...], "pending": [...]}.
+
+    Tolerant of the legacy file format (a bare JSON array): before
+    try_claim_hash()/confirm_hash_used() existed, this file only ever held
+    CONFIRMED (paid) hashes as a flat list. A legacy array is read as
+    {"confirmed": <array>, "pending": []} — no PENDING claim can ever have
+    been written under the old code, so this reconstruction is exact, not
+    a guess.
+    """
     if not os.path.exists(USED_HASHES_FILE):
-        return False
+        return {"confirmed": [], "pending": []}
     try:
         with open(USED_HASHES_FILE, "r") as f:
-            used = json.load(f)
-        return payment_hash in used
-    except Exception:
-        return False
+            data = json.load(f)
+    except Exception as e:
+        print(f"[HASH ERROR] Failed to load used hashes: {e}")
+        return {"confirmed": [], "pending": []}
+    if isinstance(data, list):
+        return {"confirmed": data, "pending": []}
+    if isinstance(data, dict):
+        confirmed = data.get("confirmed")
+        pending = data.get("pending")
+        return {
+            "confirmed": confirmed if isinstance(confirmed, list) else [],
+            "pending": pending if isinstance(pending, list) else [],
+        }
+    return {"confirmed": [], "pending": []}
 
-def mark_hash_used(payment_hash: str):
-    used = []
-    if os.path.exists(USED_HASHES_FILE):
-        try:
-            with open(USED_HASHES_FILE, "r") as f:
-                used = json.load(f)
-        except Exception:
-            pass
-    if payment_hash not in used:
-        used.append(payment_hash)
-        if len(used) > 10000:
-            used = used[-10000:]
-        try:
-            os.makedirs(os.path.dirname(USED_HASHES_FILE), exist_ok=True)
-            with open(USED_HASHES_FILE, "w") as f:
-                json.dump(used, f)
-        except Exception as e:
-            print(f"[HASH ERROR] Failed to save used hashes: {e}")
+def _save_used_hashes(state: dict) -> None:
+    try:
+        os.makedirs(os.path.dirname(USED_HASHES_FILE), exist_ok=True)
+        with open(USED_HASHES_FILE, "w") as f:
+            json.dump(state, f)
+    except Exception as e:
+        print(f"[HASH ERROR] Failed to save used hashes: {e}")
+
+def is_hash_used(payment_hash: str) -> bool:
+    """
+    True if payment_hash is CONFIRMED (a settled payment already spent)
+    or PENDING (currently claimed by a request mid-verification) — either
+    way it must not be handed out again by try_claim_hash().
+    """
+    state = _load_used_hashes()
+    return payment_hash in state["confirmed"] or payment_hash in state["pending"]
+
+# Guards every read-modify-write of used_hashes.json (claim / confirm /
+# release) as ONE atomic section. Deliberately never held across a network
+# call: check_invoice() can take up to LNBITS_TIMEOUT_SECONDS (8s default),
+# and holding this lock across it would serialize every concurrent payment
+# verification into a new, self-inflicted denial-of-service — worse than
+# the replay bug it fixes. try_claim_hash(), confirm_hash_used() and
+# release_hash_claim() each acquire it independently, only for the
+# in-memory/file I/O they need, and always after any network call has
+# already returned.
+_HASH_CLAIM_LOCK = threading.Lock()
+
+def try_claim_hash(payment_hash: str) -> bool:
+    """
+    Atomically tests-and-marks payment_hash as PENDING in a single locked
+    operation (no network I/O inside the lock). Returns True if the caller
+    just claimed it (must now verify payment with LNbits, then call
+    confirm_hash_used() if paid or release_hash_claim() otherwise) and
+    False if it was already used — CONFIRMED by a prior successful
+    payment, or PENDING under a concurrent request currently
+    mid-verification.
+
+    This closes the replay window that existed between the unlocked
+    is_hash_used() check and the write: under concurrency (threadpool-
+    deported handle_jsonrpc, or parallel REST requests), N simultaneous
+    requests carrying the SAME payment_hash could previously all observe
+    "not used yet" before any of them wrote the mark, and all N would be
+    granted premium access from a single Lightning payment.
+
+    Deliberately never truncates. A claim is, by definition, unconfirmed
+    and may still be released as UNPAID/UNKNOWN. If claiming were allowed
+    to evict entries, a burst of forged/unpaid claims could evict
+    genuinely CONFIRMED (already-paid) hashes before those claims are
+    ever checked against LNbits — making a real prior payment replayable.
+    Only confirm_hash_used() below, reached exclusively once LNbits has
+    confirmed a payment settled, is allowed to evict anything, and it
+    only ever evicts from "confirmed" — never from "pending".
+    """
+    with _HASH_CLAIM_LOCK:
+        if is_hash_used(payment_hash):
+            return False
+        state = _load_used_hashes()
+        if payment_hash not in state["pending"]:
+            state["pending"].append(payment_hash)
+        _save_used_hashes(state)
+        return True
+
+def confirm_hash_used(payment_hash: str) -> None:
+    """
+    Promotes a PENDING claim to CONFIRMED once LNbits has verified the
+    Lightning payment actually settled (PAYMENT_PAID). Must be called
+    exactly once per KEPT claim, from the same finally-equivalent block
+    that would otherwise call release_hash_claim() — see call sites in
+    handle_jsonrpc / evaluate_pool_endpoint / get_latest_audit /
+    catch_all_proxy.
+
+    This is the ONLY place the used-hash store is ever truncated to the
+    10000-entry bound, and the bound applies to "confirmed" only.
+    Truncation is therefore triggered exclusively by a real, confirmed
+    payment growing the store — never by an unconfirmed claim that might
+    still be released. A CONFIRMED entry can only ever be evicted by the
+    arrival of enough OTHER confirmed payments to push it past the bound
+    (a size-growth limitation already tracked separately), never by a
+    forged or concurrent claim that is merely PENDING.
+    """
+    with _HASH_CLAIM_LOCK:
+        state = _load_used_hashes()
+        if payment_hash in state["pending"]:
+            state["pending"].remove(payment_hash)
+        if payment_hash not in state["confirmed"]:
+            state["confirmed"].append(payment_hash)
+        if len(state["confirmed"]) > 10000:
+            state["confirmed"] = state["confirmed"][-10000:]
+        _save_used_hashes(state)
+
+def release_hash_claim(payment_hash: str) -> None:
+    """
+    Reverts a try_claim_hash() PENDING claim when verification concludes
+    UNPAID or UNKNOWN, so a client whose invoice was not actually settled
+    — or could not be checked at all — is not permanently locked out of
+    paying with that same hash. Must be called from a try/finally-
+    equivalent so it still runs if check_invoice() raises unexpectedly.
+
+    Only ever removes from "pending" — a CONFIRMED entry is never touched
+    here, so a release triggered by a forged or replayed claim can never
+    make a genuinely paid hash reusable again.
+
+    Residual window (documented, not silently accepted): if this process
+    is killed between try_claim_hash() succeeding and release_hash_claim()
+    running (e.g. OOM-kill mid-verification), the hash stays PENDING
+    forever and a legitimate payment could be lost. This is a fail-closed
+    failure mode (money is refused, never fabricated) — acceptable for a
+    payment system, but explicitly flagged here rather than discovered
+    later.
+    """
+    with _HASH_CLAIM_LOCK:
+        state = _load_used_hashes()
+        if payment_hash in state["pending"]:
+            state["pending"].remove(payment_hash)
+            _save_used_hashes(state)
 
 # Pricing matrix based on pain level
 PRICING_MAP = {
@@ -471,7 +591,7 @@ def log_tool_call(tool_name, client_ip, apy, price_ratio, days_held, tier, paywa
         sys.stderr.write(f"ERROR:    log_tool_call failed: {str(e)}\n")
         sys.stderr.flush()
 
-def handle_jsonrpc(req: dict, ctx: dict) -> tuple[dict | None, int, dict]:
+async def handle_jsonrpc(req: dict, ctx: dict) -> tuple[dict | None, int, dict]:
     """
     Single source of truth for MCP JSON-RPC 2.0 handling, shared by every
     transport (HTTP POST /mcp and the stdio loop). L402 gating for
@@ -586,6 +706,7 @@ def handle_jsonrpc(req: dict, ctx: dict) -> tuple[dict | None, int, dict]:
 
             # Gating check
             is_paid = False
+            payment_verification_unknown = False
             payment_hash = None
             if isinstance(authorization, str) and authorization.startswith("L402 "):
                 token_part = authorization.split(" ")[1]
@@ -594,7 +715,7 @@ def handle_jsonrpc(req: dict, ctx: dict) -> tuple[dict | None, int, dict]:
                 else:
                     payment_hash = token_part
                     preimage = None
-                    
+
                 if preimage == "0000000000000000000000000000000000000000000000000000000000000000" and os.getenv("L402_SANDBOX_BYPASS") == "true":
                     is_paid = True
                 else:
@@ -606,13 +727,64 @@ def handle_jsonrpc(req: dict, ctx: dict) -> tuple[dict | None, int, dict]:
                             hasher.update(preimage_bytes)
                             calculated_hash = hasher.hexdigest()
                             if calculated_hash == payment_hash:
-                                if not is_hash_used(payment_hash):
-                                    is_paid = lnbits.check_invoice(payment_hash)
-                                    if is_paid:
-                                        mark_hash_used(payment_hash)
+                                # Deported: try_claim_hash() does synchronous
+                                # JSON file I/O (read+write of used_hashes.json)
+                                # under _HASH_CLAIM_LOCK. That lock is a
+                                # threading.Lock, which serializes correctly
+                                # across threadpool workers, so deporting the
+                                # WHOLE call preserves atomicity — only the
+                                # test-and-mark step must never run split
+                                # across is_hash_used()/mark_hash_used() calls.
+                                if await run_in_threadpool(try_claim_hash, payment_hash):
+                                    # Claim reserved atomically above (no
+                                    # network I/O under the lock). Only
+                                    # keep it if LNbits confirms payment;
+                                    # release it on UNPAID/UNKNOWN/error so
+                                    # a legitimate retry isn't burned.
+                                    claim_kept = False
+                                    try:
+                                        # Deported: handle_jsonrpc is async
+                                        # and this blocking urllib call must
+                                        # never stall the event loop,
+                                        # regardless of which transport
+                                        # (HTTP or stdio-via-asyncio.run)
+                                        # is driving it.
+                                        invoice_status = await run_in_threadpool(lnbits.check_invoice, payment_hash)
+                                        if invoice_status == PAYMENT_PAID:
+                                            is_paid = True
+                                            claim_kept = True
+                                        elif invoice_status == PAYMENT_UNKNOWN:
+                                            payment_verification_unknown = True
+                                    finally:
+                                        if claim_kept:
+                                            # Promote PENDING -> CONFIRMED now
+                                            # that LNbits confirmed payment.
+                                            # This is the only path that may
+                                            # ever truncate the used-hash
+                                            # store (see confirm_hash_used).
+                                            await run_in_threadpool(confirm_hash_used, payment_hash)
+                                        else:
+                                            # Deported for the same reason as
+                                            # the claim above: synchronous
+                                            # file I/O under _HASH_CLAIM_LOCK
+                                            # must not run on the event loop.
+                                            await run_in_threadpool(release_hash_claim, payment_hash)
+                                # else: hash already claimed (paid earlier,
+                                # or a concurrent request is mid-verification
+                                # right now) — treated as replay, no premium.
                         except Exception:
                             is_paid = False
-            
+
+            if payment_verification_unknown:
+                # LNbits unreachable/unreadable: never treat as unpaid (would
+                # re-invoice a client who may have already paid) nor as paid
+                # (would grant access without proof). Signal explicitly.
+                return {
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "error": {"code": -32000, "message": "Payment verification temporarily unavailable, please retry"}
+                }, 503, {}
+
             if not is_paid:
                 if check_rate_limit(client_ip, "evaluate"):
                     try:
@@ -647,7 +819,10 @@ def handle_jsonrpc(req: dict, ctx: dict) -> tuple[dict | None, int, dict]:
                     override = os.getenv("L402_OVERRIDE_PRICE")
                     if override:
                         price_sats = int(override)
-                    invoice_data = lnbits.create_invoice(price_sats, f"Arsenal R_net Evaluation (JSON-RPC {transport.upper()})")
+                    # Deported: reached with NO Authorization header once
+                    # the free quota is exhausted — the exact path a prior
+                    # review found still blocking the event loop directly.
+                    invoice_data = await run_in_threadpool(lnbits.create_invoice, price_sats, f"Arsenal R_net Evaluation (JSON-RPC {transport.upper()})")
                     if not invoice_data or "payment_request" not in invoice_data:
                         return {
                             "jsonrpc": "2.0",
@@ -768,7 +943,15 @@ async def mcp_http_endpoint(request: Request, authorization: str = Header(None))
     # other unexpected exception must still surface as a structured JSON-RPC
     # error — never a raw, unstructured HTTP 500.
     try:
-        res, status_code, headers = handle_jsonrpc(req, ctx)
+        # handle_jsonrpc is async: it deports each individual blocking
+        # LNbits call (check_invoice / create_invoice) to the threadpool
+        # exactly where it happens, instead of guessing upfront from the
+        # request shape whether it will need one. Free-tier requests that
+        # never touch LNbits (initialize, tools/list, evaluate_pool within
+        # quota) simply never hit a run_in_threadpool call and stay on the
+        # event loop, so they cannot be degraded by a threadpool saturated
+        # with slow/blocked payment verifications.
+        res, status_code, headers = await handle_jsonrpc(req, ctx)
     except Exception as e:
         sys.stderr.write(f"Error in handle_jsonrpc (http, id={req.get('id')}): {str(e)}\n")
         sys.stderr.flush()
@@ -819,6 +1002,7 @@ async def evaluate_pool_endpoint(
 
     # Verify if client already has a valid payment (L402 verification)
     is_paid = False
+    payment_verification_unknown = False
     payment_hash = None
     if authorization and authorization.startswith("L402 "):
         token_part = authorization.split(" ")[1]
@@ -827,7 +1011,7 @@ async def evaluate_pool_endpoint(
         else:
             payment_hash = token_part
             preimage = None
-            
+
         # Sandbox bypass for testing / dev mode (using strict env toggle)
         if preimage == "0000000000000000000000000000000000000000000000000000000000000000" and os.getenv("L402_SANDBOX_BYPASS") == "true":
             is_paid = True
@@ -840,12 +1024,43 @@ async def evaluate_pool_endpoint(
                     hasher.update(preimage_bytes)
                     calculated_hash = hasher.hexdigest()
                     if calculated_hash == payment_hash:
-                        if not is_hash_used(payment_hash):
-                            is_paid = lnbits.check_invoice(payment_hash)
-                            if is_paid:
-                                mark_hash_used(payment_hash)
+                        # Deported: try_claim_hash() does synchronous file
+                        # I/O under _HASH_CLAIM_LOCK (threading.Lock, safe
+                        # across threadpool workers) — the WHOLE call must
+                        # move together so the test-and-mark stays atomic.
+                        if await run_in_threadpool(try_claim_hash, payment_hash):
+                            # Claim reserved atomically (in-memory/file only,
+                            # no network I/O under the lock). Released below
+                            # unless LNbits confirms payment.
+                            claim_kept = False
+                            try:
+                                # Blocking urllib I/O deported to the threadpool
+                                # so this await does not stall the event loop.
+                                invoice_status = await run_in_threadpool(lnbits.check_invoice, payment_hash)
+                                if invoice_status == PAYMENT_PAID:
+                                    is_paid = True
+                                    claim_kept = True
+                                elif invoice_status == PAYMENT_UNKNOWN:
+                                    payment_verification_unknown = True
+                            finally:
+                                if claim_kept:
+                                    # Promote PENDING -> CONFIRMED now that
+                                    # LNbits confirmed payment. Only path
+                                    # that may ever truncate the store.
+                                    await run_in_threadpool(confirm_hash_used, payment_hash)
+                                else:
+                                    # Deported for the same reason: file I/O
+                                    # under _HASH_CLAIM_LOCK must not run on
+                                    # the event loop.
+                                    await run_in_threadpool(release_hash_claim, payment_hash)
+                        # else: already claimed (paid earlier, or a
+                        # concurrent request is mid-verification) — treated
+                        # as replay, no premium granted.
                 except Exception:
                     is_paid = False
+
+    if payment_verification_unknown:
+        raise HTTPException(status_code=503, detail="Payment verification temporarily unavailable, please retry")
 
     if not is_paid:
         # Check rate limit for free tier
@@ -872,8 +1087,9 @@ async def evaluate_pool_endpoint(
             if override:
                 price_sats = int(override)
 
-            # Call LNbits node API to create dynamic invoice
-            invoice_data = lnbits.create_invoice(price_sats, f"Arsenal R_net Evaluation ({client_id})")
+            # Call LNbits node API to create dynamic invoice (deported to
+            # the threadpool: blocking urllib I/O must not stall the loop)
+            invoice_data = await run_in_threadpool(lnbits.create_invoice, price_sats, f"Arsenal R_net Evaluation ({client_id})")
 
             if not invoice_data or "payment_request" not in invoice_data:
                 raise HTTPException(status_code=503, detail="Payment Gateway Node is Offline or Unauthorized")
@@ -929,6 +1145,7 @@ async def get_latest_audit(request: Request, authorization: str = Header(None)):
     
     # Verify if client already has a valid payment (L402 verification)
     is_paid = False
+    payment_verification_unknown = False
     payment_hash = None
     if authorization and authorization.startswith("L402 "):
         token_part = authorization.split(" ")[1]
@@ -937,7 +1154,7 @@ async def get_latest_audit(request: Request, authorization: str = Header(None)):
         else:
             payment_hash = token_part
             preimage = None
-            
+
         # Sandbox bypass for testing / client verification
         if preimage == "0000000000000000000000000000000000000000000000000000000000000000" and os.getenv("L402_SANDBOX_BYPASS") == "true":
             is_paid = True
@@ -950,13 +1167,44 @@ async def get_latest_audit(request: Request, authorization: str = Header(None)):
                     hasher.update(preimage_bytes)
                     calculated_hash = hasher.hexdigest()
                     if calculated_hash == payment_hash:
-                        if not is_hash_used(payment_hash):
-                            is_paid = lnbits.check_invoice(payment_hash)
-                            if is_paid:
-                                mark_hash_used(payment_hash)
+                        # Deported: try_claim_hash() does synchronous file
+                        # I/O under _HASH_CLAIM_LOCK (threading.Lock, safe
+                        # across threadpool workers) — the WHOLE call must
+                        # move together so the test-and-mark stays atomic.
+                        if await run_in_threadpool(try_claim_hash, payment_hash):
+                            # Claim reserved atomically (in-memory/file only,
+                            # no network I/O under the lock). Released below
+                            # unless LNbits confirms payment.
+                            claim_kept = False
+                            try:
+                                # Blocking urllib I/O deported to the threadpool
+                                # so this await does not stall the event loop.
+                                invoice_status = await run_in_threadpool(lnbits.check_invoice, payment_hash)
+                                if invoice_status == PAYMENT_PAID:
+                                    is_paid = True
+                                    claim_kept = True
+                                elif invoice_status == PAYMENT_UNKNOWN:
+                                    payment_verification_unknown = True
+                            finally:
+                                if claim_kept:
+                                    # Promote PENDING -> CONFIRMED now that
+                                    # LNbits confirmed payment. Only path
+                                    # that may ever truncate the store.
+                                    await run_in_threadpool(confirm_hash_used, payment_hash)
+                                else:
+                                    # Deported for the same reason: file I/O
+                                    # under _HASH_CLAIM_LOCK must not run on
+                                    # the event loop.
+                                    await run_in_threadpool(release_hash_claim, payment_hash)
+                        # else: already claimed (paid earlier, or a
+                        # concurrent request is mid-verification) — treated
+                        # as replay, no premium granted.
                 except Exception:
                     is_paid = False
-        
+
+    if payment_verification_unknown:
+        raise HTTPException(status_code=503, detail="Payment verification temporarily unavailable, please retry")
+
     if not is_paid:
         # Check rate limit for free tier
         if check_rate_limit(client_ip, "audit"):
@@ -990,8 +1238,9 @@ async def get_latest_audit(request: Request, authorization: str = Header(None)):
         else:
             # Quota exhausted, trigger payment flow
             price_sats = get_dynamic_price(latest_audit_path)
-            # Call LNbits node API to create dynamic invoice
-            invoice_data = lnbits.create_invoice(price_sats, f"Arsenal Audit Unlock ({client_id})")
+            # Call LNbits node API to create dynamic invoice (deported to
+            # the threadpool: blocking urllib I/O must not stall the loop)
+            invoice_data = await run_in_threadpool(lnbits.create_invoice, price_sats, f"Arsenal Audit Unlock ({client_id})")
             
             if not invoice_data or "payment_request" not in invoice_data:
                 raise HTTPException(status_code=503, detail="Payment Gateway Node is Offline or Unauthorized")
@@ -1077,6 +1326,7 @@ async def catch_all_proxy(request: Request, path_name: str):
     if is_protected_tool:
         authorization = request.headers.get("authorization")
         is_paid = False
+        payment_verification_unknown = False
         payment_hash = None
         if authorization and authorization.startswith("L402 "):
             token_part = authorization.split(" ")[1]
@@ -1085,7 +1335,7 @@ async def catch_all_proxy(request: Request, path_name: str):
             else:
                 payment_hash = token_part
                 preimage = None
-                
+
             if preimage == "0000000000000000000000000000000000000000000000000000000000000000" and os.getenv("L402_SANDBOX_BYPASS") == "true":
                 is_paid = True
             else:
@@ -1097,20 +1347,58 @@ async def catch_all_proxy(request: Request, path_name: str):
                         hasher.update(preimage_bytes)
                         calculated_hash = hasher.hexdigest()
                         if calculated_hash == payment_hash:
-                            if not is_hash_used(payment_hash):
-                                is_paid = lnbits.check_invoice(payment_hash)
-                                if is_paid:
-                                    mark_hash_used(payment_hash)
+                            # Deported: try_claim_hash() does synchronous file
+                            # I/O under _HASH_CLAIM_LOCK (threading.Lock, safe
+                            # across threadpool workers) — the WHOLE call must
+                            # move together so the test-and-mark stays atomic.
+                            if await run_in_threadpool(try_claim_hash, payment_hash):
+                                # Claim reserved atomically (in-memory/file
+                                # only, no network I/O under the lock).
+                                # Released below unless LNbits confirms
+                                # payment.
+                                claim_kept = False
+                                try:
+                                    # Blocking urllib I/O deported to the
+                                    # threadpool so this await does not
+                                    # stall the event loop (this route is
+                                    # reachable unauthenticated via POST /).
+                                    invoice_status = await run_in_threadpool(lnbits.check_invoice, payment_hash)
+                                    if invoice_status == PAYMENT_PAID:
+                                        is_paid = True
+                                        claim_kept = True
+                                    elif invoice_status == PAYMENT_UNKNOWN:
+                                        payment_verification_unknown = True
+                                finally:
+                                    if claim_kept:
+                                        # Promote PENDING -> CONFIRMED now
+                                        # that LNbits confirmed payment. Only
+                                        # path that may ever truncate the
+                                        # store.
+                                        await run_in_threadpool(confirm_hash_used, payment_hash)
+                                    else:
+                                        # Deported for the same reason: file
+                                        # I/O under _HASH_CLAIM_LOCK must not
+                                        # run on the event loop.
+                                        await run_in_threadpool(release_hash_claim, payment_hash)
+                            # else: already claimed (paid earlier, or a
+                            # concurrent request is mid-verification) —
+                            # treated as replay, no premium granted.
                     except Exception:
                         is_paid = False
-                        
+
+        if payment_verification_unknown:
+            raise HTTPException(status_code=503, detail="Payment verification temporarily unavailable, please retry")
+
         if not is_paid:
             price_sats = 50
             override = os.getenv("L402_OVERRIDE_PRICE")
             if override:
                 price_sats = int(override)
-                
-            invoice_data = lnbits.create_invoice(price_sats, f"Arsenal R_net Evaluation (JSON-RPC)")
+
+            # Blocking urllib I/O deported to the threadpool (see check_invoice
+            # above): this route is reachable without authentication or a
+            # real payment via POST /.
+            invoice_data = await run_in_threadpool(lnbits.create_invoice, price_sats, f"Arsenal R_net Evaluation (JSON-RPC)")
             if not invoice_data or "payment_request" not in invoice_data:
                 raise HTTPException(status_code=503, detail="Payment Gateway Node is Offline or Unauthorized")
                 
@@ -1161,6 +1449,7 @@ if __name__ == "__main__":
     import sys
     import select
     import json
+    import asyncio
     try:
         rlist, _, _ = select.select([sys.stdin], [], [], 0.1)
         if rlist:
@@ -1220,7 +1509,12 @@ if __name__ == "__main__":
                         "client_id": "stdio-local",
                         "authorization": extract_stdio_authorization(req),
                     }
-                    res, _status_code, _headers = handle_jsonrpc(req, ctx)
+                    # handle_jsonrpc is now async (it deports individual
+                    # LNbits calls to the threadpool). The stdio loop itself
+                    # stays a plain synchronous loop — one asyncio.run() per
+                    # request is enough to drive it and keeps this branch
+                    # readable, no event loop to keep alive across requests.
+                    res, _status_code, _headers = asyncio.run(handle_jsonrpc(req, ctx))
                     write_jsonrpc(res)
             except Exception as e:
                 sys.stderr.write(f"Error processing stdio request (id={req_id_for_error}): {str(e)}\n")
