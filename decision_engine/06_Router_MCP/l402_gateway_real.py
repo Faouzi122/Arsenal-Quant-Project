@@ -47,16 +47,31 @@ async def redact_logs_middleware(request: Request, call_next):
     path_with_query = request.url.path
     if query_string:
         path_with_query += f"?{query_string}"
-        
+
+    # Le User-Agent est contrôlé par un appelant non authentifié : on tronque
+    # à 160 EN PREMIER pour borner le coût du filtrage à O(1), indépendamment
+    # de la taille de l'en-tête envoyé (sinon un UA de plusieurs dizaines de
+    # Ko fait payer un filtrage caractère-par-caractère sur toute sa
+    # longueur à chaque requête). Les deux transformations qui suivent sont
+    # conservatrices de longueur (un caractère en entrée -> un caractère en
+    # sortie), donc tronquer avant ou après produit le même résultat.
+    # Liste blanche ASCII imprimable (neutralise \r, \n, octet nul,
+    # séquences ANSI), puis le guillemet est traité à part car il reste
+    # imprimable et casserait le format ua="..." (injection de fausses
+    # paires ua="").
+    ua = request.headers.get("user-agent", "-")[:160]
+    ua = "".join(c if (c.isprintable() and ord(c) < 127) else " " for c in ua)
+    ua = ua.replace('"', "'")
+
     try:
         response = await call_next(request)
         status_code = response.status_code
     except Exception as e:
-        sys.stderr.write(f"ERROR:    {client_ip} - \"{request.method} {path_with_query} HTTP/1.1\" 500 - {str(e)}\n")
+        sys.stderr.write(f"ERROR:    {client_ip} - \"{request.method} {path_with_query} HTTP/1.1\" 500 - {str(e)} ua=\"{ua}\"\n")
         sys.stderr.flush()
         raise e
-        
-    sys.stderr.write(f"INFO:     {client_ip} - \"{request.method} {path_with_query} HTTP/1.1\" {status_code}\n")
+
+    sys.stderr.write(f"INFO:     {client_ip} - \"{request.method} {path_with_query} HTTP/1.1\" {status_code} ua=\"{ua}\"\n")
     sys.stderr.flush()
     return response
 
