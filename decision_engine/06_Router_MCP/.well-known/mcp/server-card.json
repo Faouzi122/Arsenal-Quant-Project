@@ -3,7 +3,7 @@
   "serverInfo": {
     "name": "Arsenal Decision Engine",
     "version": "2.0.0",
-    "description": "Stateless R_net evaluation middleware for autonomous DeFAI agents. Computes Impermanent Loss, net yield, and Breakeven Corridor in O(1). Free tier: 100 calls per IP per day, custom parameters included; L402 Lightning micro-payment beyond it.",
+    "description": "Stateless R_net evaluation middleware for autonomous DeFAI agents. Computes Impermanent Loss, net yield, and Breakeven Corridor in O(1). Free tier: 100 calls per IP per day, custom parameters included; the paid tier is not yet in service.",
     "endpoint": "https://api.arsenal-quant.com",
     "contact": "architecture@arsenal-quant.com",
     "repository": "https://github.com/Faouzi122/Arsenal-Quant-Project",
@@ -12,7 +12,7 @@
   "authentication": {
     "required": false,
     "type": "L402",
-    "description": "No authentication needed within the free quota: evaluate_pool allows 100 calls per IP per day, custom parameters included. Beyond that quota, an L402 Lightning micro-payment is required (currently 150 sats, set by server configuration). GET /mcp/audit/latest allows 3 free calls per IP per hour, then L402. Always read the authoritative amount from the WWW-Authenticate header or error.data.price_sats of the 402 response."
+    "description": "No authentication needed within the free quota: evaluate_pool allows 100 calls per IP per day, custom parameters included. Beyond that quota the server returns 402 with an L402 challenge. The payment rail is not operational in production: the paid tier is not yet in service."
   },
   "tools": [
     {
@@ -34,26 +34,62 @@
             "description": "Number of days the position has been held."
           }
         },
-        "required": ["apy", "price_ratio"]
+        "required": [
+          "apy",
+          "price_ratio"
+        ]
       },
       "outputSchema": {
         "type": "object",
         "properties": {
-          "impermanent_loss_pct": { "type": "number" },
-          "accumulated_yield_pct": { "type": "number" },
-          "r_net_pct": { "type": "number", "description": "Net return after IL. Positive = profitable." },
-          "risk_level": { "type": "string", "enum": ["LOW", "MODERATE", "HIGH", "CRITICAL"] },
+          "impermanent_loss_pct": {
+            "type": "number"
+          },
+          "accumulated_yield_pct": {
+            "type": "number"
+          },
+          "r_net_pct": {
+            "type": "number",
+            "description": "Net return after IL. Positive = profitable."
+          },
+          "risk_level": {
+            "type": "string",
+            "enum": [
+              "LOW",
+              "MODERATE",
+              "HIGH",
+              "CRITICAL"
+            ]
+          },
           "breakeven_corridor": {
             "type": "object",
             "properties": {
-              "lower_ratio": { "type": "number" },
-              "upper_ratio": { "type": "number" },
-              "interpretation": { "type": "string" }
+              "lower_ratio": {
+                "type": "number"
+              },
+              "upper_ratio": {
+                "type": "number"
+              },
+              "interpretation": {
+                "type": "string"
+              }
             }
           },
-          "oracle_signature": { "type": "string", "description": "HMAC-SHA256 proof of computation integrity." },
-          "source": { "type": "string" },
-          "layer": { "type": "string", "enum": ["FREE", "STANDARD", "PREMIUM"] }
+          "oracle_signature": {
+            "type": "string",
+            "description": "HMAC-SHA256 proof of computation integrity."
+          },
+          "source": {
+            "type": "string"
+          },
+          "layer": {
+            "type": "string",
+            "enum": [
+              "FREE",
+              "STANDARD",
+              "PREMIUM"
+            ]
+          }
         }
       },
       "pricing": {
@@ -62,7 +98,7 @@
         "amount_low": 150,
         "amount_high": 150,
         "dynamic": false,
-        "note": "Current server configuration charges a flat 150 sats. Read the authoritative amount from the WWW-Authenticate header or error.data.price_sats of the 402 response rather than hard-coding it."
+        "note": "The gateway is configured for 150 sats, but the payment rail is not operational in production. When the paid tier enters service, read the amount from the WWW-Authenticate header or error.data.price_sats rather than hard-coding it."
       }
     }
   ],

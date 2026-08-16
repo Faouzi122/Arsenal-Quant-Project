@@ -15,7 +15,7 @@
 **Transform DeFi uncertainty into deterministic, actionable risk metrics for autonomous agents.**
 We do not run stateful trading bots or generate speculative prediction signals; we provide a stateless risk middleware layer that agents query before deploying or maintaining standard constant-product / full-range LP positions.
 
-Built for agents, priced for agents. Pay per decision via Lightning Network (L402).
+Built for agents. **100 free calls per IP per day — no wallet, no sign-up, custom parameters included.** An L402 payment path is implemented in the gateway but is **not operational in production**: today, the engine is free to use.
 
 ---
 
@@ -81,13 +81,14 @@ served as `FREE`.
 ## Access and Pricing
 
 - **Free tier — `evaluate_pool`:** **100 calls per IP per day, custom parameters
-  included.** No Lightning wallet is needed to use the engine.
-- **Beyond the free quota:** an L402 Lightning micro-payment. The amount is set by
-  server configuration and is currently **150 sats** per evaluation. Read it from
-  the `WWW-Authenticate` header or from `error.data.price_sats` in the 402 response
-  rather than hard-coding it.
-- **`GET /mcp/audit/latest`:** 3 free calls per IP per hour, then L402 — this
-  route is what keeps the Lightning rail live and demonstrable.
+  included.** No Lightning wallet is needed. **This is the only tier currently in
+  service.**
+- **Beyond the free quota:** the gateway implements the L402 challenge and returns
+  `402` with a `WWW-Authenticate` header. **The payment rail is not operational in
+  production** — invoices issued today are not settleable, and no payment is expected
+  or accepted. Treat the paid tier as announced, not available.
+- **`GET /mcp/audit/latest`:** 3 free calls per IP per hour; beyond that the route
+  returns `402`. That response documents the protocol; it is not a live payment path.
 
 ---
 
@@ -151,10 +152,13 @@ if __name__ == "__main__":
 - Integration cookbook & MCP guides: [`COOKBOOK.md`](./decision_engine/08_SDK_Wrappers/COOKBOOK.md)
 - MCP auto-discovery card: `https://api.arsenal-quant.com/.well-known/mcp/server-card.json`
 
-## Why pay per call?
+## Why per-call pricing is the intended model
 
 This engine does not prevent losses, and it makes no claim about how much money it
-saves you. What it does is compute — deterministically, in $\mathcal{O}(1)$, with an
-HMAC signature over the result — whether a position sits above or below its
-breakeven boundary. What you pay for is a reproducible, auditable number your agent
-can act on, priced per call so it can be budgeted like any other input.
+saves you. What it does is compute — deterministically, in $\mathcal{O}(1)$ — whether
+a position sits above or below its breakeven boundary. Each response carries an HMAC
+tag over the result, which lets the engine detect tampering with its own output; it is
+a symmetric provenance marker, **not a proof a third party can verify independently**.
+
+The intended model is per-call pricing, so the cost can be budgeted like any other
+input. **That model is not yet in service: today every call is free.**

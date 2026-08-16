@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.Faouzi122/arsenal-decision-engine",
   "title": "Arsenal Decision Engine",
-  "description": "R_net LP risk evaluator for DeFAI agents. IL + Breakeven Corridor O(1). L402 Lightning paywall.",
+  "description": "R_net LP risk evaluator for DeFAI agents. IL + Breakeven Corridor O(1). Free tier: 100 calls/IP/day. L402 paywall implemented, not yet operational.",
   "repository": {
     "url": "https://github.com/Faouzi122/Arsenal-Quant-Project",
     "source": "github"

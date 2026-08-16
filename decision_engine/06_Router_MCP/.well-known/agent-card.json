@@ -3,7 +3,7 @@
   "agentCard": {
     "name": "Arsenal Decision Engine",
     "version": "2.0.0",
-    "description": "Stateless R_net evaluation middleware for autonomous DeFAI agents. Computes Impermanent Loss, net yield, and Breakeven Corridor bounds for constant-product / full-range LP positions in O(1). Free tier: 100 calls per IP per day, custom parameters included; L402 Lightning micro-payment beyond it.",
+    "description": "Stateless R_net evaluation middleware for autonomous DeFAI agents. Computes Impermanent Loss, net yield, and Breakeven Corridor bounds for constant-product / full-range LP positions in O(1). Free tier: 100 calls per IP per day, custom parameters included; the paid tier is not yet in service.",
     "url": "https://api.arsenal-quant.com",
     "documentationUrl": "https://github.com/Faouzi122/Arsenal-Quant-Project/blob/master/decision_engine/08_SDK_Wrappers/COOKBOOK.md",
     "iconUrl": "https://api.arsenal-quant.com/.well-known/icon.png",
@@ -17,21 +17,33 @@
       "stateTransitionHistory": false
     },
     "authentication": {
-      "schemes": ["L402"],
-      "description": "No authentication needed within the free quota: 100 calls per IP per day on evaluate_pool, custom parameters included. Beyond it, an L402 Lightning micro-payment is required (currently 150 sats, set by server configuration). Read the authoritative amount from the WWW-Authenticate header or error.data.price_sats of the 402 response."
+      "schemes": [
+        "L402"
+      ],
+      "description": "No authentication needed within the free quota: 100 calls per IP per day on evaluate_pool, custom parameters included. Beyond that quota the server returns 402 with an L402 challenge. The payment rail is not operational in production: the paid tier is not yet in service."
     },
-    "defaultInputModes": ["application/json"],
-    "defaultOutputModes": ["application/json"],
+    "defaultInputModes": [
+      "application/json"
+    ],
+    "defaultOutputModes": [
+      "application/json"
+    ],
     "skills": [
       {
         "id": "evaluate_pool",
         "name": "LP Pool Risk Evaluation",
         "description": "Given APY, price ratio, and days held, computes: Impermanent Loss %, accumulated yield %, R_net (net return), risk level (LOW/MODERATE/HIGH/CRITICAL), and Breakeven Corridor bounds. O(1) algebraic computation — deterministic, no LLM.",
-        "tags": ["defi", "risk", "impermanent-loss", "constant-product", "l402"],
+        "tags": [
+          "defi",
+          "risk",
+          "impermanent-loss",
+          "constant-product",
+          "l402"
+        ],
         "examples": [
           {
             "input": {
-              "apy": 0.20,
+              "apy": 0.2,
               "price_ratio": 0.85,
               "days_held": 30
             },
@@ -45,8 +57,12 @@
             }
           }
         ],
-        "inputModes": ["application/json"],
-        "outputModes": ["application/json"]
+        "inputModes": [
+          "application/json"
+        ],
+        "outputModes": [
+          "application/json"
+        ]
       }
     ]
   }

@@ -5,7 +5,9 @@
 This cookbook provides the exact integration blueprints to equip your autonomous agents (CrewAI, LangChain, ElizaOS) with our deterministic $\mathcal{O}(1)$ Risk Middleware.
 
 ## The Concept: L402 Deterministic Paywall
-`evaluate_pool` gives you **100 free calls per IP per day, custom parameters included** — you can integrate and test without any Lightning wallet. Past that quota, your agent intercepts an HTTP 402, pays a Lightning invoice (currently **150 sats**, set by server configuration — always read the amount from the 402 response rather than hard-coding it), and retries with the cryptographic proof to unlock the decision matrix (`r_net_pct`, `risk_level`, `breakeven_corridor`).
+`evaluate_pool` gives you **100 free calls per IP per day, custom parameters included** — you can integrate and test without any Lightning wallet. **This is the only tier currently in service.**
+
+Past that quota the gateway returns an HTTP 402 carrying an L402 challenge. The flow below shows how an agent would intercept it, settle the invoice and retry with the cryptographic proof to unlock the decision matrix (`r_net_pct`, `risk_level`, `breakeven_corridor`). **The payment rail is not operational in production**: invoices issued today are not settleable, so treat this section as the integration blueprint for when the paid tier enters service, not as a live path.
 
 Two endpoints expose the same calculation: `POST /mcp` (MCP JSON-RPC — `initialize` → `tools/list` → `tools/call`, the route advertised on the MCP registry) and `GET /mcp/evaluate` (REST convenience, GET-only). The example below uses the REST route.
 
@@ -72,6 +74,8 @@ print(f"R_net: {evaluation['r_net_pct']:+.4f}%")
 print(f"Breakeven Corridor: [{evaluation['breakeven_corridor']['lower_ratio']}, {evaluation['breakeven_corridor']['upper_ratio']}]")
 ```
 
-## Why pay for evaluations?
+## Why per-call pricing is the intended model
 
-This engine does not prevent losses and makes no claim about how much it saves you. It computes — deterministically, in O(1), with an HMAC signature over the result — whether a position sits above or below its breakeven boundary. What a paid call buys is a reproducible, auditable number your agent can act on. Start on the free quota; pay only if the calculation earns its place in your loop.
+This engine does not prevent losses and makes no claim about how much it saves you. It computes — deterministically, in O(1) — whether a position sits above or below its breakeven boundary. Each response carries an HMAC tag over the result, which lets the engine detect tampering with its own output; it is a symmetric provenance marker, **not a proof a third party can verify independently**.
+
+The intended model is per-call pricing, so the cost can be budgeted like any other input. **That model is not yet in service: today every call is free.** Integrate against the free quota; the paid tier will follow.
