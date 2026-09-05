@@ -2,7 +2,7 @@
 **The Risk-Validation Layer for Autonomous AI Agents (DeFAI)**
 
 [![Arsenal-Quant-Project MCP server](https://glama.ai/mcp/servers/Faouzi122/Arsenal-Quant-Project/badges/card.svg)](https://glama.ai/mcp/servers/Faouzi122/Arsenal-Quant-Project)
-[![smithery badge](https://smithery.ai/badge/khelifa-faouzi16/arsenal-decision-engine)](https://smithery.ai/servers/khelifa-faouzi16/arsenal-decision-engine)
+[![LightNow MCP capabilities](https://lightnow.ai/badge/io.github.Faouzi122/arsenal-decision-engine)](https://lightnow.ai/servers/io.github.Faouzi122/arsenal-decision-engine)
 
 > **Method and raw results are published** — [backtest script](./decision_engine/07_Backtest_Engine/run_empirical_backtest.py) · [result data](./decision_engine/07_Backtest_Engine/data/) (180 days of Binance ETH/USDC daily closes):
 > 🔬 **Breakeven Corridor** is a deterministic algebraic boundary (where IL = accumulated yield). Any position whose price ratio stays within `[lower_be, upper_be]` has R_net > 0 by mathematical definition — not a probabilistic model.
