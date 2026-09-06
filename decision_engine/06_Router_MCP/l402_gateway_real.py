@@ -29,6 +29,19 @@ def load_environment():
 
 load_environment()
 
+# Le refus se fait ici, a l'import du module, et non dans __main__ :
+# le service peut etre lance par uvicorn, gunicorn, un test ou un
+# import indirect, sans jamais passer par __main__. Placer le controle
+# au niveau module garantit qu'aucun chemin de demarrage ne peut
+# contourner la verification.
+ORACLE_SECRET_KEY = os.environ.get("ORACLE_SECRET_KEY", "").strip()
+if len(ORACLE_SECRET_KEY) < 32:
+    raise RuntimeError(
+        "ARRET : ORACLE_SECRET_KEY absente, vide ou trop courte (< 32 caracteres). "
+        "Le service refuse de demarrer plutot que de signer avec une valeur publique. "
+        "Renseigner ORACLE_SECRET_KEY dans 06_Router_MCP/.env, puis relancer."
+    )
+
 app = FastAPI(title="Arsenal Decision Engine — L402 Gateway")
 lnbits = LNbitsClient()
 
@@ -804,7 +817,7 @@ async def handle_jsonrpc(req: dict, ctx: dict) -> tuple[dict | None, int, dict]:
                 if check_rate_limit(client_ip, "evaluate"):
                     try:
                         eval_res = evaluate_lp(apy, price_ratio, days_held)
-                        oracle_secret = os.getenv("ORACLE_SECRET_KEY", "default_secret")
+                        oracle_secret = ORACLE_SECRET_KEY
                         payload_to_sign = {
                             "evaluation": eval_res,
                             "client_ip": client_ip,
@@ -871,7 +884,7 @@ async def handle_jsonrpc(req: dict, ctx: dict) -> tuple[dict | None, int, dict]:
             # Process evaluation
             try:
                 eval_res = evaluate_lp(apy, price_ratio, days_held)
-                oracle_secret = os.getenv("ORACLE_SECRET_KEY", "default_secret")
+                oracle_secret = ORACLE_SECRET_KEY
                 payload_to_sign = {
                     "evaluation": eval_res,
                     "payment_hash": payment_hash,
@@ -1081,7 +1094,7 @@ async def evaluate_pool_endpoint(
         # Check rate limit for free tier
         if check_rate_limit(client_ip, "evaluate"):
             # Sign the payload for security
-            oracle_secret = os.getenv("ORACLE_SECRET_KEY", "default_secret")
+            oracle_secret = ORACLE_SECRET_KEY
             payload_to_sign = {
                 "evaluation": evaluation,
                 "client_ip": client_ip,
@@ -1125,7 +1138,7 @@ async def evaluate_pool_endpoint(
             )
 
     # Paid path
-    oracle_secret = os.getenv("ORACLE_SECRET_KEY", "default_secret")
+    oracle_secret = ORACLE_SECRET_KEY
     payload_to_sign = {
         "evaluation": evaluation,
         "payment_hash": payment_hash,
@@ -1232,7 +1245,7 @@ async def get_latest_audit(request: Request, authorization: str = Header(None)):
                 # Sceau de l'Oracle (HMAC-SHA256 signature) — signs the
                 # annotated content, i.e. exactly what is served below, so
                 # signature verification matches the served bytes.
-                oracle_secret = os.getenv("ORACLE_SECRET_KEY", "default_secret")
+                oracle_secret = ORACLE_SECRET_KEY
                 payload_to_sign = {
                     "audit_content": annotated_content,
                     "client_ip": client_ip,
@@ -1285,7 +1298,7 @@ async def get_latest_audit(request: Request, authorization: str = Header(None)):
         # Sceau de l'Oracle (HMAC-SHA256 signature) — signs the annotated
         # content, i.e. exactly what is served below, so signature
         # verification matches the served bytes.
-        oracle_secret = os.getenv("ORACLE_SECRET_KEY", "default_secret")
+        oracle_secret = ORACLE_SECRET_KEY
         payload_to_sign = {
             "audit_content": annotated_content,
             "payment_hash": payment_hash,
