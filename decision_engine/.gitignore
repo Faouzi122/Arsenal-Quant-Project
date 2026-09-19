@@ -1,5 +1,8 @@
 .env
-*.bak
+# *.bak seul NE COUVRE PAS les sauvegardes horodatees (.bak-20260906153122),
+# qui sont la convention utilisee ici. Mesure le 2026-09-06 : un tel fichier
+# apparaissait dans `git add -n` sur un depot PUBLIC.
+*.bak*
 __pycache__/
 *.pyc
 .claude/
